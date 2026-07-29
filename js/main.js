@@ -22,9 +22,19 @@ const ZONES = [
   { id: "counter", label: "카운터", x: 190, y: 380, w: 100, h: 80, color: "#5a9e6f", body: "(6단계에서 구현 예정)" },
 ];
 
-const player = { x: 240, y: 240, r: 14, speed: 2.5 };
+const player = { x: 240, y: 240, r: 14, speed: 2.5, dir: "down", moving: false };
 const keys = {};
 let panelOpen = false;
+
+// LPC 워크사이클 스프라이트: 64x64 프레임, 9열 x 4행 (0=위, 1=왼쪽, 2=아래, 3=오른쪽)
+const playerSprite = new Image();
+playerSprite.src = "assets/sprites/player_walk.png";
+const FRAME_SIZE = 64;
+const DIR_ROW = { up: 0, left: 1, down: 2, right: 3 };
+let animFrame = 1;
+let animTimer = 0;
+const ANIM_SPEED = 120; // ms per frame
+let lastTime = 0;
 
 window.addEventListener("keydown", (e) => { keys[e.key.toLowerCase()] = true; });
 window.addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
@@ -43,10 +53,18 @@ function updatePlayer() {
   if (keys["arrowleft"] || keys["a"]) dx -= 1;
   if (keys["arrowright"] || keys["d"]) dx += 1;
 
-  if (dx !== 0 || dy !== 0) {
+  player.moving = dx !== 0 || dy !== 0;
+
+  if (player.moving) {
     const len = Math.hypot(dx, dy);
     player.x += (dx / len) * player.speed;
     player.y += (dy / len) * player.speed;
+
+    // 이동 방향에 따라 바라보는 방향 갱신 (세로 이동 우선)
+    if (dy < 0) player.dir = "up";
+    else if (dy > 0) player.dir = "down";
+    else if (dx < 0) player.dir = "left";
+    else if (dx > 0) player.dir = "right";
   }
 
   // 벽 충돌 (캔버스 경계)
@@ -87,15 +105,42 @@ function draw() {
     ctx.fillText(zone.label, zone.x + zone.w / 2, zone.y + zone.h / 2 + 5);
   }
 
-  // 플레이어 그리기
+  // 발밑 그림자 (입체감)
   ctx.beginPath();
-  ctx.arc(player.x, player.y, player.r, 0, Math.PI * 2);
-  ctx.fillStyle = "#e0a458";
+  ctx.ellipse(player.x, player.y + 20, 14, 5, 0, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(0,0,0,0.35)";
   ctx.fill();
+
+  // 플레이어 그리기 (LPC 스프라이트)
+  const row = DIR_ROW[player.dir];
+  const col = player.moving ? animFrame : 0;
+  if (playerSprite.complete && playerSprite.naturalWidth > 0) {
+    ctx.drawImage(
+      playerSprite,
+      col * FRAME_SIZE, row * FRAME_SIZE, FRAME_SIZE, FRAME_SIZE,
+      player.x - FRAME_SIZE / 2, player.y - FRAME_SIZE / 2, FRAME_SIZE, FRAME_SIZE
+    );
+  }
 }
 
-function gameLoop() {
+function gameLoop(time) {
+  const delta = time - lastTime;
+  lastTime = time;
+
   updatePlayer();
+
+  // 걷기 애니메이션 프레임 진행
+  if (player.moving) {
+    animTimer += delta;
+    if (animTimer > ANIM_SPEED) {
+      animTimer = 0;
+      animFrame = animFrame >= 8 ? 1 : animFrame + 1;
+    }
+  } else {
+    animFrame = 1;
+    animTimer = 0;
+  }
+
   draw();
   requestAnimationFrame(gameLoop);
 }
