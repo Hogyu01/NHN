@@ -1,2 +1,11 @@
-// 화면 전환 로직이 여기에 들어갑니다.
-console.log("던전 식당 - 초기화");
+// 화면 전환 로직
+
+function showScreen(screenId) {
+  document.querySelectorAll(".screen").forEach((el) => {
+    el.classList.toggle("hidden", el.id !== screenId);
+  });
+}
+
+document.getElementById("btn-start").addEventListener("click", () => {
+  showScreen("screen-board");
+});

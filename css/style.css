@@ -15,3 +15,40 @@ body {
   margin: 0 auto;
   padding: 20px;
 }
+
+.screen {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.hidden {
+  display: none;
+}
+
+.title {
+  font-size: 2rem;
+}
+
+.subtitle {
+  color: #b0b0b0;
+  margin-bottom: 12px;
+}
+
+.btn-primary {
+  padding: 12px 32px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #e0a458;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
