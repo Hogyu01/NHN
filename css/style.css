@@ -17,6 +17,7 @@ body {
 }
 
 .screen {
+  position: relative;
   min-height: 80vh;
   display: flex;
   flex-direction: column;
@@ -51,4 +52,43 @@ body {
 
 .btn-primary:active {
   transform: scale(0.97);
+}
+
+#game-canvas {
+  background: #3a2a1e;
+  border: 2px solid #6b4a2e;
+  border-radius: 8px;
+  touch-action: none;
+}
+
+.hint {
+  color: #808080;
+  font-size: 0.85rem;
+}
+
+.panel-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 24px;
+  width: 80%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.panel h2 {
+  margin-bottom: 12px;
+}
+
+.panel p {
+  margin-bottom: 16px;
+  color: #cfcfcf;
 }

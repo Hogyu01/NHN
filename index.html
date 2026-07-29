@@ -15,9 +15,17 @@
     <button id="btn-start" class="btn-primary">시작하기</button>
   </section>
 
-  <section id="screen-board" class="screen hidden">
-    <h2>길드 게시판</h2>
-    <p>(3단계에서 구현 예정)</p>
+  <section id="screen-room" class="screen hidden">
+    <canvas id="game-canvas" width="480" height="480"></canvas>
+    <p class="hint">방향키 또는 WASD로 이동하세요</p>
+
+    <div id="panel-overlay" class="panel-overlay hidden">
+      <div class="panel">
+        <h2 id="panel-title"></h2>
+        <p id="panel-body"></p>
+        <button id="btn-panel-close" class="btn-primary">닫기</button>
+      </div>
+    </div>
   </section>
 
 </div>
