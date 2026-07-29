@@ -25,6 +25,7 @@ const ZONES = [
 const player = { x: 240, y: 240, r: 14, speed: 2.5, dir: "down", moving: false };
 const keys = {};
 let panelOpen = false;
+let currentZoneId = null;
 
 // LPC 워크사이클 스프라이트: 64x64 프레임, 9열 x 4행 (0=위, 1=왼쪽, 2=아래, 3=오른쪽)
 const playerSprite = new Image();
@@ -71,12 +72,23 @@ function updatePlayer() {
   player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x));
   player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
 
-  // 상호작용 구역 접근 확인
+  // 상호작용 구역 접근 확인 (구역에 "새로 들어왔을 때"만 패널을 엽니다.
+  // 같은 구역에 계속 서 있으면 다시 열리지 않고, 구역을 벗어났다가 다시 들어와야 재오픈됩니다.)
+  let insideZone = null;
   for (const zone of ZONES) {
     if (rectContains(zone, player.x, player.y)) {
-      openPanel(zone);
+      insideZone = zone;
       break;
     }
+  }
+
+  if (insideZone) {
+    if (insideZone.id !== currentZoneId) {
+      currentZoneId = insideZone.id;
+      openPanel(insideZone);
+    }
+  } else {
+    currentZoneId = null;
   }
 }
 
