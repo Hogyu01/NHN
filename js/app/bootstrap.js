@@ -6,6 +6,16 @@ import {
 } from "../core/diagnostic.js";
 import { freezeDeep } from "../core/result.js";
 import { GameStore } from "../core/store.js";
+import { registerCashTransactionAPI } from "../domain/cash-transaction-api.js";
+import { createEconomyState } from "../domain/economy.js";
+import {
+  createInventoryAccountingState,
+  registerInventoryAccounting,
+} from "../domain/inventory-accounting.js";
+import { createInventoryState } from "../domain/inventory.js";
+import { createMenuState, registerMenuSystem } from "../domain/menu.js";
+import { createRecipeState, RecipeSystem } from "../domain/recipe.js";
+import { createSaleSlotsState } from "../domain/sale-slots.js";
 import { CANONICAL_CONTENT_SPECIFICATIONS } from "../infrastructure/canonical-content.js";
 import { DataLoader } from "../infrastructure/data-loader.js";
 import { BASE_MAP_ID } from "../world/map-schema.js";
@@ -377,6 +387,16 @@ export class AppBootstrap {
     this.hub = null;
     this.store = null;
     this.commandBus = null;
+    this.cashTransactionAPI = null;
+    this.inventoryAccountingAPI = null;
+    this.marketSystem = null;
+    this.facilitySystem = null;
+    this.contractSystem = null;
+    this.recipeSystem = null;
+    this.menuSystem = null;
+    this.reputationSystem = null;
+    this.unlockPublisher = null;
+    this.eventSystem = null;
     this.featureRegistry = null;
     this.canonicalContent = null;
     this.mapLoadReport = null;
@@ -578,12 +598,116 @@ export class AppBootstrap {
         const buildAndFlags = context[BOOT_STAGE.BUILD_FLAGS];
         const data = context[BOOT_STAGE.DATA];
         const maps = context[BOOT_STAGE.MAP];
+        const [
+          idModule,
+          rngModule,
+          marketModule,
+          contractModule,
+          facilityModule,
+          reputationModule,
+          unlocksModule,
+          eventModule,
+        ] = await Promise.all([
+          import("../core/ids.js"),
+          import("../core/rng.js"),
+          import("../domain/market.js"),
+          import("../domain/contract.js"),
+          import("../domain/facility.js"),
+          import("../domain/reputation.js"),
+          import("../domain/unlocks.js"),
+          import("../domain/events.js"),
+        ]);
+        const canonicalDocuments = new Map(
+          data.accepted.map((entry) => [entry.filename, entry.data]),
+        );
+        const ingredientDocument = canonicalDocuments.get("data/ingredients.json");
+        const recipeDocument = canonicalDocuments.get("data/recipes.json");
+        const facilityDocument = canonicalDocuments.get("data/upgrades.json");
+        const eventDocument = canonicalDocuments.get("data/events.json");
+        const balanceDocument = canonicalDocuments.get("data/balance.json");
+        if (!ingredientDocument || !recipeDocument || !facilityDocument || !eventDocument || !balanceDocument) {
+          throw new Error("MarketSystem, ContractSystem, Recipe/MenuSystem, ReputationSystem과 EventSystem composition에 canonical ingredients/recipes/upgrades/events/balance가 필요합니다.");
+        }
+
+        const masterSeed = 0x4e484e01;
+        const day = 1;
+        const generationId = 0;
+        const campaignId = idModule.createCampaignId(masterSeed, 0);
+        const marketGeneration = marketModule.generateDailyMarket({
+          rngState: rngModule.createRngRegistryState(masterSeed),
+          day,
+          ingredients: ingredientDocument.ingredients,
+          purchaseLimitQuantity: balanceDocument.market.defaultPurchaseLimitQuantity,
+        });
+        const marketGenerationCheckpoint = Object.freeze({
+          market: marketGeneration.market,
+          rng: marketGeneration.rngState,
+        });
+        const contractGeneration = contractModule.generateDailyContractOffers({
+          rngState: marketGenerationCheckpoint.rng,
+          day,
+          ingredients: ingredientDocument.ingredients,
+          configuration: balanceDocument.contract,
+          fixedCostG: balanceDocument.economy.fixedCostG,
+        });
+        const contractGenerationCheckpoint = Object.freeze({
+          rng: contractGeneration.rngState,
+        });
+        const eventGeneration = eventModule.generateDailyEvent({
+          rngState: contractGenerationCheckpoint.rng,
+          day,
+          eventDefinitions: eventDocument.events,
+        });
+        const unlockCatalog = unlocksModule.createUnlockCatalog({
+          recipes: recipeDocument.recipes,
+          facilities: facilityDocument.facilities,
+        });
+        const progression = unlocksModule.createProgressionState({ unlockCatalog });
+        const events = eventModule.createEventState({ activeEvent: eventGeneration.event });
+        const facilities = facilityModule.createFacilityState({
+          facilities: facilityDocument.facilities,
+        });
+        const recipes = createRecipeState({
+          recipes: recipeDocument.recipes,
+          ingredientIds: ingredientDocument.ingredients.map((ingredient) => ingredient.ingredientId),
+        });
+        const menu = createMenuState({ day, recipes });
+        const saleSlots = createSaleSlotsState({ day });
         this.store = new GameStore({
           formatVersion: 1,
           revision: 0,
           runtimePhase: "TITLE",
           checkpointPhase: null,
-          generationId: 0,
+          generationId,
+          campaign: {
+            campaignId,
+            masterSeed,
+            day,
+            consecutiveArrearsCount: 0,
+            ...reputationModule.createReputationCampaignFields(
+              balanceDocument.campaign.startReputation,
+            ),
+          },
+          progression,
+          events,
+          facilities,
+          economy: createEconomyState({
+            cashG: balanceDocument.campaign.startCashG,
+            debtG: balanceDocument.campaign.startDebtG,
+          }),
+          inventory: createInventoryState(),
+          inventoryAccounting: createInventoryAccountingState(),
+          recipes,
+          menu,
+          saleSlots,
+          market: marketGeneration.market,
+          contracts: contractGeneration.contracts,
+          rng: eventGeneration.rngState,
+          idCounters: idModule.createIdServiceState({
+            campaignId,
+            day,
+            generationId,
+          }),
           featureFlags: buildAndFlags.featureFlags,
           extensions: {},
           boot: {
@@ -603,9 +727,47 @@ export class AppBootstrap {
           commandGuards: [this.featureRegistry.createCommandGuard()],
           onDiagnostic: (diagnostic) => this._runtimeDiagnostics.push(diagnostic),
         });
-        return bootStagePass({ store: this.store, commandBus: this.commandBus }, {
+        this.cashTransactionAPI = registerCashTransactionAPI(this.commandBus);
+        this.inventoryAccountingAPI = registerInventoryAccounting(this.commandBus);
+        this.marketSystem = marketModule.registerMarketSystem(this.commandBus);
+        this.facilitySystem = facilityModule.registerFacilitySystem(this.commandBus, {
+          basePatienceMs: balanceDocument.service.basePatienceMs,
+          minimumPatienceMs: balanceDocument.service.minimumPatienceMs,
+          maximumPatienceMs: balanceDocument.service.maximumPatienceMs,
+        });
+        this.contractSystem = contractModule.registerContractSystem(this.commandBus);
+        this.recipeSystem = new RecipeSystem();
+        this.menuSystem = registerMenuSystem(this.commandBus);
+        this.reputationSystem = reputationModule.registerReputationSystem(this.commandBus);
+        this.unlockPublisher = unlocksModule.registerUnlockPublisher(this.commandBus);
+        this.eventSystem = eventModule.registerEventSystem(this.commandBus, eventDocument.events);
+        return bootStagePass({
+          store: this.store,
+          commandBus: this.commandBus,
+          cashTransactionAPI: this.cashTransactionAPI,
+          inventoryAccountingAPI: this.inventoryAccountingAPI,
+          marketSystem: this.marketSystem,
+          facilitySystem: this.facilitySystem,
+          contractSystem: this.contractSystem,
+          recipeSystem: this.recipeSystem,
+          menuSystem: this.menuSystem,
+          reputationSystem: this.reputationSystem,
+          unlockPublisher: this.unlockPublisher,
+          eventSystem: this.eventSystem,
+        }, {
           revision: this.store.revision,
           runtimePhase: this.store.runtimePhase,
+          marketOfferCount: marketGeneration.market.offers.length,
+          marketDrawsConsumed: marketGeneration.drawsConsumed,
+          facilityDefinitionCount: facilities.definitions.length,
+          purchasedFacilityCount: facilities.purchasedFacilityIds.length,
+          contractOfferCount: contractGeneration.contracts.offers.length,
+          contractOfferDrawsConsumed: contractGeneration.drawsConsumed,
+          unlockedRecipeCount: recipes.unlockedRecipeIds.length,
+          menuDraftEntryCount: menu.draftEntries.length,
+          unlockThresholdCount: progression.unlockCatalog.length,
+          activeEventCount: events.activeEvent === null ? 0 : 1,
+          eventDrawsConsumed: eventGeneration.drawsConsumed,
           optionalNamespaceCount: Object.keys(this.store.getSnapshot().extensions).length,
         }, "STORE_READY");
       },
