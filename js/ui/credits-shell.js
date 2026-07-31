@@ -117,6 +117,12 @@ export class CreditsShell {
     this.overlay.classList.remove("hidden");
     this.overlay.setAttribute("aria-hidden", "false");
     this.root.documentElement.dataset.credits = "open";
+    const EventConstructor = this.root.defaultView?.CustomEvent;
+    if (typeof EventConstructor === "function") {
+      this.root.dispatchEvent(new EventConstructor("ui:modal-context-change", {
+        detail: Object.freeze({ modal: "credits", open: true }),
+      }));
+    }
     this.closeButton.focus({ preventScroll: true });
   }
 
@@ -126,6 +132,12 @@ export class CreditsShell {
     this.overlay.classList.add("hidden");
     this.overlay.setAttribute("aria-hidden", "true");
     this.root.documentElement.dataset.credits = "closed";
+    const EventConstructor = this.root.defaultView?.CustomEvent;
+    if (typeof EventConstructor === "function") {
+      this.root.dispatchEvent(new EventConstructor("ui:modal-context-change", {
+        detail: Object.freeze({ modal: "credits", open: false }),
+      }));
+    }
     const focusTarget = this.#opener?.isConnected ? this.#opener : this.button;
     this.#opener = null;
     focusTarget.focus({ preventScroll: true });
