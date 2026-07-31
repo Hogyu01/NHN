@@ -8,6 +8,8 @@ import { freezeDeep } from "../core/result.js";
 import { GameStore } from "../core/store.js";
 import { CANONICAL_CONTENT_SPECIFICATIONS } from "../infrastructure/canonical-content.js";
 import { DataLoader } from "../infrastructure/data-loader.js";
+import { BASE_MAP_ID } from "../world/map-schema.js";
+import { MapLoader, mapLoadReportToBootOutcome } from "../world/map-loader.js";
 import { CanvasScene } from "../ui/canvas-scene.js";
 import { CreditsShell } from "../ui/credits-shell.js";
 import { ErrorScreen } from "../ui/error-screen.js";
@@ -28,6 +30,8 @@ const PROTOTYPE_QA_ROUTE = "prototype-baseline";
 const DETERMINISTIC_CORE_QA_ROUTE = "deterministic-core";
 const DATA_VALIDATION_QA_ROUTE = "data-validation";
 const BOOTSTRAP_FEATURE_QA_ROUTE = "bootstrap-features";
+const MAP_VALIDATION_QA_ROUTE = "map-validation";
+const PLAYER_WORLD_QA_ROUTE = "player-world";
 
 export const BOOT_STAGE = Object.freeze({
   SHELL: "SHELL",
@@ -343,10 +347,14 @@ export class AppBootstrap {
     featureFlags = DEFAULT_FEATURE_FLAGS,
     gateArtifacts = [],
     dataLoader = new DataLoader(),
+    mapLoader = new MapLoader(),
+    mapSpecifications = [],
     stageOverrides = {},
   } = {}) {
     if (!root || typeof root.querySelector !== "function") throw new TypeError("AppBootstrap root document가 필요합니다.");
     if (!dataLoader || typeof dataLoader.loadAll !== "function") throw new TypeError("AppBootstrap DataLoader가 필요합니다.");
+    if (!mapLoader || typeof mapLoader.load !== "function") throw new TypeError("AppBootstrap MapLoader가 필요합니다.");
+    if (!Array.isArray(mapSpecifications)) throw new TypeError("mapSpecifications는 배열이어야 합니다.");
     if (!stageOverrides || typeof stageOverrides !== "object" || Array.isArray(stageOverrides)) {
       throw new TypeError("stageOverrides는 object여야 합니다.");
     }
@@ -361,6 +369,8 @@ export class AppBootstrap {
     this.featureFlagsInput = featureFlags;
     this.gateArtifacts = gateArtifacts;
     this.dataLoader = dataLoader;
+    this.mapLoader = mapLoader;
+    this.mapSpecifications = Object.freeze([...mapSpecifications]);
     this.stageOverrides = stageOverrides;
     this.shell = null;
     this.scene = null;
@@ -369,6 +379,8 @@ export class AppBootstrap {
     this.commandBus = null;
     this.featureRegistry = null;
     this.canonicalContent = null;
+    this.mapLoadReport = null;
+    this.mapRegistry = null;
     this.bootResult = null;
     this._startPromise = null;
     this._interactionsBound = false;
@@ -410,6 +422,20 @@ export class AppBootstrap {
     );
     this.root.documentElement.dataset.phaseBgm = String(this.featureRegistry.flags.phaseBgm);
     this.root.documentElement.dataset.extendedAudio = String(this.featureRegistry.flags.extendedAudio);
+    const mapStage = result.projection.stages.find((stage) => stage.stageId === BOOT_STAGE.MAP);
+    this.root.documentElement.dataset.mapStageStatus = mapStage?.status?.toLowerCase() ?? "unknown";
+    this.root.documentElement.dataset.mapStageCode = mapStage?.code ?? "UNKNOWN";
+    this.root.documentElement.dataset.mapRegisteredCount = String(
+      this.mapLoadReport?.registryConformance.registeredCount ?? 0,
+    );
+    this.root.documentElement.dataset.mapQuarantinedCount = String(
+      this.mapLoadReport?.quarantined.length ?? 0,
+    );
+    this.root.documentElement.dataset.activeMapValidity = this.mapLoadReport?.activeMapValidity.code ?? "NOT_RUN";
+    const worldSnapshot = this.hub.getWorldSnapshot();
+    this.root.documentElement.dataset.runtimeMapId = worldSnapshot.mapId;
+    this.root.documentElement.dataset.playerCollision = `${worldSnapshot.player.collisionWidth}x${worldSnapshot.player.collisionHeight}`;
+    this.root.documentElement.dataset.playerStartMilliPx = `${worldSnapshot.player.footMilliPx.x},${worldSnapshot.player.footMilliPx.y}`;
     return result;
   }
 
@@ -476,11 +502,49 @@ export class AppBootstrap {
           },
         });
       },
-      [BOOT_STAGE.MAP]: async () => bootStageSkipped(
-        Object.freeze({ registry: null, activeMap: null }),
-        "MAP_SYSTEM_DEFERRED_TO_TASK_7",
-        { boundaryEstablished: true },
-      ),
+      [BOOT_STAGE.MAP]: async () => {
+        let specifications = this.mapSpecifications;
+        let activeMapId = BASE_MAP_ID;
+        let manifestFilename = null;
+        let manifestCode = "EXPLICIT_MAP_SPECIFICATIONS";
+        if (specifications.length === 0) {
+          const {
+            MapManifestLoader,
+          } = await import("../world/map-manifest.js");
+          const manifestReport = await new MapManifestLoader().load();
+          this.mapManifestReport = manifestReport;
+          if (!manifestReport.ok) {
+            return bootStageFailure(manifestReport.code, manifestReport.diagnostics, {
+              manifestFilename: manifestReport.filename,
+              specificationCount: 0,
+            });
+          }
+          specifications = manifestReport.specifications;
+          activeMapId = manifestReport.manifest.activeMapId;
+          manifestFilename = manifestReport.filename;
+          manifestCode = manifestReport.code;
+        }
+        const report = await this.mapLoader.load(specifications, {
+          activeMapId,
+          requireBase: true,
+        });
+        this.mapLoadReport = report;
+        this.mapRegistry = report.registry;
+        const outcome = mapLoadReportToBootOutcome(report);
+        return stageResult({
+          ok: outcome.ok,
+          value: outcome.value,
+          status: outcome.ok ? BOOT_STAGE_STATUS.PASS : BOOT_STAGE_STATUS.FAIL,
+          code: outcome.code,
+          diagnostics: outcome.diagnostics,
+          details: {
+            ...outcome.details,
+            manifestFilename,
+            manifestCode,
+            specificationCount: specifications.length,
+          },
+        });
+      },
       [BOOT_STAGE.ASSET]: async () => {
         const canvas = requireElement(this.root, "#game-canvas");
         const panelOverlay = requireElement(this.root, "#panel-overlay");
@@ -496,6 +560,7 @@ export class AppBootstrap {
           panelTitle,
           panelBody,
           panelCloseButton,
+          mapDefinition: this.mapLoadReport.activeMap,
           inputTarget: this.root.defaultView,
         });
         return bootStagePass({ scene: this.scene, hub: this.hub }, {
@@ -512,6 +577,7 @@ export class AppBootstrap {
       [BOOT_STAGE.STORE]: async (context) => {
         const buildAndFlags = context[BOOT_STAGE.BUILD_FLAGS];
         const data = context[BOOT_STAGE.DATA];
+        const maps = context[BOOT_STAGE.MAP];
         this.store = new GameStore({
           formatVersion: 1,
           revision: 0,
@@ -524,6 +590,12 @@ export class AppBootstrap {
             buildId: buildAndFlags.buildMetadata.buildId,
             contentVersion: buildAndFlags.buildMetadata.contentVersion,
             canonicalFiles: data.accepted.map((entry) => entry.filename),
+            maps: maps?.registryConformance ? {
+              activeMapId: maps.activeMapId,
+              registeredMapIds: maps.registryConformance.mapIds,
+              quarantinedCount: maps.quarantined.length,
+              activeValidityCode: maps.activeMapValidity.code,
+            } : null,
           },
         });
         this.commandBus = new CommandBus({
@@ -575,9 +647,69 @@ export class AppBootstrap {
 
     if (qaMode === PROTOTYPE_QA_ROUTE) {
       showScreen(this.root, "screen-room");
+      this.hub.usePrototypeRegressionMap();
       this.hub.activate();
       const report = await runPrototypeRegression({ root: this.root, scene: this.scene, hub: this.hub });
+      this.hub.setMapDefinition(this.mapLoadReport.activeMap);
+      this.hub.start();
+      canvas.focus({ preventScroll: true });
+      return report;
+    }
+    if (qaMode === PLAYER_WORLD_QA_ROUTE) {
+      showScreen(this.root, "screen-room");
+      this.hub.setMapDefinition(this.mapLoadReport.activeMap);
+      this.hub.activate();
+      const {
+        runPlayerWorldBrowserProbe,
+      } = await import("../qa/player-world-probe.js");
+      const report = await runPlayerWorldBrowserProbe({
+        root: this.root,
+        hub: this.hub,
+        shell: this.shell,
+        baseMap: this.mapLoadReport.activeMap,
+      });
       this.hub.reset();
+      this.hub.start();
+      canvas.focus({ preventScroll: true });
+      return report;
+    }
+    if (qaMode === "camera-input") {
+      showScreen(this.root, "screen-room");
+      this.hub.setMapDefinition(this.mapLoadReport.activeMap);
+      this.hub.activate();
+      const {
+        runCameraInputBrowserProbe,
+      } = await import("../qa/camera-input-probe.js");
+      const report = await runCameraInputBrowserProbe({
+        root: this.root,
+        hub: this.hub,
+        baseMap: this.mapLoadReport.activeMap,
+      });
+      this.hub.reset();
+      const camera = this.hub.getCameraTransform();
+      this.root.documentElement.dataset.runtimeCameraOrigin = `${camera.origin.x},${camera.origin.y}`;
+      this.root.documentElement.dataset.inputTransform = "client-rect-480-camera-world";
+      this.hub.start();
+      canvas.focus({ preventScroll: true });
+      return report;
+    }
+    if (qaMode === "world-interaction") {
+      showScreen(this.root, "screen-room");
+      this.hub.setMapDefinition(this.mapLoadReport.activeMap);
+      this.hub.activate();
+      const {
+        runWorldInteractionBrowserProbe,
+      } = await import("../qa/world-interaction-probe.js");
+      const report = await runWorldInteractionBrowserProbe({
+        root: this.root,
+        hub: this.hub,
+        shell: this.shell,
+        baseMap: this.mapLoadReport.activeMap,
+      });
+      this.hub.reset();
+      const interaction = this.hub.getInteractionSnapshot();
+      this.root.documentElement.dataset.worldInteractionOrdering = "world-distance-priority-entity-id";
+      this.root.documentElement.dataset.worldInteractionAuthoredTargets = String(interaction.router.authoredTargetCount);
       this.hub.start();
       canvas.focus({ preventScroll: true });
       return report;
@@ -619,6 +751,17 @@ export class AppBootstrap {
       const report = await runBootstrapFeatureProbe();
       const shellSmoke = runBootstrapFeatureShellSmoke({ root: this.root, app: this, report });
       publishBootstrapFeatureReport(this.root, report, shellSmoke);
+      return Object.freeze({ ...report, shellSmoke });
+    }
+    if (qaMode === MAP_VALIDATION_QA_ROUTE) {
+      const {
+        publishMapValidationReport,
+        runMapValidationProbe,
+        runMapValidationShellSmoke,
+      } = await import("../qa/map-validation-probe.js");
+      const report = await runMapValidationProbe();
+      const shellSmoke = runMapValidationShellSmoke({ root: this.root, app: this, report });
+      publishMapValidationReport(this.root, report, shellSmoke);
       return Object.freeze({ ...report, shellSmoke });
     }
     return null;

@@ -1,4 +1,22 @@
+import { freezeDeep } from "../core/result.js";
+import { deriveCameraTransform } from "../world/camera.js";
+import {
+  DYNAMIC_SERVICE_TARGET_KIND,
+  normalizeDynamicServiceTarget,
+  resolveDynamicServiceTarget,
+} from "../world/dynamic-target-resolver.js";
+import {
+  CanvasRectAdapter,
+  InputTransform,
+} from "../world/input-transform.js";
+import { WorldInteractionRouter } from "../world/interaction-router.js";
+import {
+  PLAYER_MOVEMENT_STEP_MILLI_PX,
+  PlayerController,
+} from "../world/player-controller.js";
 import { CANVAS_LOGICAL_SIZE } from "./canvas-scene.js";
+import { InputRouter } from "./input-router.js";
+import { PanelManager, STATIC_PANEL_DEFINITIONS } from "./panel-manager.js";
 
 export const PROTOTYPE_WORLD_CONTRACT = Object.freeze({
   tileSize: 32,
@@ -41,33 +59,91 @@ export const PROTOTYPE_ZONES = Object.freeze([
   }),
 ]);
 
-const INITIAL_PLAYER = Object.freeze({
-  x: 240,
-  y: 240,
-  r: 14,
-  speed: 2.5,
-  dir: "down",
+const SEMANTIC_COLORS = Object.freeze({
+  board: "#4a6fa5",
+  stove: "#c9752f",
+  counter: "#5a9e6f",
+  storage: "#775a9e",
 });
 
-const MOVEMENT_KEYS = Object.freeze({
-  arrowup: "up",
-  w: "up",
-  arrowdown: "down",
-  s: "down",
-  arrowleft: "left",
-  a: "left",
-  arrowright: "right",
-  d: "right",
-});
-
-function containsPoint(rect, x, y) {
-  return x > rect.x && x < rect.x + rect.w && y > rect.y && y < rect.y + rect.h;
+function prototypeRuntimeMapDefinition() {
+  const area = PROTOTYPE_WORLD_CONTRACT.widthTiles * PROTOTYPE_WORLD_CONTRACT.heightTiles;
+  return freezeDeep({
+    schemaVersion: 1,
+    mapId: "map.prototype_runtime",
+    width: PROTOTYPE_WORLD_CONTRACT.widthTiles,
+    height: PROTOTYPE_WORLD_CONTRACT.heightTiles,
+    tileSize: PROTOTYPE_WORLD_CONTRACT.tileSize,
+    layers: {
+      ground: Array(area).fill("tile.prototype.floor"),
+      collision: Array(area).fill(0),
+      below: Array(area).fill(null),
+      above: Array(area).fill(null),
+    },
+    objects: [],
+    zones: PROTOTYPE_ZONES.map((zone) => ({
+      zoneId: `zone.prototype-runtime.${zone.id}`,
+      semantic: zone.id,
+      rect: { x: zone.x, y: zone.y, width: zone.w, height: zone.h },
+      approachTileIds: [`approach.prototype-runtime.${zone.id}`],
+    })),
+    navigation: {
+      playerStart: {
+        pointId: "point.prototype-runtime.player-start",
+        tileX: 7,
+        tileY: 7,
+        offsetX: 16,
+        offsetY: 16,
+      },
+      spawnPoint: { pointId: "point.prototype-runtime.spawn", tileX: 1, tileY: 13, offsetX: 16, offsetY: 16 },
+      exitPoint: { pointId: "point.prototype-runtime.exit", tileX: 2, tileY: 13, offsetX: 16, offsetY: 16 },
+      approachPoints: [],
+      seatPoints: [],
+      tableServiceTargets: [],
+      transitions: [],
+    },
+    expansionRegions: [],
+  });
 }
 
-function normalizeKey(key) {
-  return typeof key === "string" ? key.toLowerCase() : "";
+export const PROTOTYPE_RUNTIME_MAP_DEFINITION = prototypeRuntimeMapDefinition();
+
+function presentationForZone(zone) {
+  const prototype = PROTOTYPE_ZONES.find((candidate) => candidate.id === zone.semantic);
+  const definition = STATIC_PANEL_DEFINITIONS[zone.semantic] ?? {
+    label: zone.semantic,
+    body: `${zone.semantic} 상호작용`,
+  };
+  return Object.freeze({
+    id: zone.semantic,
+    zoneId: zone.zoneId,
+    semantic: zone.semantic,
+    label: prototype?.label ?? definition.label,
+    body: prototype?.body ?? definition.body,
+    x: zone.rect.x,
+    y: zone.rect.y,
+    w: zone.rect.width,
+    h: zone.rect.height,
+    color: prototype?.color ?? SEMANTIC_COLORS[zone.semantic] ?? "#666666",
+  });
 }
 
+function lowerDirection(direction) {
+  return direction.toLowerCase();
+}
+
+function invokeSynchronous(callback, value, field) {
+  const outcome = callback(value);
+  if (outcome && typeof outcome.then === "function") {
+    throw new TypeError(`${field} callback은 Promise를 반환할 수 없습니다.`);
+  }
+  return outcome;
+}
+
+/**
+ * Browser adapter retained under its prototype name for compatibility. Player movement, static
+ * zone opens, and dynamic action commands all pass through production World/Input routers.
+ */
 export class PrototypeHubAdapter {
   constructor({
     scene,
@@ -75,49 +151,97 @@ export class PrototypeHubAdapter {
     panelTitle,
     panelBody,
     panelCloseButton,
+    mapDefinition = PROTOTYPE_RUNTIME_MAP_DEFINITION,
     inputTarget = window,
+    onInteractionCommand = () => undefined,
   }) {
+    if (typeof onInteractionCommand !== "function") {
+      throw new TypeError("onInteractionCommand는 함수여야 합니다.");
+    }
     this.scene = scene;
-    this.panelOverlay = panelOverlay;
-    this.panelTitle = panelTitle;
-    this.panelBody = panelBody;
-    this.panelCloseButton = panelCloseButton;
     this.inputTarget = inputTarget;
+    this.root = panelOverlay.ownerDocument;
+    this.onInteractionCommand = onInteractionCommand;
+    this.inputRouter = null;
+    this.interactionRouter = null;
+    this.panelManager = new PanelManager({
+      root: this.root,
+      overlay: panelOverlay,
+      title: panelTitle,
+      body: panelBody,
+      closeButton: panelCloseButton,
+      canvas: scene.canvas,
+      onContextChange: () => {
+        this.clearMovementInput();
+        this.inputRouter?.syncContext();
+      },
+    });
+    this.canvasRectAdapter = new CanvasRectAdapter(scene.canvas);
+    this.inputTransform = new InputTransform({
+      rectAdapter: this.canvasRectAdapter,
+      cameraProvider: () => this.getCameraTransform(),
+      viewport: CANVAS_LOGICAL_SIZE,
+    });
 
-    this.player = { ...INITIAL_PLAYER, moving: false };
-    this.keys = new Set();
-    this.panelOpen = false;
-    this.currentZoneId = null;
-    this.activePanelZoneId = null;
     this.animationFrame = 1;
     this.animationTimer = 0;
     this.running = false;
     this.inputActive = false;
     this.lastFrameTime = null;
     this.animationFrameRequest = null;
+    this.controller = null;
+    this.mapDefinition = null;
+    this.zonePresentations = [];
+    this.guestOrderTargets = Object.freeze([]);
+    this.interactionCommands = [];
+    this.lastPointerWorld = null;
+    this.lastInputTransformCode = null;
+    this.destroyed = false;
 
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.handleKeyUp = this.handleKeyUp.bind(this);
     this.gameLoop = this.gameLoop.bind(this);
-    this.inputTarget.addEventListener("keydown", this.handleKeyDown);
-    this.inputTarget.addEventListener("keyup", this.handleKeyUp);
-    this.render();
+    this.setMapDefinition(mapDefinition);
+    this.interactionRouter = new WorldInteractionRouter({
+      mapDefinition: this.mapDefinition,
+      dynamicTargetProvider: () => this.guestOrderTargets,
+      onStaticOpen: (request) => this.#openStaticRequest(request),
+      onDynamicCommand: (command) => this.#publishInteractionCommand(command),
+    });
+    this.inputRouter = new InputRouter({
+      root: this.root,
+      inputTarget: this.inputTarget,
+      canvas: this.scene.canvas,
+      inputTransform: this.inputTransform,
+      modalOpenProvider: () => this.root.documentElement.dataset.credits === "open",
+      panelOpenProvider: () => this.panelManager.isOpen,
+      canvasActiveProvider: () => this.inputActive,
+      onMovement: (logical) => this.controller.setDirectionHeld(logical.direction, logical.held),
+      onAction: (logical) => this.routeInteractionAction({
+        inputSource: logical.source,
+        inputWorldPoint: logical.worldPoint,
+      }),
+      onPointerWorld: (logical) => this.#publishPointerWorld(logical),
+      onTransformError: (failure) => this.#publishInputTransformError(failure),
+      onClearMovement: () => this.clearMovementInput(),
+    });
+  }
+
+  get panelOpen() {
+    return this.panelManager.isOpen;
   }
 
   activate() {
     this.inputActive = true;
+    this.inputRouter?.syncContext();
   }
 
   deactivate() {
     this.inputActive = false;
-    this.clearMovementInput();
+    this.inputRouter?.syncContext();
   }
 
   start() {
     this.activate();
-    if (this.running) {
-      return;
-    }
+    if (this.running) return;
     this.running = true;
     this.lastFrameTime = null;
     this.animationFrameRequest = this.inputTarget.requestAnimationFrame(this.gameLoop);
@@ -130,174 +254,268 @@ export class PrototypeHubAdapter {
     this.animationFrameRequest = null;
     this.running = false;
     this.lastFrameTime = null;
-    if (deactivate) {
-      this.deactivate();
-    }
+    if (deactivate) this.deactivate();
   }
 
   destroy() {
+    if (this.destroyed) return;
+    this.destroyed = true;
     this.stop({ deactivate: true });
-    this.inputTarget.removeEventListener("keydown", this.handleKeyDown);
-    this.inputTarget.removeEventListener("keyup", this.handleKeyUp);
+    this.inputRouter?.destroy();
+  }
+
+  setMapDefinition(mapDefinition) {
+    if (!mapDefinition || typeof mapDefinition !== "object") throw new TypeError("runtime Map definition이 필요합니다.");
+    this.panelManager.close({ returnFocus: false });
+    this.mapDefinition = mapDefinition;
+    this.controller = new PlayerController({
+      mapDefinition,
+      movementStepMilliPx: PLAYER_MOVEMENT_STEP_MILLI_PX,
+    });
+    this.zonePresentations = Object.freeze((mapDefinition.zones ?? []).map(presentationForZone));
+    this.guestOrderTargets = Object.freeze([]);
+    this.interactionCommands = [];
+    this.interactionRouter?.setMapDefinition(mapDefinition);
+    this.animationFrame = 1;
+    this.animationTimer = 0;
+    this.lastPointerWorld = null;
+    this.lastInputTransformCode = null;
+    this.render();
+    return this.getWorldSnapshot();
+  }
+
+  usePrototypeRegressionMap() {
+    return this.setMapDefinition(PROTOTYPE_RUNTIME_MAP_DEFINITION);
   }
 
   gameLoop(time) {
-    if (!this.running) {
-      return;
-    }
+    if (!this.running) return;
     const deltaMs = this.lastFrameTime === null ? 0 : time - this.lastFrameTime;
     this.lastFrameTime = time;
     this.step(deltaMs);
     this.animationFrameRequest = this.inputTarget.requestAnimationFrame(this.gameLoop);
   }
 
-  handleKeyDown(event) {
-    const key = normalizeKey(event.key);
-    if (!this.inputActive || !(key in MOVEMENT_KEYS)) {
-      return;
-    }
-    event.preventDefault();
-    if (this.panelOpen) {
-      this.clearMovementInput();
-      return;
-    }
-    this.keys.add(key);
-  }
-
-  handleKeyUp(event) {
-    const key = normalizeKey(event.key);
-    if (!(key in MOVEMENT_KEYS)) {
-      return;
-    }
-    event.preventDefault();
-    this.keys.delete(key);
-  }
-
   clearMovementInput() {
-    this.keys.clear();
-    this.player.moving = false;
+    this.controller?.clearHeldMovement();
   }
 
   step(deltaMs = 0) {
-    this.updatePlayer();
+    const movementAllowed = !this.panelManager.isOpen &&
+      this.root.documentElement.dataset.credits !== "open";
+    const result = this.controller.step({ movementAllowed });
+    this.#processZoneTransitions(result.zoneTransitions);
     this.updateAnimation(deltaMs);
     this.render();
-  }
-
-  updatePlayer() {
-    if (this.panelOpen) {
-      this.player.moving = false;
-      return;
-    }
-
-    let dx = 0;
-    let dy = 0;
-    if (this.keys.has("arrowup") || this.keys.has("w")) dy -= 1;
-    if (this.keys.has("arrowdown") || this.keys.has("s")) dy += 1;
-    if (this.keys.has("arrowleft") || this.keys.has("a")) dx -= 1;
-    if (this.keys.has("arrowright") || this.keys.has("d")) dx += 1;
-
-    this.player.moving = dx !== 0 || dy !== 0;
-    if (this.player.moving) {
-      const length = Math.hypot(dx, dy);
-      this.player.x += (dx / length) * this.player.speed;
-      this.player.y += (dy / length) * this.player.speed;
-
-      if (dy < 0) this.player.dir = "up";
-      else if (dy > 0) this.player.dir = "down";
-      else if (dx < 0) this.player.dir = "left";
-      else if (dx > 0) this.player.dir = "right";
-    }
-
-    this.player.x = Math.max(
-      this.player.r,
-      Math.min(CANVAS_LOGICAL_SIZE.width - this.player.r, this.player.x),
-    );
-    this.player.y = Math.max(
-      this.player.r,
-      Math.min(CANVAS_LOGICAL_SIZE.height - this.player.r, this.player.y),
-    );
-
-    const insideZone = PROTOTYPE_ZONES.find((zone) =>
-      containsPoint(zone, this.player.x, this.player.y),
-    );
-    if (insideZone) {
-      if (insideZone.id !== this.currentZoneId) {
-        this.currentZoneId = insideZone.id;
-        this.openPanel(insideZone);
-      }
-    } else {
-      this.currentZoneId = null;
-    }
+    return this.getWorldSnapshot();
   }
 
   updateAnimation(deltaMs) {
-    if (!this.player.moving) {
+    if (!this.controller.snapshot().player.moving) {
       this.animationFrame = 1;
       this.animationTimer = 0;
       return;
     }
-
     this.animationTimer += Math.max(0, deltaMs);
-    if (this.animationTimer > 120) {
-      this.animationTimer = 0;
-      this.animationFrame = this.animationFrame >= 8 ? 1 : this.animationFrame + 1;
+    if (this.animationTimer >= 120) {
+      const elapsedFrames = Math.floor(this.animationTimer / 120);
+      this.animationTimer %= 120;
+      this.animationFrame = 1 + ((this.animationFrame - 1 + elapsedFrames) % 8);
     }
   }
 
   openPanel(zone) {
-    this.panelOpen = true;
-    this.activePanelZoneId = zone.id;
     this.clearMovementInput();
-    this.panelTitle.textContent = zone.label;
-    this.panelBody.textContent = zone.body;
-    this.panelOverlay.classList.remove("hidden");
-    this.panelCloseButton.focus({ preventScroll: true });
+    return this.panelManager.open({
+      zoneId: zone.zoneId,
+      semantic: zone.semantic,
+      label: zone.label,
+      body: zone.body,
+    });
   }
 
   closePanel({ returnFocus = true } = {}) {
-    this.panelOpen = false;
-    this.activePanelZoneId = null;
+    const activeZoneId = this.panelManager.activeZoneId;
+    if (activeZoneId) this.controller.dismissZone(activeZoneId);
     this.clearMovementInput();
-    this.panelOverlay.classList.add("hidden");
-    if (returnFocus) {
-      this.scene.canvas.focus({ preventScroll: true });
-    }
+    return this.panelManager.close({ returnFocus });
   }
 
   setPlayerPosition(x, y) {
-    this.player.x = Math.max(this.player.r, Math.min(CANVAS_LOGICAL_SIZE.width - this.player.r, x));
-    this.player.y = Math.max(this.player.r, Math.min(CANVAS_LOGICAL_SIZE.height - this.player.r, y));
-    this.player.moving = false;
+    const result = this.controller.setFootPositionLogical(x, y);
+    this.#processZoneTransitions(result.zoneTransitions);
+    this.render();
+    return this.getWorldSnapshot();
+  }
+
+  setGuestOrderTargets(targets) {
+    if (!Array.isArray(targets)) throw new TypeError("guest order targets는 배열이어야 합니다.");
+    const normalized = targets.map((target, index) => normalizeDynamicServiceTarget(target, index));
+    if (normalized.some((target) => target.kind !== DYNAMIC_SERVICE_TARGET_KIND.GUEST_ORDER)) {
+      throw new TypeError("runtime guest target provider에는 GUEST_ORDER만 등록할 수 있습니다.");
+    }
+    resolveDynamicServiceTarget({
+      playerFootMilliPx: this.controller.snapshot().player.footMilliPx,
+      targets: [...this.interactionRouter.authoredTableTargets, ...normalized],
+    });
+    this.guestOrderTargets = Object.freeze(normalized);
+    return this.getInteractionSnapshot();
+  }
+
+  clearGuestOrderTargets() {
+    this.guestOrderTargets = Object.freeze([]);
+    return this.getInteractionSnapshot();
+  }
+
+  clearInteractionCommands() {
+    this.interactionCommands = [];
+    return this.getInteractionSnapshot();
+  }
+
+  routeInteractionAction({ inputSource = "PROGRAMMATIC", inputWorldPoint = null } = {}) {
+    return this.interactionRouter.routeAction({
+      playerFootMilliPx: this.controller.snapshot().player.footMilliPx,
+      inputSource,
+      inputWorldPoint,
+    });
   }
 
   reset() {
     this.clearMovementInput();
-    Object.assign(this.player, INITIAL_PLAYER, { moving: false });
-    this.currentZoneId = null;
-    this.activePanelZoneId = null;
-    this.panelOpen = false;
+    this.panelManager.close({ returnFocus: false });
+    this.controller.reset();
+    this.guestOrderTargets = Object.freeze([]);
+    this.interactionCommands = [];
     this.animationFrame = 1;
     this.animationTimer = 0;
-    this.panelOverlay.classList.add("hidden");
+    this.lastPointerWorld = null;
+    this.lastInputTransformCode = null;
     this.render();
+    return this.getWorldSnapshot();
+  }
+
+  getWorldSnapshot() {
+    return this.controller.snapshot();
+  }
+
+  getCameraTransform() {
+    const world = this.controller.snapshot();
+    return deriveCameraTransform({
+      mapDefinition: this.mapDefinition,
+      playerFootLogicalPx: world.player.footLogicalPx,
+      viewport: CANVAS_LOGICAL_SIZE,
+    });
+  }
+
+  clientToWorld(clientX, clientY) {
+    return this.inputTransform.clientToWorld(clientX, clientY);
+  }
+
+  worldToClient(worldX, worldY) {
+    return this.inputTransform.worldToClient(worldX, worldY);
+  }
+
+  getInteractionSnapshot() {
+    const targets = this.interactionRouter?.getDynamicTargets() ?? [];
+    return freezeDeep({
+      router: this.interactionRouter?.snapshot() ?? null,
+      input: this.inputRouter?.snapshot() ?? null,
+      dynamicTargets: targets,
+      guestOrderTargetCount: this.guestOrderTargets.length,
+      commands: [...this.interactionCommands],
+    });
   }
 
   getState() {
-    return Object.freeze({
-      player: Object.freeze({ ...this.player }),
-      panelOpen: this.panelOpen,
-      currentZoneId: this.currentZoneId,
-      activePanelZoneId: this.activePanelZoneId,
+    const world = this.controller.snapshot();
+    const camera = this.getCameraTransform();
+    const inside = Object.entries(world.staticZoneOccupancy)
+      .find(([, occupancy]) => occupancy.inside);
+    const player = world.player;
+    return freezeDeep({
+      player: {
+        x: player.footLogicalPx.x,
+        y: player.footLogicalPx.y,
+        speed: PLAYER_MOVEMENT_STEP_MILLI_PX / 1_000,
+        dir: lowerDirection(player.direction),
+        moving: player.moving,
+        collisionWidth: player.collisionWidth,
+        collisionHeight: player.collisionHeight,
+        footMilliPx: player.footMilliPx,
+      },
+      camera,
+      inputTransform: {
+        lastCode: this.lastInputTransformCode,
+        lastPointerWorld: this.lastPointerWorld,
+      },
+      interaction: this.getInteractionSnapshot(),
+      panelOpen: this.panelManager.isOpen,
+      currentZoneId: inside?.[1].semantic ?? null,
+      activePanelZoneId: this.panelManager.activeSemantic,
+      activeMapId: world.mapId,
+      heldMovementDirections: world.heldMovementDirections,
+      staticZoneOccupancy: world.staticZoneOccupancy,
       animationFrame: this.animationFrame,
+      worldSnapshot: world,
     });
   }
 
   render() {
+    const world = this.controller.snapshot();
+    const camera = this.getCameraTransform();
     this.scene.render({
-      zones: PROTOTYPE_ZONES,
-      player: this.player,
+      camera,
+      zones: this.zonePresentations,
+      player: {
+        x: world.player.footLogicalPx.x,
+        y: world.player.footLogicalPx.y,
+        dir: lowerDirection(world.player.direction),
+        moving: world.player.moving,
+      },
       animationFrame: this.animationFrame,
     });
+  }
+
+  #processZoneTransitions(transitions) {
+    if (this.panelManager.isOpen || !this.interactionRouter) return null;
+    return this.interactionRouter.routeStaticTransitions(transitions);
+  }
+
+  #openStaticRequest(request) {
+    if (this.panelManager.isOpen) return;
+    const presentation = this.zonePresentations.find((zone) => zone.zoneId === request.zoneId);
+    if (presentation) this.openPanel(presentation);
+  }
+
+  #publishInteractionCommand(command) {
+    this.interactionCommands.push(command);
+    invokeSynchronous(this.onInteractionCommand, command, "onInteractionCommand");
+    const EventConstructor = this.inputTarget.CustomEvent ?? this.root.defaultView?.CustomEvent;
+    if (typeof EventConstructor === "function") {
+      this.root.dispatchEvent(new EventConstructor("world:interaction-command", {
+        detail: command,
+      }));
+    }
+  }
+
+  #publishPointerWorld(logical) {
+    this.lastPointerWorld = logical.worldPoint;
+    this.lastInputTransformCode = "INPUT_TRANSFORM_OK";
+    const EventConstructor = this.inputTarget.CustomEvent ?? this.root.defaultView?.CustomEvent;
+    if (typeof EventConstructor === "function") {
+      this.root.dispatchEvent(new EventConstructor("world:pointer-coordinate", {
+        detail: freezeDeep({ kind: logical.pointerEventType, worldPoint: logical.worldPoint }),
+      }));
+    }
+  }
+
+  #publishInputTransformError(failure) {
+    this.lastInputTransformCode = failure.code;
+    const EventConstructor = this.inputTarget.CustomEvent ?? this.root.defaultView?.CustomEvent;
+    if (typeof EventConstructor === "function") {
+      this.root.dispatchEvent(new EventConstructor("world:pointer-transform-error", {
+        detail: failure,
+      }));
+    }
   }
 }

@@ -60,8 +60,18 @@ export class CanvasScene {
 
   render(snapshot) {
     const { context, canvas } = this;
+    const cameraOrigin = snapshot.camera?.origin ?? { x: 0, y: 0 };
+    const worldSize = snapshot.camera?.worldSize ?? { width: canvas.width, height: canvas.height };
+
     context.imageSmoothingEnabled = false;
     context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#11131a";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    context.save();
+    context.translate(-cameraOrigin.x, -cameraOrigin.y);
+    context.fillStyle = "#2a211c";
+    context.fillRect(0, 0, worldSize.width, worldSize.height);
 
     for (const zone of snapshot.zones) {
       context.fillStyle = zone.color;
@@ -78,23 +88,22 @@ export class CanvasScene {
     context.fillStyle = "rgba(0, 0, 0, 0.35)";
     context.fill();
 
-    if (!this.spriteLoaded || this.sprite.naturalWidth === 0) {
-      return;
+    if (this.spriteLoaded && this.sprite.naturalWidth > 0) {
+      const row = PLAYER_SPRITE_CONTRACT.directionRows[player.dir];
+      const column = player.moving ? snapshot.animationFrame : PLAYER_SPRITE_CONTRACT.idleColumn;
+      context.imageSmoothingEnabled = false;
+      context.drawImage(
+        this.sprite,
+        column * PLAYER_SPRITE_CONTRACT.frameWidth,
+        row * PLAYER_SPRITE_CONTRACT.frameHeight,
+        PLAYER_SPRITE_CONTRACT.frameWidth,
+        PLAYER_SPRITE_CONTRACT.frameHeight,
+        player.x - PLAYER_SPRITE_CONTRACT.frameWidth / 2,
+        player.y - PLAYER_SPRITE_CONTRACT.frameHeight / 2,
+        PLAYER_SPRITE_CONTRACT.frameWidth,
+        PLAYER_SPRITE_CONTRACT.frameHeight,
+      );
     }
-
-    const row = PLAYER_SPRITE_CONTRACT.directionRows[player.dir];
-    const column = player.moving ? snapshot.animationFrame : PLAYER_SPRITE_CONTRACT.idleColumn;
-    context.imageSmoothingEnabled = false;
-    context.drawImage(
-      this.sprite,
-      column * PLAYER_SPRITE_CONTRACT.frameWidth,
-      row * PLAYER_SPRITE_CONTRACT.frameHeight,
-      PLAYER_SPRITE_CONTRACT.frameWidth,
-      PLAYER_SPRITE_CONTRACT.frameHeight,
-      player.x - PLAYER_SPRITE_CONTRACT.frameWidth / 2,
-      player.y - PLAYER_SPRITE_CONTRACT.frameHeight / 2,
-      PLAYER_SPRITE_CONTRACT.frameWidth,
-      PLAYER_SPRITE_CONTRACT.frameHeight,
-    );
+    context.restore();
   }
 }
