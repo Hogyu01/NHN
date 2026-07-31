@@ -4,7 +4,7 @@
   "recipes": [
     {
       "recipeId": "recipe.slime_stew",
-      "displayName": "슬라임 스튜",
+      "displayName": "슬라임 젤리 화채",
       "basePriceG": 44,
       "ingredientRequirements": [
         {
@@ -12,11 +12,7 @@
           "quantity": 2
         },
         {
-          "ingredientId": "ingredient.cave_mushroom",
-          "quantity": 1
-        },
-        {
-          "ingredientId": "ingredient.crystal_salt",
+          "ingredientId": "ingredient.mimic_bean",
           "quantity": 1
         }
       ],
@@ -29,23 +25,24 @@
       "unlock": {
         "type": "STARTING",
         "reputationThreshold": null
+      },
+      "outcomeText": {
+        "success": "말랑한 젤리와 새콤한 과즙이 완벽하게 어우러졌다!",
+        "normal": "상큼하고 먹을 만한 젤리 화채가 완성됐다.",
+        "failure": "젤리가 전부 녹아 끈적한 물이 되어버렸다..."
       }
     },
     {
       "recipeId": "recipe.stonegrain_bowl",
-      "displayName": "돌곡물 버섯죽",
+      "displayName": "광부의 수정 버섯볶음",
       "basePriceG": 42,
       "ingredientRequirements": [
         {
-          "ingredientId": "ingredient.stonegrain",
-          "quantity": 2
-        },
-        {
-          "ingredientId": "ingredient.cave_mushroom",
+          "ingredientId": "ingredient.crystal_salt",
           "quantity": 1
         },
         {
-          "ingredientId": "ingredient.crystal_salt",
+          "ingredientId": "ingredient.cave_mushroom",
           "quantity": 1
         }
       ],
@@ -58,11 +55,16 @@
       "unlock": {
         "type": "STARTING",
         "reputationThreshold": null
+      },
+      "outcomeText": {
+        "success": "수정 소금이 버섯의 감칠맛을 또렷하게 끌어냈다!",
+        "normal": "짭짤하고 고소한 버섯볶음이 완성됐다.",
+        "failure": "소금 수정을 너무 많이 갈아 넣어 입안이 사막이 되었다..."
       }
     },
     {
       "recipeId": "recipe.glowcap_soup",
-      "displayName": "빛갓 수프",
+      "displayName": "동굴 버섯 스튜",
       "basePriceG": 48,
       "ingredientRequirements": [
         {
@@ -70,11 +72,7 @@
           "quantity": 1
         },
         {
-          "ingredientId": "ingredient.glow_herb",
-          "quantity": 1
-        },
-        {
-          "ingredientId": "ingredient.crystal_salt",
+          "ingredientId": "ingredient.ember_pepper",
           "quantity": 1
         }
       ],
@@ -87,11 +85,16 @@
       "unlock": {
         "type": "REPUTATION",
         "reputationThreshold": 40
+      },
+      "outcomeText": {
+        "success": "깊은 버섯 향 뒤로 알싸한 풍미가 살아난다!",
+        "normal": "따뜻하고 든든한 버섯 스튜가 완성됐다.",
+        "failure": "버섯을 너무 오래 끓여 정체불명의 죽이 되었다..."
       }
     },
     {
       "recipeId": "recipe.ember_egg_skewer",
-      "displayName": "잿불알 꼬치",
+      "displayName": "화염 도마뱀 허브구이",
       "basePriceG": 64,
       "ingredientRequirements": [
         {
@@ -99,7 +102,7 @@
           "quantity": 1
         },
         {
-          "ingredientId": "ingredient.ember_pepper",
+          "ingredientId": "ingredient.glow_herb",
           "quantity": 1
         }
       ],
@@ -112,24 +115,25 @@
       "unlock": {
         "type": "REPUTATION",
         "reputationThreshold": 48
+      },
+      "outcomeText": {
+        "success": "불향과 허브 향이 폭발하는 모험가식 특선 구이다!",
+        "normal": "조금 맵지만 향이 좋은 도마뱀 구이가 완성됐다.",
+        "failure": "도마뱀 고기가 불을 뿜으며 새까맣게 타버렸다..."
       }
     },
     {
       "recipeId": "recipe.moonroot_pie",
-      "displayName": "달뿌리 파이",
+      "displayName": "서리 멧돼지 당근수프",
       "basePriceG": 78,
       "ingredientRequirements": [
         {
-          "ingredientId": "ingredient.moonroot",
-          "quantity": 2
-        },
-        {
-          "ingredientId": "ingredient.stonegrain",
-          "quantity": 1
-        },
-        {
           "ingredientId": "ingredient.moss_cheese",
           "quantity": 1
+        },
+        {
+          "ingredientId": "ingredient.moonroot",
+          "quantity": 2
         }
       ],
       "timing": {
@@ -141,27 +145,24 @@
       "unlock": {
         "type": "REPUTATION",
         "reputationThreshold": 56
+      },
+      "outcomeText": {
+        "success": "진한 육수에 당근의 은은한 단맛이 스며들었다!",
+        "normal": "추위를 녹여줄 담백한 고기 수프가 완성됐다.",
+        "failure": "얼어붙은 고기가 끝내 익지 않아 국물만 미지근하다..."
       }
     },
     {
       "recipeId": "recipe.mimic_hotpot",
-      "displayName": "미믹콩 전골",
+      "displayName": "해독초 산성 샐러드",
       "basePriceG": 72,
       "ingredientRequirements": [
         {
+          "ingredientId": "ingredient.stonegrain",
+          "quantity": 1
+        },
+        {
           "ingredientId": "ingredient.mimic_bean",
-          "quantity": 1
-        },
-        {
-          "ingredientId": "ingredient.slime_gel",
-          "quantity": 1
-        },
-        {
-          "ingredientId": "ingredient.glow_herb",
-          "quantity": 1
-        },
-        {
-          "ingredientId": "ingredient.crystal_salt",
           "quantity": 1
         }
       ],
@@ -174,6 +175,11 @@
       "unlock": {
         "type": "REPUTATION",
         "reputationThreshold": 64
+      },
+      "outcomeText": {
+        "success": "새콤한 열매가 해독초의 쓴맛을 산뜻하게 잡아준다!",
+        "normal": "건강에는 좋을 것 같은 새콤쌉싸름한 샐러드다.",
+        "failure": "혀가 얼얼할 만큼 쓰고 시다. 손님이 고개를 젓는다..."
       }
     }
   ]

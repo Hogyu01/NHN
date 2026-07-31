@@ -4,7 +4,7 @@
   "guestArchetypes": [
     {
       "guestArchetypeId": "guest.human_adventurer",
-      "displayName": "인간 모험가",
+      "displayName": "초보 모험가 루카",
       "classification": "HUMAN",
       "visualCue": "둥근 배낭",
       "assetId": "sprite.guest.human_adventurer",
@@ -22,7 +22,8 @@
           "recipeId": "recipe.glowcap_soup",
           "weight": 3
         }
-      ]
+      ],
+      "roleLabel": "배고픈 여행자"
     },
     {
       "guestArchetypeId": "guest.dwarf_courier",
@@ -44,7 +45,8 @@
           "recipeId": "recipe.moonroot_pie",
           "weight": 3
         }
-      ]
+      ],
+      "roleLabel": "지친 광부"
     },
     {
       "guestArchetypeId": "guest.goblin_scholar",
@@ -66,7 +68,8 @@
           "recipeId": "recipe.slime_stew",
           "weight": 3
         }
-      ]
+      ],
+      "roleLabel": "호기심 많은 연금술사"
     },
     {
       "guestArchetypeId": "guest.slime_gourmand",
@@ -88,7 +91,8 @@
           "recipeId": "recipe.mimic_hotpot",
           "weight": 3
         }
-      ]
+      ],
+      "roleLabel": "까다로운 마법사"
     },
     {
       "guestArchetypeId": "guest.kobold_porter",
@@ -110,7 +114,8 @@
           "recipeId": "recipe.mimic_hotpot",
           "weight": 3
         }
-      ]
+      ],
+      "roleLabel": "허세 많은 기사"
     },
     {
       "guestArchetypeId": "guest.mushroom_traveler",
@@ -132,7 +137,8 @@
           "recipeId": "recipe.stonegrain_bowl",
           "weight": 3
         }
-      ]
+      ],
+      "roleLabel": "수습 성직자"
     }
   ]
 }

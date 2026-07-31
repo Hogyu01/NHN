@@ -5,7 +5,8 @@
     {
       "ingredientId": "ingredient.slime_gel",
       "displayName": "슬라임 젤리",
-      "category": "ARCANE",
+      "category": "MONSTER_BYPRODUCT",
+      "flavorProfile": "단맛",
       "basePriceG": 8,
       "marketAvailabilityRate": 90,
       "marketStockRange": {
@@ -16,24 +17,25 @@
         {
           "minQuality": 0,
           "maxQuality": 49,
-          "weight": 0.2
+          "weight": 0.6
         },
         {
           "minQuality": 50,
           "maxQuality": 79,
-          "weight": 0.55
+          "weight": 0.3
         },
         {
           "minQuality": 80,
           "maxQuality": 100,
-          "weight": 0.25
+          "weight": 0.1
         }
       ]
     },
     {
       "ingredientId": "ingredient.cave_mushroom",
       "displayName": "동굴 버섯",
-      "category": "FUNGI",
+      "category": "VEGETABLE",
+      "flavorProfile": "감칠맛",
       "basePriceG": 9,
       "marketAvailabilityRate": 85,
       "marketStockRange": {
@@ -44,24 +46,25 @@
         {
           "minQuality": 0,
           "maxQuality": 49,
-          "weight": 0.2
+          "weight": 0.65
         },
         {
           "minQuality": 50,
           "maxQuality": 79,
-          "weight": 0.5
+          "weight": 0.25
         },
         {
           "minQuality": 80,
           "maxQuality": 100,
-          "weight": 0.3
+          "weight": 0.1
         }
       ]
     },
     {
       "ingredientId": "ingredient.glow_herb",
-      "displayName": "발광 허브",
+      "displayName": "별빛 허브",
       "category": "HERB",
+      "flavorProfile": "향긋한맛",
       "basePriceG": 12,
       "marketAvailabilityRate": 65,
       "marketStockRange": {
@@ -72,24 +75,25 @@
         {
           "minQuality": 0,
           "maxQuality": 49,
-          "weight": 0.1
+          "weight": 0.5
         },
         {
           "minQuality": 50,
           "maxQuality": 79,
-          "weight": 0.45
+          "weight": 0.35
         },
         {
           "minQuality": 80,
           "maxQuality": 100,
-          "weight": 0.45
+          "weight": 0.15
         }
       ]
     },
     {
       "ingredientId": "ingredient.ember_pepper",
-      "displayName": "잿불 고추",
-      "category": "SPICE",
+      "displayName": "늪지 양파",
+      "category": "VEGETABLE",
+      "flavorProfile": "매운맛",
       "basePriceG": 14,
       "marketAvailabilityRate": 60,
       "marketStockRange": {
@@ -100,24 +104,25 @@
         {
           "minQuality": 0,
           "maxQuality": 49,
-          "weight": 0.25
+          "weight": 0.65
         },
         {
           "minQuality": 50,
           "maxQuality": 79,
-          "weight": 0.5
+          "weight": 0.25
         },
         {
           "minQuality": 80,
           "maxQuality": 100,
-          "weight": 0.25
+          "weight": 0.1
         }
       ]
     },
     {
       "ingredientId": "ingredient.moonroot",
-      "displayName": "달뿌리",
-      "category": "ROOT",
+      "displayName": "달빛 당근",
+      "category": "VEGETABLE",
+      "flavorProfile": "단맛",
       "basePriceG": 11,
       "marketAvailabilityRate": 75,
       "marketStockRange": {
@@ -128,24 +133,25 @@
         {
           "minQuality": 0,
           "maxQuality": 49,
-          "weight": 0.2
+          "weight": 0.7
         },
         {
           "minQuality": 50,
           "maxQuality": 79,
-          "weight": 0.55
+          "weight": 0.22
         },
         {
           "minQuality": 80,
           "maxQuality": 100,
-          "weight": 0.25
+          "weight": 0.08
         }
       ]
     },
     {
       "ingredientId": "ingredient.crystal_salt",
-      "displayName": "수정 소금",
+      "displayName": "소금 수정",
       "category": "MINERAL",
+      "flavorProfile": "짠맛",
       "basePriceG": 5,
       "marketAvailabilityRate": 95,
       "marketStockRange": {
@@ -156,24 +162,25 @@
         {
           "minQuality": 0,
           "maxQuality": 49,
-          "weight": 0.15
+          "weight": 0.5
         },
         {
           "minQuality": 50,
           "maxQuality": 79,
-          "weight": 0.6
+          "weight": 0.35
         },
         {
           "minQuality": 80,
           "maxQuality": 100,
-          "weight": 0.25
+          "weight": 0.15
         }
       ]
     },
     {
       "ingredientId": "ingredient.stonegrain",
-      "displayName": "돌껍질 곡물",
-      "category": "GRAIN",
+      "displayName": "해독초",
+      "category": "HERB",
+      "flavorProfile": "쓴맛",
       "basePriceG": 7,
       "marketAvailabilityRate": 90,
       "marketStockRange": {
@@ -184,24 +191,25 @@
         {
           "minQuality": 0,
           "maxQuality": 49,
-          "weight": 0.2
+          "weight": 0.6
         },
         {
           "minQuality": 50,
           "maxQuality": 79,
-          "weight": 0.6
+          "weight": 0.3
         },
         {
           "minQuality": 80,
           "maxQuality": 100,
-          "weight": 0.2
+          "weight": 0.1
         }
       ]
     },
     {
       "ingredientId": "ingredient.griffin_egg",
-      "displayName": "그리핀 알",
-      "category": "PROTEIN",
+      "displayName": "화염 도마뱀 고기",
+      "category": "MEAT",
+      "flavorProfile": "매운맛",
       "basePriceG": 22,
       "marketAvailabilityRate": 45,
       "marketStockRange": {
@@ -212,24 +220,25 @@
         {
           "minQuality": 0,
           "maxQuality": 49,
-          "weight": 0.25
+          "weight": 0.55
         },
         {
           "minQuality": 50,
           "maxQuality": 79,
-          "weight": 0.45
+          "weight": 0.3
         },
         {
           "minQuality": 80,
           "maxQuality": 100,
-          "weight": 0.3
+          "weight": 0.15
         }
       ]
     },
     {
       "ingredientId": "ingredient.mimic_bean",
-      "displayName": "미믹 콩",
-      "category": "LEGUME",
+      "displayName": "산성 열매",
+      "category": "FRUIT",
+      "flavorProfile": "신맛",
       "basePriceG": 16,
       "marketAvailabilityRate": 55,
       "marketStockRange": {
@@ -240,24 +249,25 @@
         {
           "minQuality": 0,
           "maxQuality": 49,
-          "weight": 0.2
+          "weight": 0.6
         },
         {
           "minQuality": 50,
           "maxQuality": 79,
-          "weight": 0.5
+          "weight": 0.28
         },
         {
           "minQuality": 80,
           "maxQuality": 100,
-          "weight": 0.3
+          "weight": 0.12
         }
       ]
     },
     {
       "ingredientId": "ingredient.moss_cheese",
-      "displayName": "이끼 치즈",
-      "category": "DAIRY",
+      "displayName": "서리 멧돼지 고기",
+      "category": "MEAT",
+      "flavorProfile": "짠맛",
       "basePriceG": 18,
       "marketAvailabilityRate": 50,
       "marketStockRange": {
@@ -268,17 +278,17 @@
         {
           "minQuality": 0,
           "maxQuality": 49,
-          "weight": 0.2
+          "weight": 0.55
         },
         {
           "minQuality": 50,
           "maxQuality": 79,
-          "weight": 0.45
+          "weight": 0.35
         },
         {
           "minQuality": 80,
           "maxQuality": 100,
-          "weight": 0.35
+          "weight": 0.1
         }
       ]
     }

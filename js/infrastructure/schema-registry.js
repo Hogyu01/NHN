@@ -256,6 +256,7 @@ const CANONICAL_INGREDIENT_ITEM_SCHEMA = {
     "ingredientId",
     "displayName",
     "category",
+    "flavorProfile",
     "basePriceG",
     "marketAvailabilityRate",
     "marketStockRange",
@@ -267,8 +268,24 @@ const CANONICAL_INGREDIENT_ITEM_SCHEMA = {
     displayName: { type: "string", minLength: 1 },
     category: {
       type: "string",
-      enum: ["ARCANE", "FUNGI", "HERB", "SPICE", "ROOT", "MINERAL", "GRAIN", "PROTEIN", "LEGUME", "DAIRY"],
+      enum: [
+        "ARCANE",
+        "FUNGI",
+        "HERB",
+        "SPICE",
+        "ROOT",
+        "MINERAL",
+        "GRAIN",
+        "PROTEIN",
+        "LEGUME",
+        "DAIRY",
+        "MONSTER_BYPRODUCT",
+        "VEGETABLE",
+        "MEAT",
+        "FRUIT",
+      ],
     },
+    flavorProfile: { type: "string", minLength: 1, maxLength: 40 },
     basePriceG: { type: "integer", minimum: 1 },
     marketAvailabilityRate: { type: "number", format: "percentage" },
     marketStockRange: {
@@ -313,6 +330,7 @@ const CANONICAL_RECIPE_ITEM_SCHEMA = {
     "ingredientRequirements",
     "timing",
     "unlock",
+    "outcomeText",
   ],
   additionalProperties: false,
   properties: {
@@ -326,6 +344,16 @@ const CANONICAL_RECIPE_ITEM_SCHEMA = {
         reputationThreshold: { type: ["integer", "null"], format: "quality" },
       },
       invariants: ["recipe-unlock"],
+    },
+    outcomeText: {
+      type: "object",
+      required: ["success", "normal", "failure"],
+      additionalProperties: false,
+      properties: {
+        success: { type: "string", minLength: 1, maxLength: 120 },
+        normal: { type: "string", minLength: 1, maxLength: 120 },
+        failure: { type: "string", minLength: 1, maxLength: 120 },
+      },
     },
   },
 };
@@ -478,6 +506,7 @@ const GUEST_ARCHETYPE_REGISTRY_SCHEMA = {
         required: [
           "guestArchetypeId",
           "displayName",
+          "roleLabel",
           "classification",
           "visualCue",
           "assetId",
@@ -488,6 +517,7 @@ const GUEST_ARCHETYPE_REGISTRY_SCHEMA = {
         properties: {
           guestArchetypeId: { type: "string", format: "stable-id", idNamespace: "guest-archetype" },
           displayName: { type: "string", minLength: 1 },
+          roleLabel: { type: "string", minLength: 1, maxLength: 40 },
           classification: {
             type: "string",
             enum: ["HUMAN", "FRIENDLY_NON_HUMAN", "FRIENDLY_MONSTER"],
@@ -768,8 +798,8 @@ const CANONICAL_MIGRATION_REPORT_SCHEMA = {
   additionalProperties: false,
   properties: {
     reportSchemaVersion: { type: "integer", const: 1 },
-    migrationId: { type: "string", const: "migration.prototype-to-canonical.v1", format: "stable-id", idNamespace: "migration-report" },
-    sourceFormat: { type: "string", const: "legacy.prototype.unversioned" },
+    migrationId: { type: "string", const: "migration.main-content-to-canonical.v1", format: "stable-id", idNamespace: "migration-report" },
+    sourceFormat: { type: "string", const: "main.authored-draft-and-legacy.unversioned" },
     targetContentVersion: { type: "integer", const: 1 },
     status: { type: "string", const: "PASS" },
     sourceFiles: {
@@ -783,7 +813,10 @@ const CANONICAL_MIGRATION_REPORT_SCHEMA = {
         properties: {
           filename: { type: "string", minLength: 1 },
           sha256: { type: "string", minLength: 64, maxLength: 64, format: "stable-id" },
-          classification: { type: "string", const: "LEGACY_PLACEHOLDER" },
+          classification: {
+            type: "string",
+            enum: ["MAIN_AUTHORED_CONTENT", "LEGACY_PLACEHOLDER"],
+          },
         },
       },
     },
@@ -832,6 +865,9 @@ const CANONICAL_MIGRATION_REPORT_SCHEMA = {
               "REPLACED_EXAMPLE_PLACEHOLDER",
               "ADDED_FROM_APPROVED_PLAN",
               "OMITTED_EXAMPLE_PLACEHOLDER",
+              "MAPPED_MAIN_CONTENT",
+              "RETAINED_FOUNDATION_VALUE",
+              "OMITTED_INCOMPATIBLE_VALUE",
             ],
           },
           targetId: { type: ["string", "null"], format: "stable-id" },
