@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "manifestId": "map-manifest.canonical.v1",
+  "activeMapId": "map.base_restaurant",
+  "maps": [
+    {
+      "mapId": "map.base_restaurant",
+      "filename": "data/maps/base-restaurant.json",
+      "role": "BASE"
+    },
+    {
+      "mapId": "map.prototype_fixture",
+      "filename": "data/maps/prototype-fixture.json",
+      "role": "PROTOTYPE"
+    }
+  ]
+}
