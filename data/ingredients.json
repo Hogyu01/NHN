@@ -1,10 +1,286 @@
-[
-  {
-    "이름": "슬라임 젤리",
-    "카테고리": "예: 육류/채소/약초/광물 중 하나",
-    "확률_일반": 0.6,
-    "확률_고급": 0.3,
-    "확률_희귀": 0.1,
-    "맛_프로필": "예: 신맛"
-  }
-]
+{
+  "contentId": "content.ingredients",
+  "schemaVersion": 1,
+  "ingredients": [
+    {
+      "ingredientId": "ingredient.slime_gel",
+      "displayName": "슬라임 젤리",
+      "category": "ARCANE",
+      "basePriceG": 8,
+      "marketAvailabilityRate": 90,
+      "marketStockRange": {
+        "minimum": 8,
+        "maximum": 16
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.2
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.55
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.25
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.cave_mushroom",
+      "displayName": "동굴 버섯",
+      "category": "FUNGI",
+      "basePriceG": 9,
+      "marketAvailabilityRate": 85,
+      "marketStockRange": {
+        "minimum": 7,
+        "maximum": 14
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.2
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.5
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.3
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.glow_herb",
+      "displayName": "발광 허브",
+      "category": "HERB",
+      "basePriceG": 12,
+      "marketAvailabilityRate": 65,
+      "marketStockRange": {
+        "minimum": 3,
+        "maximum": 8
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.1
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.45
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.45
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.ember_pepper",
+      "displayName": "잿불 고추",
+      "category": "SPICE",
+      "basePriceG": 14,
+      "marketAvailabilityRate": 60,
+      "marketStockRange": {
+        "minimum": 3,
+        "maximum": 9
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.25
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.5
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.25
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.moonroot",
+      "displayName": "달뿌리",
+      "category": "ROOT",
+      "basePriceG": 11,
+      "marketAvailabilityRate": 75,
+      "marketStockRange": {
+        "minimum": 5,
+        "maximum": 11
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.2
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.55
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.25
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.crystal_salt",
+      "displayName": "수정 소금",
+      "category": "MINERAL",
+      "basePriceG": 5,
+      "marketAvailabilityRate": 95,
+      "marketStockRange": {
+        "minimum": 8,
+        "maximum": 18
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.15
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.6
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.25
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.stonegrain",
+      "displayName": "돌껍질 곡물",
+      "category": "GRAIN",
+      "basePriceG": 7,
+      "marketAvailabilityRate": 90,
+      "marketStockRange": {
+        "minimum": 9,
+        "maximum": 18
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.2
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.6
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.2
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.griffin_egg",
+      "displayName": "그리핀 알",
+      "category": "PROTEIN",
+      "basePriceG": 22,
+      "marketAvailabilityRate": 45,
+      "marketStockRange": {
+        "minimum": 2,
+        "maximum": 6
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.25
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.45
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.3
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.mimic_bean",
+      "displayName": "미믹 콩",
+      "category": "LEGUME",
+      "basePriceG": 16,
+      "marketAvailabilityRate": 55,
+      "marketStockRange": {
+        "minimum": 3,
+        "maximum": 7
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.2
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.5
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.3
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.moss_cheese",
+      "displayName": "이끼 치즈",
+      "category": "DAIRY",
+      "basePriceG": 18,
+      "marketAvailabilityRate": 50,
+      "marketStockRange": {
+        "minimum": 2,
+        "maximum": 7
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.2
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.45
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.35
+        }
+      ]
+    }
+  ]
+}

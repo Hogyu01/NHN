@@ -1,10 +1,180 @@
-[
-  {
-    "이름": "예: 슬라임 스튜",
-    "필요_재료": ["슬라임 젤리", "던전 약초"],
-    "맛_매칭_보너스": "예: 신맛 재료 + 쓴맛 약초 = 성공률 +20%",
-    "성공_문구": "",
-    "보통_문구": "",
-    "실패_문구": ""
-  }
-]
+{
+  "contentId": "content.recipes",
+  "schemaVersion": 1,
+  "recipes": [
+    {
+      "recipeId": "recipe.slime_stew",
+      "displayName": "슬라임 스튜",
+      "basePriceG": 44,
+      "ingredientRequirements": [
+        {
+          "ingredientId": "ingredient.slime_gel",
+          "quantity": 2
+        },
+        {
+          "ingredientId": "ingredient.cave_mushroom",
+          "quantity": 1
+        },
+        {
+          "ingredientId": "ingredient.crystal_salt",
+          "quantity": 1
+        }
+      ],
+      "timing": {
+        "targetOffsetMs": 2200,
+        "successWindowMs": 250,
+        "normalWindowMs": 650,
+        "failureOffsetMs": 3500
+      },
+      "unlock": {
+        "type": "STARTING",
+        "reputationThreshold": null
+      }
+    },
+    {
+      "recipeId": "recipe.stonegrain_bowl",
+      "displayName": "돌곡물 버섯죽",
+      "basePriceG": 42,
+      "ingredientRequirements": [
+        {
+          "ingredientId": "ingredient.stonegrain",
+          "quantity": 2
+        },
+        {
+          "ingredientId": "ingredient.cave_mushroom",
+          "quantity": 1
+        },
+        {
+          "ingredientId": "ingredient.crystal_salt",
+          "quantity": 1
+        }
+      ],
+      "timing": {
+        "targetOffsetMs": 1800,
+        "successWindowMs": 300,
+        "normalWindowMs": 700,
+        "failureOffsetMs": 3200
+      },
+      "unlock": {
+        "type": "STARTING",
+        "reputationThreshold": null
+      }
+    },
+    {
+      "recipeId": "recipe.glowcap_soup",
+      "displayName": "빛갓 수프",
+      "basePriceG": 48,
+      "ingredientRequirements": [
+        {
+          "ingredientId": "ingredient.cave_mushroom",
+          "quantity": 1
+        },
+        {
+          "ingredientId": "ingredient.glow_herb",
+          "quantity": 1
+        },
+        {
+          "ingredientId": "ingredient.crystal_salt",
+          "quantity": 1
+        }
+      ],
+      "timing": {
+        "targetOffsetMs": 2600,
+        "successWindowMs": 220,
+        "normalWindowMs": 600,
+        "failureOffsetMs": 3800
+      },
+      "unlock": {
+        "type": "REPUTATION",
+        "reputationThreshold": 40
+      }
+    },
+    {
+      "recipeId": "recipe.ember_egg_skewer",
+      "displayName": "잿불알 꼬치",
+      "basePriceG": 64,
+      "ingredientRequirements": [
+        {
+          "ingredientId": "ingredient.griffin_egg",
+          "quantity": 1
+        },
+        {
+          "ingredientId": "ingredient.ember_pepper",
+          "quantity": 1
+        }
+      ],
+      "timing": {
+        "targetOffsetMs": 3000,
+        "successWindowMs": 180,
+        "normalWindowMs": 500,
+        "failureOffsetMs": 4000
+      },
+      "unlock": {
+        "type": "REPUTATION",
+        "reputationThreshold": 48
+      }
+    },
+    {
+      "recipeId": "recipe.moonroot_pie",
+      "displayName": "달뿌리 파이",
+      "basePriceG": 78,
+      "ingredientRequirements": [
+        {
+          "ingredientId": "ingredient.moonroot",
+          "quantity": 2
+        },
+        {
+          "ingredientId": "ingredient.stonegrain",
+          "quantity": 1
+        },
+        {
+          "ingredientId": "ingredient.moss_cheese",
+          "quantity": 1
+        }
+      ],
+      "timing": {
+        "targetOffsetMs": 3400,
+        "successWindowMs": 200,
+        "normalWindowMs": 650,
+        "failureOffsetMs": 4500
+      },
+      "unlock": {
+        "type": "REPUTATION",
+        "reputationThreshold": 56
+      }
+    },
+    {
+      "recipeId": "recipe.mimic_hotpot",
+      "displayName": "미믹콩 전골",
+      "basePriceG": 72,
+      "ingredientRequirements": [
+        {
+          "ingredientId": "ingredient.mimic_bean",
+          "quantity": 1
+        },
+        {
+          "ingredientId": "ingredient.slime_gel",
+          "quantity": 1
+        },
+        {
+          "ingredientId": "ingredient.glow_herb",
+          "quantity": 1
+        },
+        {
+          "ingredientId": "ingredient.crystal_salt",
+          "quantity": 1
+        }
+      ],
+      "timing": {
+        "targetOffsetMs": 3800,
+        "successWindowMs": 160,
+        "normalWindowMs": 550,
+        "failureOffsetMs": 4800
+      },
+      "unlock": {
+        "type": "REPUTATION",
+        "reputationThreshold": 64
+      }
+    }
+  ]
+}

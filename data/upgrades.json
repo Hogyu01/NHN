@@ -1,6 +1,48 @@
-[
-  {
-    "이름": "예: 레시피 확장",
-    "효과_설명": ""
-  }
-]
+{
+  "contentId": "content.facilities",
+  "schemaVersion": 1,
+  "facilities": [
+    {
+      "facilityId": "facility.kitchen_stage_1",
+      "displayName": "화로 온도계",
+      "kind": "KITCHEN",
+      "stage": 1,
+      "costG": 90,
+      "unlockReputation": 36,
+      "effect": {
+        "type": "TIMING_WINDOW_BONUS_MS",
+        "value": 120,
+        "unit": "MILLISECONDS"
+      },
+      "effectiveTiming": "SAME_DAY"
+    },
+    {
+      "facilityId": "facility.hall_stage_1",
+      "displayName": "푹신한 긴의자",
+      "kind": "HALL",
+      "stage": 1,
+      "costG": 110,
+      "unlockReputation": 42,
+      "effect": {
+        "type": "PATIENCE_BONUS_MS",
+        "value": 5000,
+        "unit": "MILLISECONDS"
+      },
+      "effectiveTiming": "SAME_DAY"
+    },
+    {
+      "facilityId": "facility.storage_stage_1",
+      "displayName": "구리 선반",
+      "kind": "STORAGE",
+      "stage": 1,
+      "costG": 100,
+      "unlockReputation": 48,
+      "effect": {
+        "type": "MARKET_PURCHASE_LIMIT_BONUS_QUANTITY",
+        "value": 12,
+        "unit": "QUANTITY"
+      },
+      "effectiveTiming": "SAME_DAY"
+    }
+  ]
+}

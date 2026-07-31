@@ -1,0 +1,427 @@
+{
+  "reportSchemaVersion": 1,
+  "migrationId": "migration.prototype-to-canonical.v1",
+  "sourceFormat": "legacy.prototype.unversioned",
+  "targetContentVersion": 1,
+  "status": "PASS",
+  "sourceFiles": [
+    {
+      "filename": "data/ingredients.json",
+      "sha256": "3f43952f490e3314f2ce83166666ff7b304ed0a15211ce85a93de5928c92d1fa",
+      "classification": "LEGACY_PLACEHOLDER"
+    },
+    {
+      "filename": "data/recipes.json",
+      "sha256": "1406ee626ffb62df9a199967dc79a2d6f4b377b8bf0bffa0dfe706b2bcf81c43",
+      "classification": "LEGACY_PLACEHOLDER"
+    },
+    {
+      "filename": "data/upgrades.json",
+      "sha256": "5b24f021d50ce65b1b9c8e71c294e364d0a6cad17abf1c2a20199a4a9a53c6f0",
+      "classification": "LEGACY_PLACEHOLDER"
+    },
+    {
+      "filename": "data/dialogue.json",
+      "sha256": "78ea5597eea5207dca28ce81d4dd9b2961856cf67ae47fea9b5ff4aa7c139516",
+      "classification": "LEGACY_PLACEHOLDER"
+    }
+  ],
+  "targetFiles": [
+    {
+      "filename": "data/ingredients.json",
+      "contentId": "content.ingredients",
+      "schemaName": "ingredient-registry.canonical.v1",
+      "schemaVersion": 1,
+      "sha256": "e5ab4795a51ac1cfc30759cf86ac0dfa40ce68efefa8fa54e51144f64dbbf7bb"
+    },
+    {
+      "filename": "data/recipes.json",
+      "contentId": "content.recipes",
+      "schemaName": "recipe-registry.canonical.v1",
+      "schemaVersion": 1,
+      "sha256": "babb351549b936c7b2fea94f7937021ea4006b20ac58b35ec05bc5f71cd5b43d"
+    },
+    {
+      "filename": "data/upgrades.json",
+      "contentId": "content.facilities",
+      "schemaName": "facility-registry.v1",
+      "schemaVersion": 1,
+      "sha256": "29ff54a61a32f1677c3793513abd06bcf5397e12dea682dcff214957778a1aa5"
+    },
+    {
+      "filename": "data/dialogue.json",
+      "contentId": "content.dialogue",
+      "schemaName": "dialogue-registry.v1",
+      "schemaVersion": 1,
+      "sha256": "2cd38c0428060ff5bccd8fa1bf5232f10b2d06062c1bf0c705ba13a878ee635b"
+    },
+    {
+      "filename": "data/guests.json",
+      "contentId": "content.guests",
+      "schemaName": "guest-archetype-registry.v1",
+      "schemaVersion": 1,
+      "sha256": "531dd639e571c3fd817766c35ee347a5f609b904d99c4805ca96b2455c154550"
+    },
+    {
+      "filename": "data/events.json",
+      "contentId": "content.events",
+      "schemaName": "event-registry.v1",
+      "schemaVersion": 1,
+      "sha256": "dbc2217d9af84c91650200110209ed2fd54b7723480c558a790815715f1cac14"
+    },
+    {
+      "filename": "data/balance.json",
+      "contentId": "content.balance",
+      "schemaName": "balance-config.v1",
+      "schemaVersion": 1,
+      "sha256": "53bebc54f9cf77beb478b7a1d6c30f3f2646b1e9274371dffc2fe216ddbdaaac"
+    },
+    {
+      "filename": "data/content-manifest.json",
+      "contentId": "content.manifest",
+      "schemaName": "content-manifest.v1",
+      "schemaVersion": 1,
+      "sha256": "dd341af15d3d6040046c7a89603d890f259c0a1568aa865beaaf0a6c2af1f5f0"
+    }
+  ],
+  "idMappings": [
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[0].이름",
+      "sourceValue": "슬라임 젤리",
+      "disposition": "MAPPED_LEGACY_VALUE",
+      "targetId": "ingredient.slime_gel",
+      "rationale": "유일한 비예시 legacy 표시명을 승인 ID ingredient.slime_gel에 명시적으로 매핑했습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "ingredient.cave_mushroom",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "ingredient.glow_herb",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "ingredient.ember_pepper",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "ingredient.moonroot",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "ingredient.crystal_salt",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "ingredient.stonegrain",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "ingredient.griffin_egg",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "ingredient.mimic_bean",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "ingredient.moss_cheese",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[0].이름",
+      "sourceValue": "예: 슬라임 스튜",
+      "disposition": "REPLACED_EXAMPLE_PLACEHOLDER",
+      "targetId": "recipe.slime_stew",
+      "rationale": "'예:' 값은 데이터로 승격하지 않고 승인 계획의 recipe.slime_stew로 교체했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "recipe.stonegrain_bowl",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "recipe.glowcap_soup",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "recipe.ember_egg_skewer",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "recipe.moonroot_pie",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "recipe.mimic_hotpot",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "FACILITY",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "facility.kitchen_stage_1",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "FACILITY",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "facility.hall_stage_1",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "FACILITY",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "facility.storage_stage_1",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "guest.human_adventurer",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "guest.dwarf_courier",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "guest.goblin_scholar",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "guest.slime_gourmand",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "guest.kobold_porter",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "guest.mushroom_traveler",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "EVENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "event.intro_last_hearth",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "EVENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "event.busy_crossroads",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "EVENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "event.patient_pilgrims",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "EVENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "event.calm_embers",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "EVENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "ADDED_FROM_APPROVED_PLAN",
+      "targetId": "event.quartermaster_visit",
+      "rationale": "content-balance-plan.md의 승인된 ID/수량 baseline을 canonical stable ID로 채택했습니다."
+    },
+    {
+      "domain": "FACILITY",
+      "sourceFile": "data/upgrades.json",
+      "sourcePath": "$[0].이름",
+      "sourceValue": "예: 레시피 확장",
+      "disposition": "OMITTED_EXAMPLE_PLACEHOLDER",
+      "targetId": null,
+      "rationale": "generic 레시피 확장 예시는 kitchen/hall/storage Must stage와 의미가 달라 매핑하지 않았습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[0].유형",
+      "sourceValue": "예: 배고픈 여행자",
+      "disposition": "OMITTED_EXAMPLE_PLACEHOLDER",
+      "targetId": null,
+      "rationale": "빈 대사와 '예:' 손님 유형은 canonical dialogue/guest ID로 추정 변환하지 않았습니다."
+    }
+  ],
+  "decisions": [
+    {
+      "decisionId": "migration.decision.no_ratio_coercion",
+      "authority": "requirements.md 20.2 and Task 5",
+      "field": "legacy ingredients probabilities",
+      "value": "discarded",
+      "rationale": "0.6/0.3/0.1은 legacy 등급 확률이며 canonical marketAvailabilityRate와 의미가 다릅니다. 60/30/10으로 coercion하지 않았습니다."
+    },
+    {
+      "decisionId": "migration.decision.approved_ids",
+      "authority": "content-balance-plan.md sections 3-5",
+      "field": "ingredient/recipe/guest IDs",
+      "value": "preserved exactly",
+      "rationale": "승인 문서의 10 ingredient, 6 Recipe, 6 Guest stable ID를 그대로 사용했습니다."
+    },
+    {
+      "decisionId": "migration.decision.explicit_tuning_baseline",
+      "authority": "Task 5 implementation baseline within requirements.md ranges",
+      "field": "prices, stock, preference weights, unlocks, facilities, event modifiers",
+      "value": "explicit canonical v1 values",
+      "rationale": "legacy 예시에서 추정하지 않고 이번 migration에서 명시한 값입니다. 후속 balance report가 이 versioned baseline을 측정합니다."
+    },
+    {
+      "decisionId": "migration.decision.fixed_product_values",
+      "authority": "requirements.md approved product boundary",
+      "field": "campaign/economy/service/contract/world constants",
+      "value": "14d, 300G, 500G, 30->70, 40G, 105000ms, 6 guests",
+      "rationale": "승인된 고정값과 범위·계약을 balance.json에 분리해 단일 versioned source로 기록했습니다."
+    },
+    {
+      "decisionId": "migration.decision.excluded_domains",
+      "authority": "requirements.md explicit exclusions and Requirement 34.15",
+      "field": "spoilage/combat/attack/damage/loot",
+      "value": "absent",
+      "rationale": "유통기한·부패와 전투 관련 필드·enum을 canonical schema 및 payload에 포함하지 않았습니다."
+    }
+  ],
+  "validation": {
+    "validatorStatus": "PASS",
+    "documentCount": 8,
+    "diagnosticCount": 0,
+    "danglingReferenceCount": 0,
+    "ingredientCount": 10,
+    "recipeCount": 6,
+    "startingRecipeCount": 2,
+    "guestCount": 6,
+    "friendlyNonHumanOrMonsterCount": 5,
+    "facilityCount": 3,
+    "eventCount": 5
+  }
+}

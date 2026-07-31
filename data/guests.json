@@ -1,0 +1,138 @@
+{
+  "contentId": "content.guests",
+  "schemaVersion": 1,
+  "guestArchetypes": [
+    {
+      "guestArchetypeId": "guest.human_adventurer",
+      "displayName": "인간 모험가",
+      "classification": "HUMAN",
+      "visualCue": "둥근 배낭",
+      "assetId": "sprite.guest.human_adventurer",
+      "selectionWeight": 20,
+      "recipePreferenceWeights": [
+        {
+          "recipeId": "recipe.stonegrain_bowl",
+          "weight": 5
+        },
+        {
+          "recipeId": "recipe.slime_stew",
+          "weight": 4
+        },
+        {
+          "recipeId": "recipe.glowcap_soup",
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "guestArchetypeId": "guest.dwarf_courier",
+      "displayName": "드워프 운송인",
+      "classification": "FRIENDLY_NON_HUMAN",
+      "visualCue": "큰 소포",
+      "assetId": "sprite.guest.dwarf_courier",
+      "selectionWeight": 15,
+      "recipePreferenceWeights": [
+        {
+          "recipeId": "recipe.stonegrain_bowl",
+          "weight": 6
+        },
+        {
+          "recipeId": "recipe.ember_egg_skewer",
+          "weight": 4
+        },
+        {
+          "recipeId": "recipe.moonroot_pie",
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "guestArchetypeId": "guest.goblin_scholar",
+      "displayName": "고블린 학자",
+      "classification": "FRIENDLY_NON_HUMAN",
+      "visualCue": "책과 안경",
+      "assetId": "sprite.guest.goblin_scholar",
+      "selectionWeight": 16,
+      "recipePreferenceWeights": [
+        {
+          "recipeId": "recipe.glowcap_soup",
+          "weight": 6
+        },
+        {
+          "recipeId": "recipe.mimic_hotpot",
+          "weight": 4
+        },
+        {
+          "recipeId": "recipe.slime_stew",
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "guestArchetypeId": "guest.slime_gourmand",
+      "displayName": "슬라임 미식가",
+      "classification": "FRIENDLY_MONSTER",
+      "visualCue": "냅킨과 숟가락",
+      "assetId": "sprite.guest.slime_gourmand",
+      "selectionWeight": 16,
+      "recipePreferenceWeights": [
+        {
+          "recipeId": "recipe.slime_stew",
+          "weight": 7
+        },
+        {
+          "recipeId": "recipe.glowcap_soup",
+          "weight": 4
+        },
+        {
+          "recipeId": "recipe.mimic_hotpot",
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "guestArchetypeId": "guest.kobold_porter",
+      "displayName": "코볼트 짐꾼",
+      "classification": "FRIENDLY_NON_HUMAN",
+      "visualCue": "꼬리와 나무 상자",
+      "assetId": "sprite.guest.kobold_porter",
+      "selectionWeight": 17,
+      "recipePreferenceWeights": [
+        {
+          "recipeId": "recipe.ember_egg_skewer",
+          "weight": 6
+        },
+        {
+          "recipeId": "recipe.stonegrain_bowl",
+          "weight": 4
+        },
+        {
+          "recipeId": "recipe.mimic_hotpot",
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "guestArchetypeId": "guest.mushroom_traveler",
+      "displayName": "버섯 종족 여행자",
+      "classification": "FRIENDLY_NON_HUMAN",
+      "visualCue": "갓과 김",
+      "assetId": "sprite.guest.mushroom_traveler",
+      "selectionWeight": 16,
+      "recipePreferenceWeights": [
+        {
+          "recipeId": "recipe.glowcap_soup",
+          "weight": 7
+        },
+        {
+          "recipeId": "recipe.moonroot_pie",
+          "weight": 4
+        },
+        {
+          "recipeId": "recipe.stonegrain_bowl",
+          "weight": 3
+        }
+      ]
+    }
+  ]
+}

@@ -1,15 +1,186 @@
 {
-  "모험가": {
-    "이름": "",
-    "성격_한줄": "",
-    "리빌_연출_문구": "예: 봇짐을 풀어 보여줍니다..."
-  },
-  "손님": [
+  "contentId": "content.dialogue",
+  "schemaVersion": 1,
+  "dialogues": [
     {
-      "유형": "예: 배고픈 여행자",
-      "요청_대사": "",
-      "재촉_대사": "",
-      "만족_대사": ""
+      "dialogueId": "dialogue.intro.narrator",
+      "context": "INTRO",
+      "speaker": "NARRATOR",
+      "guestArchetypeId": null,
+      "recipeId": null,
+      "eventId": "event.intro_last_hearth",
+      "text": "던전 입구의 마지막 화로가 다시 켜졌습니다. 장부는 아직 따뜻하지 않습니다."
+    },
+    {
+      "dialogueId": "dialogue.intro.owner",
+      "context": "INTRO",
+      "speaker": "OWNER",
+      "guestArchetypeId": null,
+      "recipeId": null,
+      "eventId": "event.intro_last_hearth",
+      "text": "주인장, 오늘은 국자보다 계산이 먼저입니다."
+    },
+    {
+      "dialogueId": "dialogue.human_adventurer.order",
+      "context": "ORDER",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.human_adventurer",
+      "recipeId": null,
+      "eventId": null,
+      "text": "배낭보다 든든한 한 그릇으로 부탁합니다."
+    },
+    {
+      "dialogueId": "dialogue.human_adventurer.hurry",
+      "context": "HURRY",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.human_adventurer",
+      "recipeId": null,
+      "eventId": null,
+      "text": "던전 시계가 제 배보다 빠르군요."
+    },
+    {
+      "dialogueId": "dialogue.human_adventurer.satisfied",
+      "context": "SATISFIED",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.human_adventurer",
+      "recipeId": null,
+      "eventId": null,
+      "text": "이 정도면 지도에 별표를 그려도 되겠습니다."
+    },
+    {
+      "dialogueId": "dialogue.dwarf_courier.order",
+      "context": "ORDER",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.dwarf_courier",
+      "recipeId": null,
+      "eventId": null,
+      "text": "소포는 식고, 식사는 따뜻해야 합니다."
+    },
+    {
+      "dialogueId": "dialogue.dwarf_courier.hurry",
+      "context": "HURRY",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.dwarf_courier",
+      "recipeId": null,
+      "eventId": null,
+      "text": "배송표보다 주문표가 늦어지고 있습니다."
+    },
+    {
+      "dialogueId": "dialogue.dwarf_courier.satisfied",
+      "context": "SATISFIED",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.dwarf_courier",
+      "recipeId": null,
+      "eventId": null,
+      "text": "튼튼한 그릇입니다. 내용물은 더 훌륭하고요."
+    },
+    {
+      "dialogueId": "dialogue.goblin_scholar.order",
+      "context": "ORDER",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.goblin_scholar",
+      "recipeId": null,
+      "eventId": null,
+      "text": "오늘의 연구 주제는 빈 접시의 원인입니다."
+    },
+    {
+      "dialogueId": "dialogue.goblin_scholar.hurry",
+      "context": "HURRY",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.goblin_scholar",
+      "recipeId": null,
+      "eventId": null,
+      "text": "가설: 조금 더 기다리면 배가 더 고프다."
+    },
+    {
+      "dialogueId": "dialogue.goblin_scholar.satisfied",
+      "context": "SATISFIED",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.goblin_scholar",
+      "recipeId": null,
+      "eventId": null,
+      "text": "결론: 재현 실험이 필요한 맛입니다."
+    },
+    {
+      "dialogueId": "dialogue.slime_gourmand.order",
+      "context": "ORDER",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.slime_gourmand",
+      "recipeId": null,
+      "eventId": null,
+      "text": "숟가락은 하나면 됩니다. 저는 형태가 유연하거든요."
+    },
+    {
+      "dialogueId": "dialogue.slime_gourmand.hurry",
+      "context": "HURRY",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.slime_gourmand",
+      "recipeId": null,
+      "eventId": null,
+      "text": "냅킨이 먼저 녹기 전에 부탁합니다."
+    },
+    {
+      "dialogueId": "dialogue.slime_gourmand.satisfied",
+      "context": "SATISFIED",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.slime_gourmand",
+      "recipeId": null,
+      "eventId": null,
+      "text": "탱글함의 기준이 한 단계 올랐습니다."
+    },
+    {
+      "dialogueId": "dialogue.kobold_porter.order",
+      "context": "ORDER",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.kobold_porter",
+      "recipeId": null,
+      "eventId": null,
+      "text": "상자는 무겁고 배는 가볍습니다."
+    },
+    {
+      "dialogueId": "dialogue.kobold_porter.hurry",
+      "context": "HURRY",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.kobold_porter",
+      "recipeId": null,
+      "eventId": null,
+      "text": "꼬리가 세 번 흔들리기 전에 나오면 좋겠습니다."
+    },
+    {
+      "dialogueId": "dialogue.kobold_porter.satisfied",
+      "context": "SATISFIED",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.kobold_porter",
+      "recipeId": null,
+      "eventId": null,
+      "text": "이제 상자 두 개쯤은 더 들 수 있겠습니다."
+    },
+    {
+      "dialogueId": "dialogue.mushroom_traveler.order",
+      "context": "ORDER",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.mushroom_traveler",
+      "recipeId": null,
+      "eventId": null,
+      "text": "김이 나는 메뉴로 부탁합니다. 친척은 아닐 겁니다."
+    },
+    {
+      "dialogueId": "dialogue.mushroom_traveler.hurry",
+      "context": "HURRY",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.mushroom_traveler",
+      "recipeId": null,
+      "eventId": null,
+      "text": "제 갓에서 김이 나기 시작했습니다."
+    },
+    {
+      "dialogueId": "dialogue.mushroom_traveler.satisfied",
+      "context": "SATISFIED",
+      "speaker": "GUEST",
+      "guestArchetypeId": "guest.mushroom_traveler",
+      "recipeId": null,
+      "eventId": null,
+      "text": "향이 좋군요. 제 갓은 경쟁을 포기했습니다."
     }
   ]
 }
