@@ -1,0 +1,71 @@
+{
+  "contentId": "content.events",
+  "schemaVersion": 1,
+  "events": [
+    {
+      "eventId": "event.intro_last_hearth",
+      "displayName": "마지막 화로의 첫 불",
+      "description": "황동 나침반 아래에서 주인장이 첫 장부를 펼칩니다.",
+      "selection": "FIXED_DAY_1",
+      "durationDays": 1,
+      "modifiers": {
+        "guestCountDelta": 0,
+        "patienceDeltaMs": 0,
+        "timingWindowBonusMs": 0,
+        "marketPurchaseLimitBonusQuantity": 0
+      }
+    },
+    {
+      "eventId": "event.busy_crossroads",
+      "displayName": "붐비는 갈림길",
+      "description": "길 안내 표지판이 식당을 가리켜 손님이 조금 늘어납니다.",
+      "selection": "RANDOM_DAY_2_14",
+      "durationDays": 1,
+      "modifiers": {
+        "guestCountDelta": 2,
+        "patienceDeltaMs": 0,
+        "timingWindowBonusMs": 0,
+        "marketPurchaseLimitBonusQuantity": 0
+      }
+    },
+    {
+      "eventId": "event.patient_pilgrims",
+      "displayName": "느긋한 순례단",
+      "description": "길이 길었던 만큼 손님들이 메뉴를 천천히 기다립니다.",
+      "selection": "RANDOM_DAY_2_14",
+      "durationDays": 1,
+      "modifiers": {
+        "guestCountDelta": 0,
+        "patienceDeltaMs": 5000,
+        "timingWindowBonusMs": 0,
+        "marketPurchaseLimitBonusQuantity": 0
+      }
+    },
+    {
+      "eventId": "event.calm_embers",
+      "displayName": "얌전한 불씨",
+      "description": "화로가 드물게 말썽을 쉬어 Timing Cook 여유가 늘어납니다.",
+      "selection": "RANDOM_DAY_2_14",
+      "durationDays": 1,
+      "modifiers": {
+        "guestCountDelta": 0,
+        "patienceDeltaMs": 0,
+        "timingWindowBonusMs": 100,
+        "marketPurchaseLimitBonusQuantity": 0
+      }
+    },
+    {
+      "eventId": "event.quartermaster_visit",
+      "displayName": "길드 보급관 방문",
+      "description": "빈 수레가 아깝다며 오늘만 재료를 더 실어 줍니다.",
+      "selection": "RANDOM_DAY_2_14",
+      "durationDays": 1,
+      "modifiers": {
+        "guestCountDelta": 0,
+        "patienceDeltaMs": 0,
+        "timingWindowBonusMs": 0,
+        "marketPurchaseLimitBonusQuantity": 8
+      }
+    }
+  ]
+}

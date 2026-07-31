@@ -1,0 +1,73 @@
+{
+  "contentId": "content.balance",
+  "schemaVersion": 1,
+  "campaign": {
+    "days": 14,
+    "startCashG": 300,
+    "startDebtG": 500,
+    "startReputation": 30,
+    "targetReputation": 70
+  },
+  "bankruptcy": {
+    "arrearsThresholdG": 80,
+    "consecutiveArrearsThreshold": 2
+  },
+  "economy": {
+    "fixedCostG": 40
+  },
+  "service": {
+    "durationMs": 105000,
+    "minimumDurationMs": 90000,
+    "maximumDurationMs": 105000,
+    "defaultGuestCount": 6,
+    "minimumGuestCount": 4,
+    "maximumGuestCount": 12,
+    "basePatienceMs": 30000,
+    "minimumPatienceMs": 20000,
+    "maximumPatienceMs": 60000,
+    "wrongServePenaltyMs": 3000,
+    "cleanupOvertimeMs": 12000,
+    "guestSpeedLogicalPxPerSecond": 96,
+    "reactionFrameMs": 120,
+    "reactionFrameCount": 4
+  },
+  "market": {
+    "priceVariancePercent": 20,
+    "defaultPurchaseLimitQuantity": 30
+  },
+  "contract": {
+    "prepaidPercent": 20,
+    "arrivalDayOffset": 1,
+    "riskTiers": [
+      {
+        "risk": "LOW",
+        "successRate": 90,
+        "discountPercent": 5
+      },
+      {
+        "risk": "MEDIUM",
+        "successRate": 70,
+        "discountPercent": 15
+      },
+      {
+        "risk": "HIGH",
+        "successRate": 50,
+        "discountPercent": 30
+      }
+    ]
+  },
+  "world": {
+    "baseMapId": "map.base_restaurant",
+    "tileSize": 32,
+    "cameraViewportWidth": 480,
+    "cameraViewportHeight": 480,
+    "playerCollisionWidth": 20,
+    "playerCollisionHeight": 12,
+    "maximumMapAxis": 128,
+    "maximumMapArea": 16384,
+    "maximumRegisteredMaps": 16,
+    "baseTableCount": 6,
+    "baseSeatsPerTable": 2,
+    "baseActiveSeatCount": 12
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "manifestVersion": 1,
+  "contentVersion": 1,
+  "manifestId": "manifest.canonical-content.v1",
+  "files": [
+    {
+      "contentId": "content.ingredients",
+      "filename": "data/ingredients.json",
+      "schemaName": "ingredient-registry.canonical.v1",
+      "schemaVersion": 1,
+      "required": true
+    },
+    {
+      "contentId": "content.recipes",
+      "filename": "data/recipes.json",
+      "schemaName": "recipe-registry.canonical.v1",
+      "schemaVersion": 1,
+      "required": true
+    },
+    {
+      "contentId": "content.facilities",
+      "filename": "data/upgrades.json",
+      "schemaName": "facility-registry.v1",
+      "schemaVersion": 1,
+      "required": true
+    },
+    {
+      "contentId": "content.dialogue",
+      "filename": "data/dialogue.json",
+      "schemaName": "dialogue-registry.v1",
+      "schemaVersion": 1,
+      "required": true
+    },
+    {
+      "contentId": "content.guests",
+      "filename": "data/guests.json",
+      "schemaName": "guest-archetype-registry.v1",
+      "schemaVersion": 1,
+      "required": true
+    },
+    {
+      "contentId": "content.events",
+      "filename": "data/events.json",
+      "schemaName": "event-registry.v1",
+      "schemaVersion": 1,
+      "required": true
+    },
+    {
+      "contentId": "content.balance",
+      "filename": "data/balance.json",
+      "schemaName": "balance-config.v1",
+      "schemaVersion": 1,
+      "required": true
+    }
+  ]
+}

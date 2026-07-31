@@ -1,82 +1,296 @@
-[
-  {
-    "이름": "슬라임 젤리",
-    "카테고리": "마물 부산물",
-    "확률_일반": 0.6,
-    "확률_고급": 0.3,
-    "확률_희귀": 0.1,
-    "맛_프로필": "단맛"
-  },
-  {
-    "이름": "동굴 버섯",
-    "카테고리": "채소",
-    "확률_일반": 0.65,
-    "확률_고급": 0.25,
-    "확률_희귀": 0.1,
-    "맛_프로필": "감칠맛"
-  },
-  {
-    "이름": "화염 도마뱀 고기",
-    "카테고리": "육류",
-    "확률_일반": 0.55,
-    "확률_고급": 0.3,
-    "확률_희귀": 0.15,
-    "맛_프로필": "매운맛"
-  },
-  {
-    "이름": "서리 멧돼지 고기",
-    "카테고리": "육류",
-    "확률_일반": 0.55,
-    "확률_고급": 0.35,
-    "확률_희귀": 0.1,
-    "맛_프로필": "짠맛"
-  },
-  {
-    "이름": "달빛 당근",
-    "카테고리": "채소",
-    "확률_일반": 0.7,
-    "확률_고급": 0.22,
-    "확률_희귀": 0.08,
-    "맛_프로필": "단맛"
-  },
-  {
-    "이름": "늪지 양파",
-    "카테고리": "채소",
-    "확률_일반": 0.65,
-    "확률_고급": 0.25,
-    "확률_희귀": 0.1,
-    "맛_프로필": "매운맛"
-  },
-  {
-    "이름": "해독초",
-    "카테고리": "약초",
-    "확률_일반": 0.6,
-    "확률_고급": 0.3,
-    "확률_희귀": 0.1,
-    "맛_프로필": "쓴맛"
-  },
-  {
-    "이름": "별빛 허브",
-    "카테고리": "약초",
-    "확률_일반": 0.5,
-    "확률_고급": 0.35,
-    "확률_희귀": 0.15,
-    "맛_프로필": "향긋한맛"
-  },
-  {
-    "이름": "산성 열매",
-    "카테고리": "과일",
-    "확률_일반": 0.6,
-    "확률_고급": 0.28,
-    "확률_희귀": 0.12,
-    "맛_프로필": "신맛"
-  },
-  {
-    "이름": "소금 수정",
-    "카테고리": "광물",
-    "확률_일반": 0.5,
-    "확률_고급": 0.35,
-    "확률_희귀": 0.15,
-    "맛_프로필": "짠맛"
-  }
-]
+{
+  "contentId": "content.ingredients",
+  "schemaVersion": 1,
+  "ingredients": [
+    {
+      "ingredientId": "ingredient.slime_gel",
+      "displayName": "슬라임 젤리",
+      "category": "MONSTER_BYPRODUCT",
+      "flavorProfile": "단맛",
+      "basePriceG": 8,
+      "marketAvailabilityRate": 90,
+      "marketStockRange": {
+        "minimum": 8,
+        "maximum": 16
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.6
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.3
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.1
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.cave_mushroom",
+      "displayName": "동굴 버섯",
+      "category": "VEGETABLE",
+      "flavorProfile": "감칠맛",
+      "basePriceG": 9,
+      "marketAvailabilityRate": 85,
+      "marketStockRange": {
+        "minimum": 7,
+        "maximum": 14
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.65
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.25
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.1
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.glow_herb",
+      "displayName": "별빛 허브",
+      "category": "HERB",
+      "flavorProfile": "향긋한맛",
+      "basePriceG": 12,
+      "marketAvailabilityRate": 65,
+      "marketStockRange": {
+        "minimum": 3,
+        "maximum": 8
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.5
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.35
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.15
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.ember_pepper",
+      "displayName": "늪지 양파",
+      "category": "VEGETABLE",
+      "flavorProfile": "매운맛",
+      "basePriceG": 14,
+      "marketAvailabilityRate": 60,
+      "marketStockRange": {
+        "minimum": 3,
+        "maximum": 9
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.65
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.25
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.1
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.moonroot",
+      "displayName": "달빛 당근",
+      "category": "VEGETABLE",
+      "flavorProfile": "단맛",
+      "basePriceG": 11,
+      "marketAvailabilityRate": 75,
+      "marketStockRange": {
+        "minimum": 5,
+        "maximum": 11
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.7
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.22
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.08
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.crystal_salt",
+      "displayName": "소금 수정",
+      "category": "MINERAL",
+      "flavorProfile": "짠맛",
+      "basePriceG": 5,
+      "marketAvailabilityRate": 95,
+      "marketStockRange": {
+        "minimum": 8,
+        "maximum": 18
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.5
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.35
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.15
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.stonegrain",
+      "displayName": "해독초",
+      "category": "HERB",
+      "flavorProfile": "쓴맛",
+      "basePriceG": 7,
+      "marketAvailabilityRate": 90,
+      "marketStockRange": {
+        "minimum": 9,
+        "maximum": 18
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.6
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.3
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.1
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.griffin_egg",
+      "displayName": "화염 도마뱀 고기",
+      "category": "MEAT",
+      "flavorProfile": "매운맛",
+      "basePriceG": 22,
+      "marketAvailabilityRate": 45,
+      "marketStockRange": {
+        "minimum": 2,
+        "maximum": 6
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.55
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.3
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.15
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.mimic_bean",
+      "displayName": "산성 열매",
+      "category": "FRUIT",
+      "flavorProfile": "신맛",
+      "basePriceG": 16,
+      "marketAvailabilityRate": 55,
+      "marketStockRange": {
+        "minimum": 3,
+        "maximum": 7
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.6
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.28
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.12
+        }
+      ]
+    },
+    {
+      "ingredientId": "ingredient.moss_cheese",
+      "displayName": "서리 멧돼지 고기",
+      "category": "MEAT",
+      "flavorProfile": "짠맛",
+      "basePriceG": 18,
+      "marketAvailabilityRate": 50,
+      "marketStockRange": {
+        "minimum": 2,
+        "maximum": 7
+      },
+      "qualityDistribution": [
+        {
+          "minQuality": 0,
+          "maxQuality": 49,
+          "weight": 0.55
+        },
+        {
+          "minQuality": 50,
+          "maxQuality": 79,
+          "weight": 0.35
+        },
+        {
+          "minQuality": 80,
+          "maxQuality": 100,
+          "weight": 0.1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,795 @@
+{
+  "reportSchemaVersion": 1,
+  "migrationId": "migration.main-content-to-canonical.v1",
+  "sourceFormat": "main.authored-draft-and-legacy.unversioned",
+  "targetContentVersion": 1,
+  "status": "PASS",
+  "sourceFiles": [
+    {
+      "filename": "data/ingredients.json",
+      "sha256": "530b4b3e00f44c69381f79f4417f2e4181cdac79e3acb8defba3596310899bce",
+      "classification": "MAIN_AUTHORED_CONTENT"
+    },
+    {
+      "filename": "data/recipes.json",
+      "sha256": "55bf3f3396d3a8a5f803076e34dbd617cbb1cdafd1ddac47f7b0b1920005399a",
+      "classification": "MAIN_AUTHORED_CONTENT"
+    },
+    {
+      "filename": "data/upgrades.json",
+      "sha256": "63cbf29eb8e6f753812a9e351afb89c61d622b638cc24679611554d76b05c3b3",
+      "classification": "LEGACY_PLACEHOLDER"
+    },
+    {
+      "filename": "data/dialogue.json",
+      "sha256": "1ef63b98f9f129a661fca534ab77a877178e73ac871bab5a3d6319c1fbcbcb46",
+      "classification": "MAIN_AUTHORED_CONTENT"
+    }
+  ],
+  "targetFiles": [
+    {
+      "filename": "data/ingredients.json",
+      "contentId": "content.ingredients",
+      "schemaName": "ingredient-registry.canonical.v1",
+      "schemaVersion": 1,
+      "sha256": "54f96de50d6c01288c26945fb06199efd18dc069f724583383165c4cbb78a700"
+    },
+    {
+      "filename": "data/recipes.json",
+      "contentId": "content.recipes",
+      "schemaName": "recipe-registry.canonical.v1",
+      "schemaVersion": 1,
+      "sha256": "b881916c8e03524da5e05a3198eccd02cc4160ddc22732acc0c17278b01ca3b4"
+    },
+    {
+      "filename": "data/upgrades.json",
+      "contentId": "content.facilities",
+      "schemaName": "facility-registry.v1",
+      "schemaVersion": 1,
+      "sha256": "29ff54a61a32f1677c3793513abd06bcf5397e12dea682dcff214957778a1aa5"
+    },
+    {
+      "filename": "data/dialogue.json",
+      "contentId": "content.dialogue",
+      "schemaName": "dialogue-registry.v1",
+      "schemaVersion": 1,
+      "sha256": "912042db454022ea656d99f4135ac5722ced6632192ff97f8c4dbc26f2b7914e"
+    },
+    {
+      "filename": "data/guests.json",
+      "contentId": "content.guests",
+      "schemaName": "guest-archetype-registry.v1",
+      "schemaVersion": 1,
+      "sha256": "128b12f99025eabe485515852f41a0ed6a055cecb10d5e20b21de623704b6134"
+    },
+    {
+      "filename": "data/events.json",
+      "contentId": "content.events",
+      "schemaName": "event-registry.v1",
+      "schemaVersion": 1,
+      "sha256": "dbc2217d9af84c91650200110209ed2fd54b7723480c558a790815715f1cac14"
+    },
+    {
+      "filename": "data/balance.json",
+      "contentId": "content.balance",
+      "schemaName": "balance-config.v1",
+      "schemaVersion": 1,
+      "sha256": "53bebc54f9cf77beb478b7a1d6c30f3f2646b1e9274371dffc2fe216ddbdaaac"
+    },
+    {
+      "filename": "data/content-manifest.json",
+      "contentId": "content.manifest",
+      "schemaName": "content-manifest.v1",
+      "schemaVersion": 1,
+      "sha256": "dd341af15d3d6040046c7a89603d890f259c0a1568aa865beaaf0a6c2af1f5f0"
+    }
+  ],
+  "idMappings": [
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[0]",
+      "sourceValue": "슬라임 젤리",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "ingredient.slime_gel",
+      "rationale": "동일한 슬라임 젤리 정체성을 유지합니다. 표시명·카테고리·맛 프로필과 일반/고급/희귀 가중치를 함께 보존했습니다. 의미가 다른 market availability로 변환하지 않았습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[1]",
+      "sourceValue": "동굴 버섯",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "ingredient.cave_mushroom",
+      "rationale": "동일한 동굴 버섯 정체성을 유지합니다. 표시명·카테고리·맛 프로필과 일반/고급/희귀 가중치를 함께 보존했습니다. 의미가 다른 market availability로 변환하지 않았습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[7]",
+      "sourceValue": "별빛 허브",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "ingredient.glow_herb",
+      "rationale": "별빛/발광 허브의 광원 약초 역할을 연결합니다. 표시명·카테고리·맛 프로필과 일반/고급/희귀 가중치를 함께 보존했습니다. 의미가 다른 market availability로 변환하지 않았습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[5]",
+      "sourceValue": "늪지 양파",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "ingredient.ember_pepper",
+      "rationale": "매운맛 채소 슬롯에 늪지 양파 콘텐츠를 배정합니다. 표시명·카테고리·맛 프로필과 일반/고급/희귀 가중치를 함께 보존했습니다. 의미가 다른 market availability로 변환하지 않았습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[4]",
+      "sourceValue": "달빛 당근",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "ingredient.moonroot",
+      "rationale": "달빛 계열 뿌리채소 정체성을 연결합니다. 표시명·카테고리·맛 프로필과 일반/고급/희귀 가중치를 함께 보존했습니다. 의미가 다른 market availability로 변환하지 않았습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[9]",
+      "sourceValue": "소금 수정",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "ingredient.crystal_salt",
+      "rationale": "소금 수정과 수정 소금은 동일 광물 조미료입니다. 표시명·카테고리·맛 프로필과 일반/고급/희귀 가중치를 함께 보존했습니다. 의미가 다른 market availability로 변환하지 않았습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[6]",
+      "sourceValue": "해독초",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "ingredient.stonegrain",
+      "rationale": "공용 공급 stable ID에 해독초 콘텐츠를 명시적으로 연결합니다. 표시명·카테고리·맛 프로필과 일반/고급/희귀 가중치를 함께 보존했습니다. 의미가 다른 market availability로 변환하지 않았습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[2]",
+      "sourceValue": "화염 도마뱀 고기",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "ingredient.griffin_egg",
+      "rationale": "희귀 마물 단백질 stable ID에 화염 도마뱀 고기를 명시적으로 연결합니다. 표시명·카테고리·맛 프로필과 일반/고급/희귀 가중치를 함께 보존했습니다. 의미가 다른 market availability로 변환하지 않았습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[8]",
+      "sourceValue": "산성 열매",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "ingredient.mimic_bean",
+      "rationale": "특수 계약 재료 stable ID에 산성 열매 콘텐츠를 명시적으로 연결합니다. 표시명·카테고리·맛 프로필과 일반/고급/희귀 가중치를 함께 보존했습니다. 의미가 다른 market availability로 변환하지 않았습니다."
+    },
+    {
+      "domain": "INGREDIENT",
+      "sourceFile": "data/ingredients.json",
+      "sourcePath": "$[3]",
+      "sourceValue": "서리 멧돼지 고기",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "ingredient.moss_cheese",
+      "rationale": "후반 고원가 재료 stable ID에 서리 멧돼지 고기를 명시적으로 연결합니다. 표시명·카테고리·맛 프로필과 일반/고급/희귀 가중치를 함께 보존했습니다. 의미가 다른 market availability로 변환하지 않았습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[0]",
+      "sourceValue": "슬라임 젤리 화채",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "recipe.slime_stew",
+      "rationale": "표시명·두 재료의 membership과 성공/보통/실패 문구를 stable Recipe ID에 보존했습니다. 수량·가격·Timing·해금은 Foundation v1 값을 유지했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[0].맛_매칭_보너스",
+      "sourceValue": "단맛 재료 + 신맛 재료 = 성공률 +20%",
+      "disposition": "OMITTED_INCOMPATIBLE_VALUE",
+      "targetId": "recipe.slime_stew",
+      "rationale": "RNG 없는 deterministic Timing_Cook 계약에 +20% 성공률 필드가 없어 runtime mechanic으로 추정 삽입하지 않았습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[5]",
+      "sourceValue": "광부의 수정 버섯볶음",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "recipe.stonegrain_bowl",
+      "rationale": "표시명·두 재료의 membership과 성공/보통/실패 문구를 stable Recipe ID에 보존했습니다. 수량·가격·Timing·해금은 Foundation v1 값을 유지했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[5].맛_매칭_보너스",
+      "sourceValue": "짠맛 재료 + 감칠맛 재료 = 성공률 +20%",
+      "disposition": "OMITTED_INCOMPATIBLE_VALUE",
+      "targetId": "recipe.stonegrain_bowl",
+      "rationale": "RNG 없는 deterministic Timing_Cook 계약에 +20% 성공률 필드가 없어 runtime mechanic으로 추정 삽입하지 않았습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[1]",
+      "sourceValue": "동굴 버섯 스튜",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "recipe.glowcap_soup",
+      "rationale": "표시명·두 재료의 membership과 성공/보통/실패 문구를 stable Recipe ID에 보존했습니다. 수량·가격·Timing·해금은 Foundation v1 값을 유지했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[1].맛_매칭_보너스",
+      "sourceValue": "감칠맛 재료 + 매운맛 재료 = 성공률 +20%",
+      "disposition": "OMITTED_INCOMPATIBLE_VALUE",
+      "targetId": "recipe.glowcap_soup",
+      "rationale": "RNG 없는 deterministic Timing_Cook 계약에 +20% 성공률 필드가 없어 runtime mechanic으로 추정 삽입하지 않았습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[2]",
+      "sourceValue": "화염 도마뱀 허브구이",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "recipe.ember_egg_skewer",
+      "rationale": "표시명·두 재료의 membership과 성공/보통/실패 문구를 stable Recipe ID에 보존했습니다. 수량·가격·Timing·해금은 Foundation v1 값을 유지했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[2].맛_매칭_보너스",
+      "sourceValue": "매운맛 재료 + 향긋한맛 재료 = 성공률 +20%",
+      "disposition": "OMITTED_INCOMPATIBLE_VALUE",
+      "targetId": "recipe.ember_egg_skewer",
+      "rationale": "RNG 없는 deterministic Timing_Cook 계약에 +20% 성공률 필드가 없어 runtime mechanic으로 추정 삽입하지 않았습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[3]",
+      "sourceValue": "서리 멧돼지 당근수프",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "recipe.moonroot_pie",
+      "rationale": "표시명·두 재료의 membership과 성공/보통/실패 문구를 stable Recipe ID에 보존했습니다. 수량·가격·Timing·해금은 Foundation v1 값을 유지했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[3].맛_매칭_보너스",
+      "sourceValue": "짠맛 재료 + 단맛 재료 = 성공률 +20%",
+      "disposition": "OMITTED_INCOMPATIBLE_VALUE",
+      "targetId": "recipe.moonroot_pie",
+      "rationale": "RNG 없는 deterministic Timing_Cook 계약에 +20% 성공률 필드가 없어 runtime mechanic으로 추정 삽입하지 않았습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[4]",
+      "sourceValue": "해독초 산성 샐러드",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "recipe.mimic_hotpot",
+      "rationale": "표시명·두 재료의 membership과 성공/보통/실패 문구를 stable Recipe ID에 보존했습니다. 수량·가격·Timing·해금은 Foundation v1 값을 유지했습니다."
+    },
+    {
+      "domain": "RECIPE",
+      "sourceFile": "data/recipes.json",
+      "sourcePath": "$[4].맛_매칭_보너스",
+      "sourceValue": "쓴맛 재료 + 신맛 재료 = 성공률 +20%",
+      "disposition": "OMITTED_INCOMPATIBLE_VALUE",
+      "targetId": "recipe.mimic_hotpot",
+      "rationale": "RNG 없는 deterministic Timing_Cook 계약에 +20% 성공률 필드가 없어 runtime mechanic으로 추정 삽입하지 않았습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[0].유형",
+      "sourceValue": "배고픈 여행자",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "guest.human_adventurer",
+      "rationale": "Foundation 종족·분류를 유지하면서 canonical roleLabel로 원문 역할명을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[0].요청_대사",
+      "sourceValue": "멀리서부터 냄새를 맡고 왔어요. 든든한 요리 하나 부탁해요!",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.human_adventurer.order",
+      "rationale": "guest.human_adventurer의 canonical ORDER 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[0].재촉_대사",
+      "sourceValue": "배에서 천둥이 치고 있어요. 아직 멀었나요?",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.human_adventurer.hurry",
+      "rationale": "guest.human_adventurer의 canonical HURRY 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[0].만족_대사",
+      "sourceValue": "살 것 같네요! 다음 여정에도 꼭 들를게요.",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.human_adventurer.satisfied",
+      "rationale": "guest.human_adventurer의 canonical SATISFIED 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[2].유형",
+      "sourceValue": "지친 광부",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "guest.dwarf_courier",
+      "rationale": "Foundation 종족·분류를 유지하면서 canonical roleLabel로 원문 역할명을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[2].요청_대사",
+      "sourceValue": "오늘 수정 광맥을 세 개나 팠어. 짭짤하고 힘나는 걸로 줘!",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.dwarf_courier.order",
+      "rationale": "guest.dwarf_courier의 canonical ORDER 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[2].재촉_대사",
+      "sourceValue": "곡괭이 들 힘도 없다고! 뭐라도 빨리 부탁해!",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.dwarf_courier.hurry",
+      "rationale": "guest.dwarf_courier의 canonical HURRY 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[2].만족_대사",
+      "sourceValue": "이거지! 속이 든든하니 다시 한 층 더 내려갈 수 있겠어.",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.dwarf_courier.satisfied",
+      "rationale": "guest.dwarf_courier의 canonical SATISFIED 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[5].유형",
+      "sourceValue": "호기심 많은 연금술사",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "guest.goblin_scholar",
+      "rationale": "Foundation 종족·분류를 유지하면서 canonical roleLabel로 원문 역할명을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[5].요청_대사",
+      "sourceValue": "서로 다른 맛이 반응하는 특별한 요리를 실험해 보고 싶어요!",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.goblin_scholar.order",
+      "rationale": "guest.goblin_scholar의 canonical ORDER 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[5].재촉_대사",
+      "sourceValue": "반응 시간이 지나면 가설을 검증할 수 없어요. 서둘러 주세요!",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.goblin_scholar.hurry",
+      "rationale": "guest.goblin_scholar의 canonical HURRY 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[5].만족_대사",
+      "sourceValue": "예상 이상의 조합이에요! 이 결과는 제 연구 일지에 적어둘게요.",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.goblin_scholar.satisfied",
+      "rationale": "guest.goblin_scholar의 canonical SATISFIED 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[1].유형",
+      "sourceValue": "까다로운 마법사",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "guest.slime_gourmand",
+      "rationale": "Foundation 종족·분류를 유지하면서 canonical roleLabel로 원문 역할명을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[1].요청_대사",
+      "sourceValue": "평범한 맛은 사양하지. 향이 살아 있는 요리를 내오게.",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.slime_gourmand.order",
+      "rationale": "guest.slime_gourmand의 canonical ORDER 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[1].재촉_대사",
+      "sourceValue": "내 인내심에도 마나처럼 한계가 있다는 걸 명심하게.",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.slime_gourmand.hurry",
+      "rationale": "guest.slime_gourmand의 canonical HURRY 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[1].만족_대사",
+      "sourceValue": "흠, 제법이군. 이 맛이라면 연구 중간에 다시 찾아오지.",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.slime_gourmand.satisfied",
+      "rationale": "guest.slime_gourmand의 canonical SATISFIED 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[4].유형",
+      "sourceValue": "허세 많은 기사",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "guest.kobold_porter",
+      "rationale": "Foundation 종족·분류를 유지하면서 canonical roleLabel로 원문 역할명을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[4].요청_대사",
+      "sourceValue": "용맹한 기사에게 어울릴 만큼 화끈한 요리를 내오도록!",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.kobold_porter.order",
+      "rationale": "guest.kobold_porter의 canonical ORDER 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[4].재촉_대사",
+      "sourceValue": "기사를 기다리게 하다니! 내 갑옷보다 조리가 더 무거운가?",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.kobold_porter.hurry",
+      "rationale": "guest.kobold_porter의 canonical HURRY 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[4].만족_대사",
+      "sourceValue": "크흠, 훌륭하군! 맵다고 눈물이 난 것은 절대 아니다.",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.kobold_porter.satisfied",
+      "rationale": "guest.kobold_porter의 canonical SATISFIED 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[3].유형",
+      "sourceValue": "수습 성직자",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "guest.mushroom_traveler",
+      "rationale": "Foundation 종족·분류를 유지하면서 canonical roleLabel로 원문 역할명을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[3].요청_대사",
+      "sourceValue": "던전 독기에 오래 노출됐어요. 몸이 맑아질 만한 요리가 있을까요?",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.mushroom_traveler.order",
+      "rationale": "guest.mushroom_traveler의 canonical ORDER 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[3].재촉_대사",
+      "sourceValue": "죄송하지만... 눈앞이 조금씩 빙빙 도는 것 같아요.",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.mushroom_traveler.hurry",
+      "rationale": "guest.mushroom_traveler의 canonical HURRY 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.손님[3].만족_대사",
+      "sourceValue": "신의 가호가 이 식당에도 머물기를! 정말 개운해졌어요.",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.mushroom_traveler.satisfied",
+      "rationale": "guest.mushroom_traveler의 canonical SATISFIED 문구로 원문을 보존했습니다."
+    },
+    {
+      "domain": "GUEST",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.모험가.이름",
+      "sourceValue": "초보 모험가 루카",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "guest.human_adventurer",
+      "rationale": "인간 손님 archetype의 표시명으로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.모험가.성격_한줄",
+      "sourceValue": "겁은 많지만 좋은 재료를 발견하면 누구보다 신이 나는 수다쟁이 모험가",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.human_adventurer.profile",
+      "rationale": "Day 1 소개용 canonical narrative text로 원문을 보존했습니다."
+    },
+    {
+      "domain": "DIALOGUE",
+      "sourceFile": "data/dialogue.json",
+      "sourcePath": "$.모험가.리빌_연출_문구",
+      "sourceValue": "루카가 눈치를 살피며 묵직한 봇짐을 풀어 보여줍니다...",
+      "disposition": "MAPPED_MAIN_CONTENT",
+      "targetId": "dialogue.human_adventurer.reveal",
+      "rationale": "Day 1 소개용 canonical reveal text로 원문을 보존했습니다."
+    },
+    {
+      "domain": "FACILITY",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "RETAINED_FOUNDATION_VALUE",
+      "targetId": "facility.kitchen_stage_1",
+      "rationale": "main 초안에 대응 가능한 Must 시설 값이 없어 승인된 Foundation canonical v1 값을 유지했습니다."
+    },
+    {
+      "domain": "FACILITY",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "RETAINED_FOUNDATION_VALUE",
+      "targetId": "facility.hall_stage_1",
+      "rationale": "main 초안에 대응 가능한 Must 시설 값이 없어 승인된 Foundation canonical v1 값을 유지했습니다."
+    },
+    {
+      "domain": "FACILITY",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "RETAINED_FOUNDATION_VALUE",
+      "targetId": "facility.storage_stage_1",
+      "rationale": "main 초안에 대응 가능한 Must 시설 값이 없어 승인된 Foundation canonical v1 값을 유지했습니다."
+    },
+    {
+      "domain": "EVENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "RETAINED_FOUNDATION_VALUE",
+      "targetId": "event.intro_last_hearth",
+      "rationale": "main 초안에 사건 데이터가 없어 승인된 Foundation canonical v1 event를 유지했습니다."
+    },
+    {
+      "domain": "EVENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "RETAINED_FOUNDATION_VALUE",
+      "targetId": "event.busy_crossroads",
+      "rationale": "main 초안에 사건 데이터가 없어 승인된 Foundation canonical v1 event를 유지했습니다."
+    },
+    {
+      "domain": "EVENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "RETAINED_FOUNDATION_VALUE",
+      "targetId": "event.patient_pilgrims",
+      "rationale": "main 초안에 사건 데이터가 없어 승인된 Foundation canonical v1 event를 유지했습니다."
+    },
+    {
+      "domain": "EVENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "RETAINED_FOUNDATION_VALUE",
+      "targetId": "event.calm_embers",
+      "rationale": "main 초안에 사건 데이터가 없어 승인된 Foundation canonical v1 event를 유지했습니다."
+    },
+    {
+      "domain": "EVENT",
+      "sourceFile": null,
+      "sourcePath": null,
+      "sourceValue": null,
+      "disposition": "RETAINED_FOUNDATION_VALUE",
+      "targetId": "event.quartermaster_visit",
+      "rationale": "main 초안에 사건 데이터가 없어 승인된 Foundation canonical v1 event를 유지했습니다."
+    },
+    {
+      "domain": "FACILITY",
+      "sourceFile": "data/upgrades.json",
+      "sourcePath": "$[0].이름",
+      "sourceValue": "예: 레시피 확장",
+      "disposition": "OMITTED_EXAMPLE_PLACEHOLDER",
+      "targetId": null,
+      "rationale": "'예:' 표시명과 빈 설명은 실제 작성 콘텐츠가 아니며 kitchen/hall/storage Must stage로 추정 변환하지 않았습니다."
+    }
+  ],
+  "decisions": [
+    {
+      "decisionId": "migration.decision.source_snapshots",
+      "authority": "origin/main f51ea5475184543b8410dc1d3c47ff6c2d404ea5",
+      "field": "main source files",
+      "value": {
+        "data/ingredients.json": "530b4b3e00f44c69381f79f4417f2e4181cdac79e3acb8defba3596310899bce",
+        "data/recipes.json": "55bf3f3396d3a8a5f803076e34dbd617cbb1cdafd1ddac47f7b0b1920005399a",
+        "data/upgrades.json": "63cbf29eb8e6f753812a9e351afb89c61d622b638cc24679611554d76b05c3b3",
+        "data/dialogue.json": "1ef63b98f9f129a661fca534ab77a877178e73ac871bab5a3d6319c1fbcbcb46"
+      },
+      "rationale": "내장 source 문서를 origin/main blob의 exact-byte SHA-256과 대조해 mapping source-of-truth가 바뀌지 않도록 고정했습니다."
+    },
+    {
+      "decisionId": "migration.decision.stable_id_crosswalk",
+      "authority": "explicit merge choice and Foundation canonical v1 cardinality",
+      "field": "main names to approved stable IDs",
+      "value": {
+        "ingredients": [
+          {
+            "source": "슬라임 젤리",
+            "target": "ingredient.slime_gel"
+          },
+          {
+            "source": "동굴 버섯",
+            "target": "ingredient.cave_mushroom"
+          },
+          {
+            "source": "별빛 허브",
+            "target": "ingredient.glow_herb"
+          },
+          {
+            "source": "늪지 양파",
+            "target": "ingredient.ember_pepper"
+          },
+          {
+            "source": "달빛 당근",
+            "target": "ingredient.moonroot"
+          },
+          {
+            "source": "소금 수정",
+            "target": "ingredient.crystal_salt"
+          },
+          {
+            "source": "해독초",
+            "target": "ingredient.stonegrain"
+          },
+          {
+            "source": "화염 도마뱀 고기",
+            "target": "ingredient.griffin_egg"
+          },
+          {
+            "source": "산성 열매",
+            "target": "ingredient.mimic_bean"
+          },
+          {
+            "source": "서리 멧돼지 고기",
+            "target": "ingredient.moss_cheese"
+          }
+        ],
+        "recipes": [
+          {
+            "source": "슬라임 젤리 화채",
+            "target": "recipe.slime_stew"
+          },
+          {
+            "source": "광부의 수정 버섯볶음",
+            "target": "recipe.stonegrain_bowl"
+          },
+          {
+            "source": "동굴 버섯 스튜",
+            "target": "recipe.glowcap_soup"
+          },
+          {
+            "source": "화염 도마뱀 허브구이",
+            "target": "recipe.ember_egg_skewer"
+          },
+          {
+            "source": "서리 멧돼지 당근수프",
+            "target": "recipe.moonroot_pie"
+          },
+          {
+            "source": "해독초 산성 샐러드",
+            "target": "recipe.mimic_hotpot"
+          }
+        ]
+      },
+      "rationale": "stable ID는 기술 식별자입니다. 의미가 동일하다고 추정하지 않고, 승인된 10/6 ID set과 main recipe membership graph를 동시에 보존하는 명시적 crosswalk로 기록했습니다."
+    },
+    {
+      "decisionId": "migration.decision.quality_weights_not_percentages",
+      "authority": "requirements.md 20.2-20.3 and main ingredient draft",
+      "field": "일반/고급/희귀 확률",
+      "value": "mapped exactly to qualityDistribution.weight",
+      "rationale": "합이 1인 0..1 값은 등급 분포 가중치로 그대로 보존했습니다. marketAvailabilityRate 같은 integer percentage로 coercion하지 않았습니다."
+    },
+    {
+      "decisionId": "migration.decision.recipe_mechanical_baseline",
+      "authority": "Foundation canonical v1 plus main authored recipe membership",
+      "field": "recipe quantities/prices/timing/unlocks",
+      "value": "Foundation v1 mechanical values retained",
+      "rationale": "main은 재료 이름만 제공하고 수량·가격·Timing·해금을 제공하지 않습니다. membership은 매핑하되 누락 수치를 추정하지 않고 Foundation 수치를 유지했습니다."
+    },
+    {
+      "decisionId": "migration.decision.omit_taste_bonus",
+      "authority": "design.md deterministic Timing_Cook contract",
+      "field": "맛_매칭_보너스",
+      "value": [
+        "단맛 재료 + 신맛 재료 = 성공률 +20%",
+        "감칠맛 재료 + 매운맛 재료 = 성공률 +20%",
+        "매운맛 재료 + 향긋한맛 재료 = 성공률 +20%",
+        "짠맛 재료 + 단맛 재료 = 성공률 +20%",
+        "쓴맛 재료 + 신맛 재료 = 성공률 +20%",
+        "짠맛 재료 + 감칠맛 재료 = 성공률 +20%"
+      ],
+      "rationale": "성공률 +20% 효과는 canonical Timing_Cook 판정에 없는 mechanic이므로 원문과 제외 근거만 report에 남겼습니다."
+    },
+    {
+      "decisionId": "migration.decision.guest_roles",
+      "authority": "requirements.md 34.1-34.2 and main dialogue draft",
+      "field": "guest roleLabel/displayName/dialogue",
+      "value": [
+        {
+          "roleLabel": "배고픈 여행자",
+          "target": "guest.human_adventurer"
+        },
+        {
+          "roleLabel": "지친 광부",
+          "target": "guest.dwarf_courier"
+        },
+        {
+          "roleLabel": "호기심 많은 연금술사",
+          "target": "guest.goblin_scholar"
+        },
+        {
+          "roleLabel": "까다로운 마법사",
+          "target": "guest.slime_gourmand"
+        },
+        {
+          "roleLabel": "허세 많은 기사",
+          "target": "guest.kobold_porter"
+        },
+        {
+          "roleLabel": "수습 성직자",
+          "target": "guest.mushroom_traveler"
+        }
+      ],
+      "rationale": "여섯 역할명과 18개 대사 원문을 보존하면서 Foundation의 HUMAN/친화적 비인간·몬스터 구성과 stable ID는 유지했습니다."
+    },
+    {
+      "decisionId": "migration.decision.placeholder_not_promoted",
+      "authority": "explicit merge constraint",
+      "field": "data/upgrades.json legacy example",
+      "value": "omitted",
+      "rationale": "'예: 레시피 확장'과 빈 설명은 placeholder이므로 실제 시설 콘텐츠로 승격하지 않았습니다."
+    },
+    {
+      "decisionId": "migration.decision.foundation_tuning",
+      "authority": "Foundation canonical v1",
+      "field": "market availability/stock, prices, preferences, facilities, events, balance",
+      "value": "retained",
+      "rationale": "main이 제공하지 않은 mechanics는 추정하지 않고 기존 Foundation canonical v1 값을 유지했습니다."
+    },
+    {
+      "decisionId": "migration.decision.excluded_domains",
+      "authority": "requirements.md explicit exclusions and Requirement 34.15",
+      "field": "spoilage/combat/attack/damage/loot",
+      "value": "absent",
+      "rationale": "유통기한·부패와 전투 관련 필드·enum을 canonical payload에 포함하지 않았습니다."
+    }
+  ],
+  "validation": {
+    "validatorStatus": "PASS",
+    "documentCount": 8,
+    "diagnosticCount": 0,
+    "danglingReferenceCount": 0,
+    "ingredientCount": 10,
+    "recipeCount": 6,
+    "startingRecipeCount": 2,
+    "guestCount": 6,
+    "friendlyNonHumanOrMonsterCount": 5,
+    "facilityCount": 3,
+    "eventCount": 5
+  }
+}
