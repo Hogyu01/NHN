@@ -9,17 +9,49 @@
 <body>
 <div id="app">
 
+  <header class="shell-bar" aria-label="애플리케이션 도구">
+    <span class="shell-brand">마지막 화로</span>
+    <button id="btn-credits" class="btn-secondary" type="button">Credits</button>
+  </header>
+
   <section id="screen-start" class="screen">
     <h1 class="title">던전 식당</h1>
     <p class="subtitle">실패한 모험가, 던전 앞 식당을 차리다</p>
     <button id="btn-start" class="btn-primary">시작하기</button>
   </section>
 
+  <section
+    id="screen-error"
+    class="screen screen-error hidden"
+    tabindex="-1"
+    aria-labelledby="error-title"
+    aria-describedby="error-summary"
+  >
+    <p class="error-kicker">시작 shell은 계속 사용할 수 있습니다</p>
+    <h1 id="error-title">데이터를 불러오지 못했습니다</h1>
+    <p id="error-summary" class="error-summary" aria-live="assertive"></p>
+    <div id="error-list" class="error-list"></div>
+    <p class="error-help">오류 항목은 filename/storage key와 error type을 먼저 표시합니다. Credits는 위 버튼에서 언제든 열 수 있습니다.</p>
+  </section>
+
   <section id="screen-room" class="screen hidden">
-    <canvas id="game-canvas" width="480" height="480"></canvas>
+    <canvas
+      id="game-canvas"
+      width="480"
+      height="480"
+      tabindex="0"
+      aria-label="던전 식당 프로토타입 월드"
+    ></canvas>
     <p class="hint">방향키 또는 WASD로 이동하세요</p>
 
-    <div id="panel-overlay" class="panel-overlay hidden">
+    <div
+      id="panel-overlay"
+      class="panel-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="panel-title"
+      aria-describedby="panel-body"
+    >
       <div class="panel">
         <h2 id="panel-title"></h2>
         <p id="panel-body"></p>
@@ -28,7 +60,23 @@
     </div>
   </section>
 
+  <div
+    id="credits-overlay"
+    class="credits-overlay hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="credits-title"
+  >
+    <div class="credits-panel">
+      <h2 id="credits-title">Credits &amp; Provenance</h2>
+      <p>검증 성공 여부와 관계없이 등록된 출처 정보를 표시합니다.</p>
+      <ul id="credits-list" class="credits-list"></ul>
+      <button id="btn-credits-close" class="btn-primary" type="button">닫기</button>
+    </div>
+  </div>
+
 </div>
-<script src="js/main.js"></script>
+<script type="module" src="./js/main.js"></script>
 </body>
 </html>

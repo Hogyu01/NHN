@@ -11,7 +11,7 @@ body {
 }
 
 #app {
-  max-width: 480px;
+  width: min(520px, 100%);
   margin: 0 auto;
   padding: 20px;
 }
@@ -28,7 +28,7 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .title {
@@ -54,10 +54,20 @@ body {
   transform: scale(0.97);
 }
 
+.btn-primary:focus-visible,
+#game-canvas:focus-visible {
+  outline: 3px solid #f4d58d;
+  outline-offset: 3px;
+}
+
 #game-canvas {
+  display: block;
+  width: min(480px, 100%);
+  height: auto;
   background: #3a2a1e;
   border: 2px solid #6b4a2e;
   border-radius: 8px;
+  image-rendering: pixelated;
   touch-action: none;
 }
 
@@ -69,6 +79,7 @@ body {
 .panel-overlay {
   position: absolute;
   inset: 0;
+  z-index: 10;
   background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
@@ -77,6 +88,7 @@ body {
 
 .panel {
   background: #2a2a2a;
+  border: 2px solid #6b4a2e;
   border-radius: 12px;
   padding: 24px;
   width: 80%;
@@ -91,4 +103,207 @@ body {
 .panel p {
   margin-bottom: 16px;
   color: #cfcfcf;
+}
+
+.qa-report {
+  width: min(720px, calc(100% - 32px));
+  margin: 0 auto 24px;
+  padding: 16px 20px;
+  border: 2px solid #666;
+  border-radius: 8px;
+  background: #242424;
+}
+
+.qa-report--pass {
+  border-color: #5a9e6f;
+}
+
+.qa-report--fail {
+  border-color: #d65f5f;
+}
+
+.qa-report h2,
+.qa-report > p {
+  margin-bottom: 8px;
+}
+
+.qa-report ol {
+  padding-left: 24px;
+  text-align: left;
+}
+
+.qa-report li {
+  margin: 6px 0;
+}
+
+.qa-pass {
+  color: #b8e6c4;
+}
+
+.qa-fail {
+  color: #ffb3b3;
+}
+
+.qa-report pre {
+  margin-top: 4px;
+  white-space: pre-wrap;
+  color: #ffd1d1;
+}
+
+
+.shell-bar {
+  position: relative;
+  z-index: 30;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shell-brand {
+  color: #e0a458;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.btn-secondary {
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid #9d6b53;
+  border-radius: 8px;
+  background: #2a2230;
+  color: #f0f0f0;
+  cursor: pointer;
+}
+
+.btn-secondary:focus-visible,
+#btn-credits-close:focus-visible,
+.screen-error:focus-visible {
+  outline: 3px solid #f4d58d;
+  outline-offset: 3px;
+}
+
+.btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+.screen-error {
+  justify-content: flex-start;
+  align-items: stretch;
+  min-height: calc(80vh - 44px);
+  padding: 40px 0;
+  text-align: left;
+}
+
+.error-kicker {
+  color: #e0a458;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.error-summary,
+.error-help {
+  color: #d6cbd8;
+  line-height: 1.5;
+}
+
+.error-list {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+}
+
+.diagnostic {
+  padding: 14px;
+  border: 2px solid #d65f5f;
+  border-radius: 8px;
+  background: #2a2024;
+  overflow-wrap: anywhere;
+}
+
+.diagnostic--quarantined-content,
+.diagnostic--recoverable-command {
+  border-color: #d8a94e;
+}
+
+.diagnostic-primary {
+  color: #ffd1d1;
+  font-weight: 700;
+}
+
+.diagnostic-secondary {
+  margin-top: 6px;
+  color: #f0d9bd;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.diagnostic-details {
+  max-height: 180px;
+  margin-top: 8px;
+  padding: 8px;
+  overflow: auto;
+  border-radius: 4px;
+  background: #171317;
+  color: #cfcfcf;
+  white-space: pre-wrap;
+  font-size: 0.78rem;
+}
+
+.credits-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.82);
+}
+
+.credits-panel {
+  width: min(620px, 100%);
+  max-height: min(680px, calc(100vh - 40px));
+  padding: 24px;
+  overflow: auto;
+  border: 2px solid #8b5c91;
+  border-radius: 12px;
+  background: #242027;
+  text-align: left;
+}
+
+.credits-panel > p {
+  margin: 8px 0 16px;
+  color: #cfcfcf;
+}
+
+.credits-list {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.credit-entry {
+  padding: 12px;
+  border-left: 4px solid #e0a458;
+  background: #302a32;
+}
+
+.credit-entry h3 {
+  font-size: 1rem;
+}
+
+.credit-entry p {
+  margin: 6px 0;
+  color: #d8cfd9;
+  line-height: 1.4;
+}
+
+.credit-entry a {
+  color: #f4d58d;
 }
