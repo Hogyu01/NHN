@@ -199,23 +199,25 @@ export async function runPrototypeRegression({ root = document, scene, hub }) {
       return observed;
     }),
 
-    runCase("world-boundary-collision", "기존 원형 Player World 경계 충돌을 보존한다", () => {
-      const radius = hub.getState().player.r;
+    runCase("world-boundary-collision", "20×12 foot AABB가 prototype World 경계를 통과하지 않는다", () => {
+      const player = hub.getState().player;
+      const halfWidth = player.collisionWidth / 2;
+      const halfHeight = player.collisionHeight / 2;
       const checks = [
-        [radius, 240, "ArrowLeft", "x", radius],
-        [480 - radius, 240, "ArrowRight", "x", 480 - radius],
-        [240, radius, "ArrowUp", "y", radius],
-        [240, 480 - radius, "ArrowDown", "y", 480 - radius],
+        [halfWidth, 240, "ArrowLeft", "x", halfWidth],
+        [480 - halfWidth, 240, "ArrowRight", "x", 480 - halfWidth],
+        [240, halfHeight, "ArrowUp", "y", halfHeight],
+        [240, 480 - halfHeight, "ArrowDown", "y", 480 - halfHeight],
       ];
       for (const [x, y, key, axis, expected] of checks) {
         hub.reset();
         hub.setPlayerPosition(x, y);
         dispatchKey(root, "keydown", key);
-        hub.step(16);
+        hub.step(20);
         dispatchKey(root, "keyup", key);
         assert(hub.getState().player[axis] === expected, `${key} 입력이 World 경계를 통과했습니다.`);
       }
-      return { radius, bounds: [radius, 480 - radius] };
+      return { collision: "20x12", xBounds: [halfWidth, 480 - halfWidth], yBounds: [halfHeight, 480 - halfHeight] };
     }),
 
     runCase("panel-input-suppression", "semantic panel이 열려 있는 동안 movement input을 처리하지 않는다", () => {

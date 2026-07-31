@@ -8,8 +8,9 @@ import { CANONICAL_VALIDATION_SPECIFICATIONS } from "../js/infrastructure/canoni
 import { runCanonicalContentProbe } from "../js/qa/canonical-content-probe.js";
 import { runDataValidationProbe } from "../js/qa/data-validation-probe.js";
 import { migrateCanonicalData } from "./migrate-canonical-data.mjs";
+import { runMapValidationSuite } from "./validate-maps.mjs";
 
-const supportedArguments = new Set(["--json"]);
+const supportedArguments = new Set(["--json", "--maps"]);
 const unknownArguments = process.argv.slice(2).filter((argument) => !supportedArguments.has(argument));
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -20,7 +21,7 @@ function failureResult(error) {
   });
 }
 
-async function run() {
+async function run({ includeMaps = false } = {}) {
   const foundation = await runDataValidationProbe();
 
   let migration;
@@ -35,10 +36,12 @@ async function run() {
   });
   const loadReport = await loader.loadAll(CANONICAL_VALIDATION_SPECIFICATIONS);
   const canonical = await runCanonicalContentProbe(loadReport);
+  const maps = includeMaps ? await runMapValidationSuite() : null;
   const status = foundation.status === "PASS" &&
     migration.status === "PASS" &&
     loadReport.ok &&
-    canonical.status === "PASS"
+    canonical.status === "PASS" &&
+    (!includeMaps || maps?.status === "PASS")
     ? "PASS"
     : "FAIL";
 
@@ -53,6 +56,7 @@ async function run() {
       diagnostics: loadReport.diagnostics,
     }),
     canonical,
+    ...(includeMaps ? { maps } : {}),
   });
 }
 
@@ -60,7 +64,8 @@ if (unknownArguments.length > 0) {
   console.error(`지원하지 않는 인자입니다: ${unknownArguments.join(", ")}`);
   process.exitCode = 2;
 } else {
-  const report = await run();
+  const includeMaps = process.argv.includes("--maps");
+  const report = await run({ includeMaps });
   if (process.argv.includes("--json")) {
     console.log(JSON.stringify(report, null, 2));
   } else {
@@ -69,6 +74,13 @@ if (unknownArguments.length > 0) {
     console.log(`Canonical migration: ${report.migration.status}${report.migration.mode ? ` (${report.migration.mode})` : ""}`);
     console.log(`Canonical loader: ${report.canonicalLoad.status} (${report.canonicalLoad.accepted} accepted, ${report.canonicalLoad.diagnostics.length} diagnostics)`);
     console.log(`Canonical acceptance: ${report.canonical.status} (${report.canonical.passed}/${report.canonical.total})`);
+    if (report.maps) {
+      console.log(`Canonical Map validation: ${report.maps.status}`);
+      console.log(`  Task 7: ${report.maps.task7.status} (${report.maps.task7.passed}/${report.maps.task7.total})`);
+      console.log(`  Task 8: ${report.maps.task8.status} (${report.maps.task8.passed}/${report.maps.task8.total})`);
+      console.log(`  Task 9: ${report.maps.canonical.status}${report.maps.canonical.passed === undefined ? "" : ` (${report.maps.canonical.passed}/${report.maps.canonical.total})`}`);
+      console.log(`  Base: ${report.maps.canonicalLoad.activeValidity}/${report.maps.canonicalLoad.accessibility}`);
+    }
     for (const result of [...report.foundation.results, ...report.canonical.results]) {
       const suffix = result.status === "PASS" ? "" : ` — ${result.error}`;
       console.log(`${result.status}  ${result.id}${suffix}`);
@@ -76,6 +88,21 @@ if (unknownArguments.length > 0) {
     if (report.migration.error) console.log(`FAIL  migration-check — ${report.migration.error}`);
     for (const diagnostic of report.canonicalLoad.diagnostics) {
       console.log(`FAIL  ${diagnostic.filename} | ${diagnostic.errorType} | ${diagnostic.fieldPath} | ${diagnostic.code}`);
+    }
+    if (report.maps?.status === "FAIL") {
+      for (const result of [
+        ...report.maps.task7.results,
+        ...report.maps.task8.results,
+        ...(report.maps.canonical.results ?? []),
+      ].filter((entry) => entry.status === "FAIL")) {
+        console.log(`FAIL  ${result.id} — ${result.error}`);
+      }
+      for (const diagnostic of [
+        ...report.maps.manifest.diagnostics,
+        ...report.maps.canonicalLoad.diagnostics,
+      ]) {
+        console.log(`FAIL  ${diagnostic.filename} | ${diagnostic.errorType} | ${diagnostic.fieldPath} | ${diagnostic.code}`);
+      }
     }
   }
   if (report.status !== "PASS") process.exitCode = 1;

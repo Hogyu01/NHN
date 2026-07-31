@@ -36,6 +36,106 @@ const ROUTES = Object.freeze({
         state.creditsEntries >= 2;
     },
   }),
+  "map-validation": Object.freeze({
+    markerExpression: "document.body?.dataset?.mapValidationQa ?? null",
+    stateExpression: `({
+      marker: document.body?.dataset?.mapValidationQa ?? null,
+      passed: document.body?.dataset?.mapValidationQaPassed ?? null,
+      total: document.body?.dataset?.mapValidationQaTotal ?? null,
+      moduleBoot: document.documentElement.dataset.moduleBoot ?? null,
+      bootStatus: document.documentElement.dataset.bootStatus ?? null,
+      bootStage: document.documentElement.dataset.bootStage ?? null,
+      mapStageStatus: document.documentElement.dataset.mapStageStatus ?? null,
+      mapStageCode: document.documentElement.dataset.mapStageCode ?? null,
+      activeMapValidity: document.documentElement.dataset.activeMapValidity ?? null,
+      mapFaultInjection: document.documentElement.dataset.mapFaultInjection ?? null,
+      campaignStart: document.documentElement.dataset.campaignStart ?? null,
+      errorVisible: !document.querySelector("#screen-error")?.classList.contains("hidden"),
+      creditsEntries: document.querySelectorAll("#credits-list .credit-entry").length,
+      reportText: document.querySelector("#map-validation-qa-report")?.textContent?.trim() ?? null
+    })`,
+    assert(state) {
+      return state.marker === "pass" &&
+        state.passed === "12" &&
+        state.total === "12" &&
+        state.moduleBoot === "ready" &&
+        state.bootStatus === "ready" &&
+        state.bootStage === "STORE" &&
+        state.mapStageStatus === "pass" &&
+        state.mapStageCode === "MAP_READY" &&
+        state.activeMapValidity === "ACTIVE_MAP_VALID" &&
+        state.mapFaultInjection === "base" &&
+        state.campaignStart === "blocked" &&
+        state.errorVisible === true &&
+        state.creditsEntries >= 2;
+    },
+  }),
+  "player-world": Object.freeze({
+    markerExpression: "document.body?.dataset?.playerWorldQa ?? null",
+    stateExpression: `({
+      marker: document.body?.dataset?.playerWorldQa ?? null,
+      passed: document.body?.dataset?.playerWorldQaPassed ?? null,
+      total: document.body?.dataset?.playerWorldQaTotal ?? null,
+      moduleBoot: document.documentElement.dataset.moduleBoot ?? null,
+      runtimeMapId: document.documentElement.dataset.runtimeMapId ?? null,
+      playerCollision: document.documentElement.dataset.playerCollision ?? null,
+      playerStartMilliPx: document.documentElement.dataset.playerStartMilliPx ?? null,
+      reportText: document.querySelector("#player-world-qa-report")?.textContent?.trim() ?? null
+    })`,
+    assert(state) {
+      return state.marker === "pass" &&
+        state.passed === "11" &&
+        state.total === "11" &&
+        state.moduleBoot === "ready" &&
+        state.runtimeMapId === "map.base_restaurant" &&
+        state.playerCollision === "20x12" &&
+        state.playerStartMilliPx === "112000,504000";
+    },
+  }),
+  "camera-input": Object.freeze({
+    markerExpression: "document.body?.dataset?.cameraInputQa ?? null",
+    stateExpression: `({
+      marker: document.body?.dataset?.cameraInputQa ?? null,
+      passed: document.body?.dataset?.cameraInputQaPassed ?? null,
+      total: document.body?.dataset?.cameraInputQaTotal ?? null,
+      moduleBoot: document.documentElement.dataset.moduleBoot ?? null,
+      runtimeMapId: document.documentElement.dataset.runtimeMapId ?? null,
+      cameraOrigin: document.documentElement.dataset.runtimeCameraOrigin ?? null,
+      inputTransform: document.documentElement.dataset.inputTransform ?? null,
+      reportText: document.querySelector("#camera-input-qa-report")?.textContent?.trim() ?? null
+    })`,
+    assert(state) {
+      return state.marker === "pass" &&
+        state.passed === "14" &&
+        state.total === "14" &&
+        state.moduleBoot === "ready" &&
+        state.runtimeMapId === "map.base_restaurant" &&
+        state.cameraOrigin === "0,160" &&
+        state.inputTransform === "client-rect-480-camera-world";
+    },
+  }),
+  "world-interaction": Object.freeze({
+    markerExpression: "document.body?.dataset?.worldInteractionQa ?? null",
+    stateExpression: `({
+      marker: document.body?.dataset?.worldInteractionQa ?? null,
+      passed: document.body?.dataset?.worldInteractionQaPassed ?? null,
+      total: document.body?.dataset?.worldInteractionQaTotal ?? null,
+      moduleBoot: document.documentElement.dataset.moduleBoot ?? null,
+      runtimeMapId: document.documentElement.dataset.runtimeMapId ?? null,
+      ordering: document.documentElement.dataset.worldInteractionOrdering ?? null,
+      authoredTargets: document.documentElement.dataset.worldInteractionAuthoredTargets ?? null,
+      reportText: document.querySelector("#world-interaction-qa-report")?.textContent?.trim() ?? null
+    })`,
+    assert(state) {
+      return state.marker === "pass" &&
+        state.passed === "18" &&
+        state.total === "18" &&
+        state.moduleBoot === "ready" &&
+        state.runtimeMapId === "map.base_restaurant" &&
+        state.ordering === "world-distance-priority-entity-id" &&
+        state.authoredTargets === "6";
+    },
+  }),
   "data-validation": Object.freeze({
     markerExpression: "document.body?.dataset?.dataValidationQa ?? null",
     stateExpression: `({
