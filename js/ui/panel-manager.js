@@ -68,7 +68,7 @@ export class PanelManager {
     return this.openState;
   }
 
-  open({ zoneId, semantic, label = undefined, body = undefined, projection = undefined }) {
+  open({ zoneId, semantic, label = undefined, body = undefined, projection = undefined, actions = [] }) {
     if (typeof zoneId !== "string" || zoneId.length === 0 ||
         typeof semantic !== "string" || semantic.length === 0) {
       throw new TypeError("Panel open에는 zoneId와 semantic이 필요합니다.");
@@ -78,12 +78,42 @@ export class PanelManager {
     this.activeSemantic = semantic;
     this.openState = true;
     this.title.textContent = label ?? resolved.label;
-    this.body.textContent = body ?? resolved.body;
+    this.#renderBody(body ?? resolved.body, actions);
     this.overlay.classList.remove("hidden");
     this.overlay.setAttribute("aria-hidden", "false");
     this.onContextChange?.(true, this.snapshot());
     this.closeButton.focus({ preventScroll: true });
     return this.snapshot();
+  }
+
+  /** Task 24 최소 배선: 텍스트 본문 아래에 real command를 dispatch하는 button과 결과 한 줄을 붙인다. */
+  #renderBody(bodyText, actions) {
+    this.body.textContent = "";
+    this.body.append(this.root.createTextNode(bodyText));
+    if (!Array.isArray(actions) || actions.length === 0) return;
+    const resultLine = this.root.createElement("p");
+    resultLine.className = "panel-action-result";
+    for (const action of actions) {
+      const button = this.root.createElement("button");
+      button.type = "button";
+      button.textContent = action.label;
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        resultLine.textContent = "처리 중...";
+        try {
+          const result = await action.onClick();
+          resultLine.textContent = result?.ok
+            ? `완료: ${action.label}`
+            : `실패: ${result?.code ?? "UNKNOWN"}`;
+        } catch (error) {
+          resultLine.textContent = `오류: ${error instanceof Error ? error.message : String(error)}`;
+        } finally {
+          button.disabled = false;
+        }
+      });
+      this.body.append(button);
+    }
+    this.body.append(resultLine);
   }
 
   close({ returnFocus = true } = {}) {

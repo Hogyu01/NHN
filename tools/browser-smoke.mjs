@@ -1,5 +1,42 @@
 #!/usr/bin/env node
 const ROUTES = Object.freeze({
+  "day-loop": Object.freeze({
+    markerExpression: "document.body?.dataset?.dayLoopQa ?? null",
+    stateExpression: `({
+      marker: document.body?.dataset?.dayLoopQa ?? null,
+      passed: document.body?.dataset?.dayLoopQaPassed ?? null,
+      total: document.body?.dataset?.dayLoopQaTotal ?? null,
+      moduleBoot: document.documentElement.dataset.moduleBoot ?? null,
+      runtimePhase: document.documentElement.dataset.dayLoopPhase ?? null,
+      validationAttempts: document.documentElement.dataset.dayLoopStartValidationAttempts ?? null,
+      reportText: document.querySelector("#day-loop-qa-report")?.textContent?.trim() ?? null
+    })`,
+    assert(state) {
+      return state.marker === "pass" &&
+        state.passed === "2" &&
+        state.total === "2" &&
+        state.moduleBoot === "ready" &&
+        state.runtimePhase === "PLANNING" &&
+        state.validationAttempts === "1";
+    },
+  }),
+  "one-day": Object.freeze({
+    markerExpression: "document.body?.dataset?.oneDayQa ?? null",
+    stateExpression: `({
+      marker: document.body?.dataset?.oneDayQa ?? null,
+      passed: document.body?.dataset?.oneDayQaPassed ?? null,
+      total: document.body?.dataset?.oneDayQaTotal ?? null,
+      moduleBoot: document.documentElement.dataset.moduleBoot ?? null,
+      runtimePhase: document.documentElement.dataset.oneDayPhase ?? null
+    })`,
+    assert(state) {
+      return state.marker === "pass" &&
+        state.passed === "1" &&
+        state.total === "1" &&
+        state.moduleBoot === "ready" &&
+        state.runtimePhase === "SETTLEMENT";
+    },
+  }),
   "bootstrap-features": Object.freeze({
     markerExpression: "document.body?.dataset?.bootstrapFeatureQa ?? null",
     stateExpression: `({

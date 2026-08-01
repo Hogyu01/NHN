@@ -732,6 +732,11 @@ export function planEscrowRestore(inventory, accounting, input) {
   } catch (error) {
     return failure(error?.code ?? "ESCROW_RESTORE_OVERFLOW");
   }
+  // 전량 소비돼 배열에서 제거됐던 reservation을 다시 만들면 원래 위치가 아니라 배열 끝에
+  // 붙어서 순서가 어긋난다. reservationId 오름차순으로 정렬해 원래 순서를 복원한다.
+  candidate.reservations.sort((left, right) => (
+    left.reservationId < right.reservationId ? -1 : left.reservationId > right.reservationId ? 1 : 0
+  ));
   candidate.cookEscrows = candidate.cookEscrows.filter((item) => item.escrowId !== escrow.escrowId);
   const nextInventory = inventoryCandidate(candidate, {});
   if (!nextInventory.ok && nextInventory.code) return nextInventory;
