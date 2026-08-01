@@ -20,6 +20,21 @@ const ROUTES = Object.freeze({
         state.validationAttempts === "1";
     },
   }),
+  "timer-system": Object.freeze({
+    markerExpression: "document.body?.dataset?.timerSystemQa ?? null",
+    stateExpression: `({
+      marker: document.body?.dataset?.timerSystemQa ?? null,
+      passed: document.body?.dataset?.timerSystemQaPassed ?? null,
+      total: document.body?.dataset?.timerSystemQaTotal ?? null,
+      moduleBoot: document.documentElement.dataset.moduleBoot ?? null
+    })`,
+    assert(state) {
+      return state.marker === "pass" &&
+        state.passed === "2" &&
+        state.total === "2" &&
+        state.moduleBoot === "ready";
+    },
+  }),
   "one-day": Object.freeze({
     markerExpression: "document.body?.dataset?.oneDayQa ?? null",
     stateExpression: `({

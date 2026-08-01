@@ -63,6 +63,7 @@ export const CONTRACT_STATUS = Object.freeze({
   ACCEPTED_PENDING: "ACCEPTED_PENDING",
   RESOLVED_SUCCESS: "RESOLVED_SUCCESS",
   RESOLVED_FAILURE: "RESOLVED_FAILURE",
+  TERMINAL_CANCELLED: "TERMINAL_CANCELLED",
 });
 
 export const CONTRACT_RESOLUTION_OUTCOME = Object.freeze({
@@ -523,7 +524,8 @@ function validateAcceptedContract(contract) {
   if (!Object.values(CONTRACT_STATUS).includes(contract.status)) {
     return failure("INVALID_CONTRACT_STATUS", { status: contract.status });
   }
-  if (contract.status === CONTRACT_STATUS.ACCEPTED_PENDING) {
+  if (contract.status === CONTRACT_STATUS.ACCEPTED_PENDING ||
+      contract.status === CONTRACT_STATUS.TERMINAL_CANCELLED) {
     if (contract.resolution !== null) return failure("PENDING_CONTRACT_HAS_RESOLUTION");
     return validationSuccess();
   }
@@ -609,7 +611,8 @@ export function validateContractState(contracts) {
     contractIds.add(contract.contractId);
     acceptedDays.add(contract.acceptedDay);
     if (contract.acceptedDay === contracts.day) currentDayContractId = contract.contractId;
-    if (contract.status !== CONTRACT_STATUS.ACCEPTED_PENDING) {
+    if (contract.status === CONTRACT_STATUS.RESOLVED_SUCCESS ||
+        contract.status === CONTRACT_STATUS.RESOLVED_FAILURE) {
       const resolutionId = contract.resolution.resolutionId;
       resolvedIds.add(resolutionId);
       if (!resolutionIds.has(resolutionId)) {
