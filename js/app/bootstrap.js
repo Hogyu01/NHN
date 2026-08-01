@@ -1,4 +1,5 @@
 import { CommandBus } from "../core/command-bus.js";
+import { Scheduler } from "../core/scheduler.js";
 import {
   createDiagnostic,
   diagnosticFromError,
@@ -20,6 +21,11 @@ import {
 } from "../domain/day-loop.js";
 import { createMenuState, registerMenuSystem } from "../domain/menu.js";
 import { registerOrderSystem } from "../domain/orders.js";
+import { registerServiceCleanupSystem } from "../domain/service-cleanup.js";
+import { registerCampaignOutcomeSystem } from "../domain/terminal-result.js";
+import { registerDayInitializationSystem } from "../domain/day-initialization.js";
+import { CampaignManager } from "../domain/campaign.js";
+import { StorageAdapter } from "../infrastructure/storage-adapter.js";
 import { createRecipeState, RecipeSystem } from "../domain/recipe.js";
 import { createSaleSlotsState } from "../domain/sale-slots.js";
 import { createSalesState } from "../domain/sales.js";
@@ -33,6 +39,7 @@ import { CreditsShell } from "../ui/credits-shell.js";
 import { ErrorScreen } from "../ui/error-screen.js";
 import { PrototypeHubAdapter } from "../ui/prototype-hub-adapter.js";
 import { runPrototypeRegression } from "../qa/prototype-regression.js";
+import { SimulationLoop } from "./simulation-loop.js";
 import {
   DEFAULT_BUILD_METADATA,
   validateBuildMetadata,
@@ -52,6 +59,7 @@ const MAP_VALIDATION_QA_ROUTE = "map-validation";
 const PLAYER_WORLD_QA_ROUTE = "player-world";
 const DAY_LOOP_QA_ROUTE = "day-loop";
 const ONE_DAY_QA_ROUTE = "one-day";
+const TIMER_SYSTEM_QA_ROUTE = "timer-system";
 
 export const BOOT_STAGE = Object.freeze({
   SHELL: "SHELL",
@@ -395,6 +403,7 @@ export class AppBootstrap {
     this.shell = null;
     this.scene = null;
     this.hub = null;
+    this.storageAdapter = null;
     this.store = null;
     this.commandBus = null;
     this.cashTransactionAPI = null;
@@ -407,6 +416,12 @@ export class AppBootstrap {
     this.dayLoopController = null;
     this.directServiceSystem = null;
     this.orderSystem = null;
+    this.serviceCleanupSystem = null;
+    this.campaignOutcomeSystem = null;
+    this.dayInitializationSystem = null;
+    this.campaignManager = null;
+    this.scheduler = null;
+    this.simulationLoop = null;
     this.reputationSystem = null;
     this.unlockPublisher = null;
     this.eventSystem = null;
@@ -603,11 +618,51 @@ export class AppBootstrap {
           height: sprite.height,
         }, "PROTOTYPE_ASSET_READY");
       },
-      [BOOT_STAGE.SAVE]: async () => bootStageSkipped(
-        Object.freeze({ checkpoint: null, recovery: "NEW_CAMPAIGN" }),
-        "SAVE_SYSTEM_DEFERRED_TO_TASK_27",
-        { boundaryEstablished: true, recovery: "NEW_CAMPAIGN" },
-      ),
+      [BOOT_STAGE.SAVE]: async () => {
+        let storage;
+        try {
+          storage = this.root.defaultView.localStorage;
+        } catch {
+          storage = null;
+        }
+        if (!storage) {
+          return bootStagePass(
+            Object.freeze({ checkpoint: null, recovery: "NEW_CAMPAIGN" }),
+            { reason: "STORAGE_UNAVAILABLE" },
+            "SAVE_STORAGE_UNAVAILABLE",
+          );
+        }
+        this.storageAdapter = new StorageAdapter({ storage });
+        const current = await this.storageAdapter.readCurrent();
+        if (current.ok) {
+          return bootStagePass(
+            Object.freeze({ checkpoint: current.payload, recovery: "CONTINUE" }),
+            { checkpointPhase: current.payload.checkpointPhase },
+            "SAVE_CHECKPOINT_FOUND",
+          );
+        }
+        if (current.code === "STORAGE_ABSENT") {
+          return bootStagePass(
+            Object.freeze({ checkpoint: null, recovery: "NEW_CAMPAIGN" }),
+            {},
+            "SAVE_NO_CHECKPOINT",
+          );
+        }
+        const recovered = await this.storageAdapter.recoverFromPrevious();
+        if (recovered.ok) {
+          return bootStagePass(
+            Object.freeze({ checkpoint: recovered.payload, recovery: "RECOVERED_FROM_PREVIOUS" }),
+            { currentCorruption: current.code },
+            "SAVE_CURRENT_CORRUPT_RECOVERED",
+          );
+        }
+        const diagnosis = await this.storageAdapter.diagnoseCorruption();
+        return bootStagePass(
+          Object.freeze({ checkpoint: null, recovery: "BOTH_CORRUPT" }),
+          { diagnosis },
+          "SAVE_BOTH_CORRUPT",
+        );
+      },
       [BOOT_STAGE.STORE]: async (context) => {
         const buildAndFlags = context[BOOT_STAGE.BUILD_FLAGS];
         const data = context[BOOT_STAGE.DATA];
@@ -703,6 +758,8 @@ export class AppBootstrap {
             day,
             consecutiveArrearsCount: 0,
             canonicalDayResults: [],
+            settlementOutcomeSealedForDay: null,
+            terminalResult: null,
             ...reputationModule.createReputationCampaignFields(
               balanceDocument.campaign.startReputation,
             ),
@@ -775,6 +832,83 @@ export class AppBootstrap {
         this.unlockPublisher = unlocksModule.registerUnlockPublisher(this.commandBus);
         this.eventSystem = eventModule.registerEventSystem(this.commandBus, eventDocument.events);
         this.settlementSystem = settlementModule.registerSettlementSystem(this.commandBus);
+        this.serviceCleanupSystem = registerServiceCleanupSystem(this.commandBus);
+        this.campaignOutcomeSystem = registerCampaignOutcomeSystem(this.commandBus);
+        this.dayInitializationSystem = registerDayInitializationSystem(this.commandBus, {
+          ingredients: ingredientDocument.ingredients,
+          eventDefinitions: eventDocument.events,
+          balance: balanceDocument,
+        });
+        this.campaignManager = new CampaignManager({
+          store: this.store,
+          commandBus: this.commandBus,
+          campaignOutcomeSystem: this.campaignOutcomeSystem,
+          dayInitializationSystem: this.dayInitializationSystem,
+          contractSystem: this.contractSystem,
+          dayLoopController: this.dayLoopController,
+        });
+        this.scheduler = new Scheduler();
+        this.simulationLoop = new SimulationLoop({
+          store: this.store,
+          commandBus: this.commandBus,
+          scheduler: this.scheduler,
+          directServiceSystem: this.directServiceSystem,
+          menuSystem: this.menuSystem,
+          serviceCleanupSystem: this.serviceCleanupSystem,
+          dayLoopController: this.dayLoopController,
+          requestAnimationFrame: this.root.defaultView.requestAnimationFrame.bind(this.root.defaultView),
+          cancelAnimationFrame: this.root.defaultView.cancelAnimationFrame.bind(this.root.defaultView),
+          visibilityTarget: this.root,
+        });
+        this.commandBus.subscribeEvent("day-loop.service-started", (event) => {
+          this.simulationLoop.timerSystem.armServiceTimer({
+            serviceToken: event.payload.transitionToken,
+            durationMs: event.payload.durationMs,
+          });
+        });
+        this.commandBus.subscribeEvent("day-loop.service-results-closed", (event) => {
+          const transitionToken = event.payload.transitionToken;
+          this.simulationLoop.timerSystem.disarmServiceTimer(transitionToken);
+          this.simulationLoop.timerSystem.armCleanupCap({ serviceToken: transitionToken });
+          // CommandBus는 post-commit event 전달 중 재진입 dispatch를 거절하므로(REENTRANT_
+          // DISPATCH_FORBIDDEN), 실제 cleanup dispatch는 이 handler 바깥, 다음 macrotask로
+          // 미룬다. handler 자신은 아무것도 await하지 않고 즉시 반환해야 한다.
+          this.root.defaultView.setTimeout(() => {
+            this.simulationLoop.timerSystem.runCleanupToCompletion({ transitionToken })
+              .catch((error) => this._runtimeDiagnostics.push(diagnosticFromError(error, {
+                severity: DIAGNOSTIC_SEVERITY.DEGRADED_EFFECT,
+                subsystem: "app.simulation-loop",
+                code: "CLEANUP_ORCHESTRATION_FAILED",
+                errorType: "ServiceCleanupError",
+              })));
+          }, 0);
+        });
+        this.commandBus.subscribeEvent("settlement.day-sealed", () => {
+          // 같은 reentrant-dispatch 제약(REENTRANT_DISPATCH_FORBIDDEN) 때문에 다음
+          // macrotask로 미룬다 — Task 26의 cleanup 자동화와 동일한 이유다.
+          this.root.defaultView.setTimeout(() => {
+            this.campaignManager.advanceAfterSettlement()
+              .then((outcome) => {
+                if (!outcome.ok) {
+                  this._runtimeDiagnostics.push(createDiagnostic({
+                    diagnosticId: `campaign-manager:advance-failed:${this.store.revision}`,
+                    severity: DIAGNOSTIC_SEVERITY.DEGRADED_EFFECT,
+                    subsystem: "app.campaign-manager",
+                    code: "CAMPAIGN_ADVANCE_FAILED",
+                    errorType: "CampaignAdvanceError",
+                    details: outcome,
+                  }));
+                }
+              })
+              .catch((error) => this._runtimeDiagnostics.push(diagnosticFromError(error, {
+                severity: DIAGNOSTIC_SEVERITY.DEGRADED_EFFECT,
+                subsystem: "app.campaign-manager",
+                code: "CAMPAIGN_ADVANCE_THREW",
+                errorType: "CampaignAdvanceError",
+              })));
+          }, 0);
+        });
+        this.simulationLoop.start();
         return bootStagePass({
           store: this.store,
           commandBus: this.commandBus,
@@ -788,6 +922,12 @@ export class AppBootstrap {
           dayLoopController: this.dayLoopController,
           directServiceSystem: this.directServiceSystem,
           orderSystem: this.orderSystem,
+          serviceCleanupSystem: this.serviceCleanupSystem,
+          campaignOutcomeSystem: this.campaignOutcomeSystem,
+          dayInitializationSystem: this.dayInitializationSystem,
+          campaignManager: this.campaignManager,
+          scheduler: this.scheduler,
+          simulationLoop: this.simulationLoop,
           reputationSystem: this.reputationSystem,
           unlockPublisher: this.unlockPublisher,
           eventSystem: this.eventSystem,
@@ -889,6 +1029,18 @@ export class AppBootstrap {
       this.hub.activate();
       const { runOneDayBrowserProbe } = await import("../qa/one-day-probe.js");
       const report = await runOneDayBrowserProbe({ root: this.root, app: this });
+      this.hub.reset();
+      this.hub.start();
+      canvas.focus({ preventScroll: true });
+      return report;
+    }
+
+    if (qaMode === TIMER_SYSTEM_QA_ROUTE) {
+      showScreen(this.root, "screen-room");
+      this.hub.setMapDefinition(this.mapLoadReport.activeMap);
+      this.hub.activate();
+      const { runTimerSystemBrowserProbe } = await import("../qa/timer-system-probe.js");
+      const report = await runTimerSystemBrowserProbe({ root: this.root, app: this });
       this.hub.reset();
       this.hub.start();
       canvas.focus({ preventScroll: true });
@@ -1020,6 +1172,7 @@ export class AppBootstrap {
   destroy() {
     if (this._destroyed) return;
     this._destroyed = true;
+    this.simulationLoop?.stop();
     this.hub?.destroy();
     this.shell?.credits.destroy();
     if (this._interactionsBound) {
@@ -1069,7 +1222,13 @@ export function bootstrapPrototypeApp(root = document, options = {}) {
     get marketSystem() { return app.marketSystem; },
     get menuSystem() { return app.menuSystem; },
     get orderSystem() { return app.orderSystem; },
+    get serviceCleanupSystem() { return app.serviceCleanupSystem; },
+    get campaignOutcomeSystem() { return app.campaignOutcomeSystem; },
+    get dayInitializationSystem() { return app.dayInitializationSystem; },
+    get campaignManager() { return app.campaignManager; },
     get settlementSystem() { return app.settlementSystem; },
+    get scheduler() { return app.scheduler; },
+    get simulationLoop() { return app.simulationLoop; },
     get featureRegistry() { return app.featureRegistry; },
     get bootState() { return app.getBootState(); },
   });
