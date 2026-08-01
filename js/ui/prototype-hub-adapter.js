@@ -1,4 +1,8 @@
+import { createRuntimeComposition } from "../app/runtime-composition.js";
+import { resolveOrderableRecipe } from "../app/one-day-scenario.js";
 import { freezeDeep } from "../core/result.js";
+import { ACTIVE_ORDER_STATE } from "../domain/orders.js";
+import { SALE_SLOT_STATE } from "../domain/sale-slots.js";
 import { deriveCameraTransform } from "../world/camera.js";
 import {
   DYNAMIC_SERVICE_TARGET_KIND,
@@ -140,6 +144,99 @@ function invokeSynchronous(callback, value, field) {
   return outcome;
 }
 
+/** Task 24 최소 배선: board panel의 시장 구매/메뉴 확정/Service 시작 real command 3개. */
+function boardActions(app) {
+  const composition = createRuntimeComposition(app);
+  return [
+    {
+      label: "재료 구매",
+      async onClick() {
+        const { offers } = resolveOrderableRecipe(app);
+        let last = { ok: true };
+        for (const offer of offers) {
+          last = await composition.buyMarketOffer(offer);
+          if (!last.ok) return last;
+        }
+        return last;
+      },
+    },
+    {
+      label: "메뉴 확정",
+      async onClick() {
+        const { recipeId, recipe } = resolveOrderableRecipe(app);
+        const edited = await composition.confirmMenuEntry({
+          recipeId,
+          enabled: true,
+          priceG: recipe.basePriceG,
+          plannedQuantity: 1,
+        });
+        if (!edited.ok) return edited;
+        return composition.confirmMenuPlan();
+      },
+    },
+    {
+      label: "Service 시작",
+      onClick: () => composition.startService(),
+    },
+  ];
+}
+
+/** stove panel: ACTIVE order가 있으면 그 slot을, 없으면 첫 AVAILABLE slot을 조리한다. */
+function stoveActions(app) {
+  const composition = createRuntimeComposition(app);
+  return [
+    {
+      label: "조리 시작",
+      onClick: () => {
+        const snapshot = app.store.getSnapshot();
+        const activeOrder = snapshot.service.orders.find(
+          (order) => order.state === ACTIVE_ORDER_STATE.ACTIVE,
+        );
+        const slot = activeOrder
+          ? snapshot.saleSlots.slots.find((candidate) => candidate.saleSlotId === activeOrder.saleSlotId)
+          : snapshot.saleSlots.slots.find((candidate) => candidate.state === SALE_SLOT_STATE.AVAILABLE);
+        if (!slot) return Promise.resolve({ ok: false, code: "NO_COOKABLE_SLOT" });
+        return composition.startCook({
+          recipeId: slot.recipeId,
+          saleSlotId: slot.saleSlotId,
+          sourceOrderId: activeOrder ? activeOrder.orderId : null,
+        });
+      },
+    },
+    {
+      label: "조리 완료",
+      onClick: () => {
+        const timingCook = app.store.getSnapshot().service.timingCook;
+        if (!timingCook) return Promise.resolve({ ok: false, code: "NO_RUNNING_COOK" });
+        return composition.completeCook({ inputAtMs: timingCook.targetAtMs });
+      },
+    },
+  ];
+}
+
+/** counter panel: 첫 ACTIVE order에 carried dish를 서빙한다. */
+function counterActions(app) {
+  const composition = createRuntimeComposition(app);
+  return [
+    {
+      label: "서빙",
+      onClick: () => {
+        const activeOrder = app.store.getSnapshot().service.orders.find(
+          (order) => order.state === ACTIVE_ORDER_STATE.ACTIVE,
+        );
+        if (!activeOrder) return Promise.resolve({ ok: false, code: "NO_ACTIVE_ORDER" });
+        return composition.serveOrder({ targetOrderId: activeOrder.orderId });
+      },
+    },
+  ];
+}
+
+const PANEL_ACTION_BUILDERS = Object.freeze({
+  board: boardActions,
+  stove: stoveActions,
+  counter: counterActions,
+});
+
 /**
  * Browser adapter retained under its prototype name for compatibility. Player movement, static
  * zone opens, and dynamic action commands all pass through production World/Input routers.
@@ -154,10 +251,12 @@ export class PrototypeHubAdapter {
     mapDefinition = PROTOTYPE_RUNTIME_MAP_DEFINITION,
     inputTarget = window,
     onInteractionCommand = () => undefined,
+    getApp = () => null,
   }) {
     if (typeof onInteractionCommand !== "function") {
       throw new TypeError("onInteractionCommand는 함수여야 합니다.");
     }
+    this.getApp = getApp;
     this.scene = scene;
     this.inputTarget = inputTarget;
     this.root = panelOverlay.ownerDocument;
@@ -326,11 +425,14 @@ export class PrototypeHubAdapter {
 
   openPanel(zone) {
     this.clearMovementInput();
+    const app = this.getApp();
+    const builder = app ? PANEL_ACTION_BUILDERS[zone.semantic] : undefined;
     return this.panelManager.open({
       zoneId: zone.zoneId,
       semantic: zone.semantic,
       label: zone.label,
       body: zone.body,
+      actions: builder ? builder(app) : [],
     });
   }
 

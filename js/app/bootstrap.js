@@ -8,14 +8,22 @@ import { freezeDeep } from "../core/result.js";
 import { GameStore } from "../core/store.js";
 import { registerCashTransactionAPI } from "../domain/cash-transaction-api.js";
 import { createEconomyState } from "../domain/economy.js";
+import { registerDirectServiceSystem } from "../domain/direct-service.js";
 import {
   createInventoryAccountingState,
   registerInventoryAccounting,
 } from "../domain/inventory-accounting.js";
 import { createInventoryState } from "../domain/inventory.js";
+import {
+  DAY_LOOP_TRIGGER,
+  registerDayLoopController,
+} from "../domain/day-loop.js";
 import { createMenuState, registerMenuSystem } from "../domain/menu.js";
+import { registerOrderSystem } from "../domain/orders.js";
 import { createRecipeState, RecipeSystem } from "../domain/recipe.js";
 import { createSaleSlotsState } from "../domain/sale-slots.js";
+import { createSalesState } from "../domain/sales.js";
+import { createServiceTimerState } from "../domain/timer-state.js";
 import { CANONICAL_CONTENT_SPECIFICATIONS } from "../infrastructure/canonical-content.js";
 import { DataLoader } from "../infrastructure/data-loader.js";
 import { BASE_MAP_ID } from "../world/map-schema.js";
@@ -42,6 +50,8 @@ const DATA_VALIDATION_QA_ROUTE = "data-validation";
 const BOOTSTRAP_FEATURE_QA_ROUTE = "bootstrap-features";
 const MAP_VALIDATION_QA_ROUTE = "map-validation";
 const PLAYER_WORLD_QA_ROUTE = "player-world";
+const DAY_LOOP_QA_ROUTE = "day-loop";
+const ONE_DAY_QA_ROUTE = "one-day";
 
 export const BOOT_STAGE = Object.freeze({
   SHELL: "SHELL",
@@ -394,6 +404,9 @@ export class AppBootstrap {
     this.contractSystem = null;
     this.recipeSystem = null;
     this.menuSystem = null;
+    this.dayLoopController = null;
+    this.directServiceSystem = null;
+    this.orderSystem = null;
     this.reputationSystem = null;
     this.unlockPublisher = null;
     this.eventSystem = null;
@@ -582,6 +595,7 @@ export class AppBootstrap {
           panelCloseButton,
           mapDefinition: this.mapLoadReport.activeMap,
           inputTarget: this.root.defaultView,
+          getApp: () => (this.commandBus ? this : null),
         });
         return bootStagePass({ scene: this.scene, hub: this.hub }, {
           assetId: "prototype.player_walk.l0",
@@ -607,6 +621,7 @@ export class AppBootstrap {
           reputationModule,
           unlocksModule,
           eventModule,
+          settlementModule,
         ] = await Promise.all([
           import("../core/ids.js"),
           import("../core/rng.js"),
@@ -616,6 +631,7 @@ export class AppBootstrap {
           import("../domain/reputation.js"),
           import("../domain/unlocks.js"),
           import("../domain/events.js"),
+          import("../domain/settlement.js"),
         ]);
         const canonicalDocuments = new Map(
           data.accepted.map((entry) => [entry.filename, entry.data]),
@@ -625,8 +641,10 @@ export class AppBootstrap {
         const facilityDocument = canonicalDocuments.get("data/upgrades.json");
         const eventDocument = canonicalDocuments.get("data/events.json");
         const balanceDocument = canonicalDocuments.get("data/balance.json");
-        if (!ingredientDocument || !recipeDocument || !facilityDocument || !eventDocument || !balanceDocument) {
-          throw new Error("MarketSystem, ContractSystem, Recipe/MenuSystem, ReputationSystem과 EventSystem composition에 canonical ingredients/recipes/upgrades/events/balance가 필요합니다.");
+        const guestDocument = canonicalDocuments.get("data/guests.json");
+        if (!ingredientDocument || !recipeDocument || !facilityDocument || !eventDocument ||
+            !balanceDocument || !guestDocument) {
+          throw new Error("MarketSystem, ContractSystem, Recipe/MenuSystem, ReputationSystem, EventSystem, DayLoopController(DemandSystem) composition에 canonical ingredients/recipes/upgrades/events/balance/guests가 필요합니다.");
         }
 
         const masterSeed = 0x4e484e01;
@@ -684,6 +702,7 @@ export class AppBootstrap {
             masterSeed,
             day,
             consecutiveArrearsCount: 0,
+            canonicalDayResults: [],
             ...reputationModule.createReputationCampaignFields(
               balanceDocument.campaign.startReputation,
             ),
@@ -700,6 +719,11 @@ export class AppBootstrap {
           recipes,
           menu,
           saleSlots,
+          sales: createSalesState({ day }),
+          service: createServiceTimerState({
+            durationMs: balanceDocument.service.durationMs,
+            cleanupOvertimeMs: balanceDocument.service.cleanupOvertimeMs,
+          }),
           market: marketGeneration.market,
           contracts: contractGeneration.contracts,
           rng: eventGeneration.rngState,
@@ -738,9 +762,19 @@ export class AppBootstrap {
         this.contractSystem = contractModule.registerContractSystem(this.commandBus);
         this.recipeSystem = new RecipeSystem();
         this.menuSystem = registerMenuSystem(this.commandBus);
+        this.dayLoopController = registerDayLoopController(this.commandBus, {
+          guestArchetypes: guestDocument.guestArchetypes,
+        });
+        this.directServiceSystem = registerDirectServiceSystem(this.commandBus, {
+          wrongServePenaltyMs: balanceDocument.service.wrongServePenaltyMs,
+          reactionDurationMs: balanceDocument.service.reactionFrameMs *
+            balanceDocument.service.reactionFrameCount,
+        });
+        this.orderSystem = registerOrderSystem(this.commandBus);
         this.reputationSystem = reputationModule.registerReputationSystem(this.commandBus);
         this.unlockPublisher = unlocksModule.registerUnlockPublisher(this.commandBus);
         this.eventSystem = eventModule.registerEventSystem(this.commandBus, eventDocument.events);
+        this.settlementSystem = settlementModule.registerSettlementSystem(this.commandBus);
         return bootStagePass({
           store: this.store,
           commandBus: this.commandBus,
@@ -751,9 +785,13 @@ export class AppBootstrap {
           contractSystem: this.contractSystem,
           recipeSystem: this.recipeSystem,
           menuSystem: this.menuSystem,
+          dayLoopController: this.dayLoopController,
+          directServiceSystem: this.directServiceSystem,
+          orderSystem: this.orderSystem,
           reputationSystem: this.reputationSystem,
           unlockPublisher: this.unlockPublisher,
           eventSystem: this.eventSystem,
+          settlementSystem: this.settlementSystem,
         }, {
           revision: this.store.revision,
           runtimePhase: this.store.runtimePhase,
@@ -765,6 +803,8 @@ export class AppBootstrap {
           contractOfferDrawsConsumed: contractGeneration.drawsConsumed,
           unlockedRecipeCount: recipes.unlockedRecipeIds.length,
           menuDraftEntryCount: menu.draftEntries.length,
+          serviceLifecycle: this.store.getSnapshot().service.lifecycle,
+          serviceDurationMs: this.store.getSnapshot().service.durationMs,
           unlockThresholdCount: progression.unlockCatalog.length,
           activeEventCount: events.activeEvent === null ? 0 : 1,
           eventDrawsConsumed: eventGeneration.drawsConsumed,
@@ -787,12 +827,27 @@ export class AppBootstrap {
     const canvas = requireElement(this.root, "#game-canvas");
     const panelCloseButton = requireElement(this.root, "#btn-panel-close");
 
-    this.enterPrototype = () => {
-      if (this.shell.errorScreen.blocked || this.getBootState().status !== BOOT_STATUS.READY) return;
+    this.enterPrototype = async () => {
+      if (this.shell.errorScreen.blocked || this.getBootState().status !== BOOT_STATUS.READY) return null;
+      if (this.store.runtimePhase === "TITLE") {
+        const snapshot = this.store.getSnapshot();
+        const transition = await this.dayLoopController.transition({
+          commandId: `${snapshot.campaign.campaignId}:day-loop:title-ready:${snapshot.generationId}`,
+          expectedRevision: this.store.revision,
+          generationId: this.store.generationId,
+          issuedAtSimulationMs: 0,
+          payload: { trigger: DAY_LOOP_TRIGGER.NEW_CAMPAIGN_READY },
+        });
+        if (!transition.ok) {
+          this._runtimeDiagnostics.push(...transition.diagnostics);
+          return transition;
+        }
+      }
       this.shell.credits.close();
       showScreen(this.root, "screen-room");
       this.hub.start();
       canvas.focus({ preventScroll: true });
+      return Object.freeze({ ok: true, runtimePhase: this.store.runtimePhase });
     };
     this.closePanel = () => this.hub.closePanel();
     this.handlePageHide = () => this.destroy();
@@ -806,6 +861,39 @@ export class AppBootstrap {
     if (!this.bootResult?.ok) return this.bootResult;
     const canvas = requireElement(this.root, "#game-canvas");
     const qaMode = new URL(this.root.defaultView.location.href).searchParams.get("qa");
+
+    if (qaMode === DAY_LOOP_QA_ROUTE) {
+      showScreen(this.root, "screen-room");
+      this.hub.setMapDefinition(this.mapLoadReport.activeMap);
+      this.hub.activate();
+      const {
+        runDayLoopBrowserProbe,
+      } = await import("../qa/day-loop-probe.js");
+      const report = await runDayLoopBrowserProbe({
+        root: this.root,
+        hub: this.hub,
+        baseMap: this.mapLoadReport.activeMap,
+        store: this.store,
+        dayLoopController: this.dayLoopController,
+        menuSystem: this.menuSystem,
+      });
+      this.hub.reset();
+      this.hub.start();
+      canvas.focus({ preventScroll: true });
+      return report;
+    }
+
+    if (qaMode === ONE_DAY_QA_ROUTE) {
+      showScreen(this.root, "screen-room");
+      this.hub.setMapDefinition(this.mapLoadReport.activeMap);
+      this.hub.activate();
+      const { runOneDayBrowserProbe } = await import("../qa/one-day-probe.js");
+      const report = await runOneDayBrowserProbe({ root: this.root, app: this });
+      this.hub.reset();
+      this.hub.start();
+      canvas.focus({ preventScroll: true });
+      return report;
+    }
 
     if (qaMode === PROTOTYPE_QA_ROUTE) {
       showScreen(this.root, "screen-room");
@@ -976,6 +1064,12 @@ export function bootstrapPrototypeApp(root = document, options = {}) {
     get shell() { return app.shell; },
     get store() { return app.store; },
     get commandBus() { return app.commandBus; },
+    get dayLoopController() { return app.dayLoopController; },
+    get directServiceSystem() { return app.directServiceSystem; },
+    get marketSystem() { return app.marketSystem; },
+    get menuSystem() { return app.menuSystem; },
+    get orderSystem() { return app.orderSystem; },
+    get settlementSystem() { return app.settlementSystem; },
     get featureRegistry() { return app.featureRegistry; },
     get bootState() { return app.getBootState(); },
   });
