@@ -85,6 +85,13 @@ body {
   box-shadow: 0 1px 0 #7f3d1c;
 }
 
+.start-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
 .btn-primary:focus-visible,
 #game-canvas:focus-visible {
   outline: 3px solid #f4d58d;

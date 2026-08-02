@@ -20,8 +20,8 @@ export const LOGICAL_SIZE = 480;
 const TILE_SIZE = 32;
 // 서로 다른 원본 frame을 타일 높이에 맞춰 정규화한다. 프레임을 먼저 자른 뒤 height를
 // 고정해야 Pixi가 원본 sheet 전체 크기를 기준으로 스케일을 되돌리지 않는다.
-const PLAYER_VISUAL_HEIGHT_PX = 48;
-const GUEST_VISUAL_HEIGHT_PX = 44;
+const PLAYER_VISUAL_HEIGHT_PX = 64;
+const GUEST_VISUAL_HEIGHT_PX = 64;
 
 // player_walk.png(구 L0_Placeholder, 머리 없는 프로토타입 도형)는 QA fixture 전용으로 남기고,
 // 실제 렌더링은 player_ai/*.png(팀원 제공 4방향×4프레임)을 합성한 player_walk_v2.png를 쓴다.

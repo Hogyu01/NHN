@@ -497,11 +497,13 @@ export class AppBootstrap {
 
     this.#bindPrototypeInteractions();
     const startButton = requireElement(this.root, "#btn-start");
+    const newGameButton = requireElement(this.root, "#btn-new-game");
     startButton.textContent = this.store.runtimePhase === RUNTIME_PHASE.TERMINAL
       ? "결과 보기"
       : this.store.runtimePhase === RUNTIME_PHASE.TITLE
         ? "시작하기"
         : "이어하기";
+    newGameButton.classList.toggle("hidden", this.store.runtimePhase === RUNTIME_PHASE.TITLE);
     this.shell.errorScreen.clear({ enableStart: true });
     this.root.documentElement.dataset.buildId = this.buildMetadataInput.buildId;
     this.root.documentElement.dataset.featureFlagsEnabled = String(
@@ -1198,6 +1200,7 @@ export class AppBootstrap {
   #bindPrototypeInteractions() {
     if (this._interactionsBound) return;
     const startButton = requireElement(this.root, "#btn-start");
+    const newGameButton = requireElement(this.root, "#btn-new-game");
     const canvas = requireElement(this.root, "#game-canvas");
     const panelCloseButton = requireElement(this.root, "#btn-panel-close");
     const pauseButton = requireElement(this.root, "#btn-pause");
@@ -1289,7 +1292,18 @@ export class AppBootstrap {
       this.shell.credits.close();
       this.settingsOverlay.open(settingsButton);
     };
+    this.startNewCampaign = () => {
+      const win = this.root.defaultView;
+      if (!win?.confirm("기존 진행 상황을 지우고 새 게임을 시작할까요?")) return;
+      const cleared = this.storageAdapter?.clearCampaign();
+      if (cleared && !cleared.ok) {
+        win.alert(cleared.message);
+        return;
+      }
+      win.location.reload();
+    };
     startButton.addEventListener("click", this.enterPrototype);
+    newGameButton.addEventListener("click", this.startNewCampaign);
     panelCloseButton.addEventListener("click", this.closePanel);
     pauseButton.addEventListener("click", this.togglePause);
     settingsButton.addEventListener("click", this.openSettings);
@@ -1605,10 +1619,12 @@ export class AppBootstrap {
     this.audioSystem?.destroy();
     if (this._interactionsBound) {
       const startButton = this.root.querySelector("#btn-start");
+      const newGameButton = this.root.querySelector("#btn-new-game");
       const panelCloseButton = this.root.querySelector("#btn-panel-close");
       const pauseButton = this.root.querySelector("#btn-pause");
       const settingsButton = this.root.querySelector("#btn-settings");
       startButton?.removeEventListener("click", this.enterPrototype);
+      newGameButton?.removeEventListener("click", this.startNewCampaign);
       panelCloseButton?.removeEventListener("click", this.closePanel);
       pauseButton?.removeEventListener("click", this.togglePause);
       settingsButton?.removeEventListener("click", this.openSettings);
