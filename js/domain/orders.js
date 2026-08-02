@@ -539,6 +539,7 @@ export function planOrderTimeout({
   menu,
   recipes,
   runtimePhase,
+  issuedAtSimulationMs,
 }, payload, configuration = {}) {
   let config;
   try {
@@ -561,10 +562,14 @@ export function planOrderTimeout({
   if (order.state !== ACTIVE_ORDER_STATE.ACTIVE) {
     return failure("ORDER_NOT_ACTIVE", { orderId: payload.orderId, state: order.state });
   }
-  if (order.patienceRemainingMs > 0) {
+  const elapsedMs = Number.isSafeInteger(issuedAtSimulationMs)
+    ? Math.max(0, issuedAtSimulationMs - order.createdAtMs)
+    : 0;
+  const effectivePatienceRemainingMs = order.patienceRemainingMs - elapsedMs;
+  if (effectivePatienceRemainingMs > 0) {
     return failure("ORDER_PATIENCE_REMAINS", {
       orderId: payload.orderId,
-      patienceRemainingMs: order.patienceRemainingMs,
+      patienceRemainingMs: effectivePatienceRemainingMs,
     });
   }
   const guest = service.guests.find((candidate) => candidate.guestId === order.guestId);
@@ -582,6 +587,7 @@ export function planOrderTimeout({
   const serviceCandidate = cloneValue(service);
   const orderCandidate = serviceCandidate.orders.find((candidate) => candidate.orderId === payload.orderId);
   orderCandidate.state = ACTIVE_ORDER_STATE.TIMED_OUT;
+  orderCandidate.patienceRemainingMs = Math.min(0, effectivePatienceRemainingMs);
   const guestCandidate = serviceCandidate.guests.find((candidate) => candidate.guestId === order.guestId);
   guestCandidate.state = ORDER_GUEST_STATE.MEAL_REACTION;
   guestCandidate.reaction = reaction(ORDER_REACTION_KIND.FAILURE_TIMEOUT, config.reactionDurationMs);
@@ -721,6 +727,7 @@ function createOrderTimeoutAtomicTransaction(configuration) {
         menu: ctx.read("menu"),
         recipes: ctx.read("recipes"),
         runtimePhase: ctx.phase,
+        issuedAtSimulationMs: ctx.command.issuedAtSimulationMs,
       }, ctx.command.payload, config);
     },
     mutate(draft) {
@@ -730,6 +737,7 @@ function createOrderTimeoutAtomicTransaction(configuration) {
         menu: draft.read("menu"),
         recipes: draft.read("recipes"),
         runtimePhase: RUNTIME_PHASE.SERVICE,
+        issuedAtSimulationMs: draft.command.issuedAtSimulationMs,
       }, draft.command.payload, config);
       if (!planned.ok) return planned;
       draft.replace("service", planned.plan.service);
@@ -743,6 +751,7 @@ function createOrderTimeoutAtomicTransaction(configuration) {
         menu: before.menu,
         recipes: before.recipes,
         runtimePhase: before.runtimePhase,
+        issuedAtSimulationMs: ctx.command.issuedAtSimulationMs,
       }, ctx.command.payload, config);
       if (!planned.ok) return planned;
       if (!equivalent(after.service, planned.plan.service) ||
@@ -758,6 +767,7 @@ function createOrderTimeoutAtomicTransaction(configuration) {
         menu: before.menu,
         recipes: before.recipes,
         runtimePhase: before.runtimePhase,
+        issuedAtSimulationMs: ctx.command.issuedAtSimulationMs,
       }, ctx.command.payload, config);
       if (!planned.ok) return [];
       return [{

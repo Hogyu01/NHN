@@ -6,12 +6,17 @@ import { COOK_TRIGGER } from "../domain/timing-cook.js";
  * commandBus.dispatch를 거치는 real command이며, mock/shortcut state를 만들지 않는다.
  */
 
-function commandInput(store, idPrefix, payload) {
+function commandInput(app, idPrefix, payload) {
+  const store = app.store;
+  const schedulerTime = app.scheduler?.simulationTimeMs;
+  const issuedAtSimulationMs = Number.isSafeInteger(schedulerTime) && schedulerTime >= 0
+    ? schedulerTime
+    : store.revision * 20;
   return {
     commandId: `${idPrefix}:${store.revision}`,
     expectedRevision: store.revision,
     generationId: store.generationId,
-    issuedAtSimulationMs: store.revision * 20,
+    issuedAtSimulationMs,
     payload,
   };
 }
@@ -25,35 +30,53 @@ export function createRuntimeComposition(app) {
     buyMarketOffer({ offerId, quantity }) {
       const day = app.store.getSnapshot().campaign.day;
       return app.marketSystem.purchaseOffer(
-        commandInput(app.store, "runtime:market.purchase", { offerId, quantity, day }),
+        commandInput(app, "runtime:market.purchase", { offerId, quantity, day }),
       );
+    },
+
+    acceptContract({ offerId, fixedCostRiskConfirmed = false }) {
+      const day = app.store.getSnapshot().campaign.day;
+      return app.contractSystem.acceptContract(commandInput(
+        app,
+        "runtime:contract.accept",
+        { day, offerId, fixedCostRiskConfirmed },
+      ));
+    },
+
+    purchaseFacility({ facilityId }) {
+      const day = app.store.getSnapshot().campaign.day;
+      return app.facilitySystem.purchase(commandInput(
+        app,
+        "runtime:facility.purchase",
+        { day, facilityId },
+      ));
     },
 
     confirmMenuEntry({ recipeId, enabled, priceG, plannedQuantity }) {
       return app.menuSystem.editEntry(
-        commandInput(app.store, "runtime:menu.edit", { recipeId, enabled, priceG, plannedQuantity }),
+        commandInput(app, "runtime:menu.edit", { recipeId, enabled, priceG, plannedQuantity }),
       );
     },
 
     confirmMenuPlan() {
       const day = app.store.getSnapshot().campaign.day;
-      return app.menuSystem.confirmPlan(commandInput(app.store, "runtime:menu.confirm", { day }));
+      return app.menuSystem.confirmPlan(commandInput(app, "runtime:menu.confirm", { day }));
     },
 
     startService() {
       const day = app.store.getSnapshot().campaign.day;
       return app.dayLoopController.confirmServiceStart(
-        commandInput(app.store, "runtime:service.start", { day }),
+        commandInput(app, "runtime:service.start", { day }),
       );
     },
 
     createOrder({ guestId }) {
-      return app.orderSystem.createOrder(commandInput(app.store, "runtime:order.create", { guestId }));
+      return app.orderSystem.createOrder(commandInput(app, "runtime:order.create", { guestId }));
     },
 
     startCook({ recipeId, saleSlotId, sourceOrderId = null, trigger = COOK_TRIGGER.PLAYER }) {
       return app.directServiceSystem.startCook(
-        commandInput(app.store, "runtime:cook.start", { recipeId, saleSlotId, sourceOrderId, trigger }),
+        commandInput(app, "runtime:cook.start", { recipeId, saleSlotId, sourceOrderId, trigger }),
       );
     },
 
@@ -72,19 +95,19 @@ export function createRuntimeComposition(app) {
 
     serveOrder({ targetOrderId }) {
       return app.directServiceSystem.serve(
-        commandInput(app.store, "runtime:order.serve", { targetOrderId }),
+        commandInput(app, "runtime:order.serve", { targetOrderId }),
       );
     },
 
     transitionDayLoop({ trigger, earlyEnd = undefined, transitionToken = undefined }) {
       return app.dayLoopController.transition(
-        commandInput(app.store, "runtime:day-loop.transition", { trigger, earlyEnd, transitionToken }),
+        commandInput(app, "runtime:day-loop.transition", { trigger, earlyEnd, transitionToken }),
       );
     },
 
     settleDay() {
       const day = app.store.getSnapshot().campaign.day;
-      return app.settlementSystem.settleDay(commandInput(app.store, "runtime:settlement.settle", { day }));
+      return app.settlementSystem.settleDay(commandInput(app, "runtime:settlement.settle", { day }));
     },
   });
 }

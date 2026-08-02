@@ -74,7 +74,7 @@ function isNonNegativeSafeInteger(value) {
 function hasNoServiceTransients(state) {
   return state.plans.length === 0 && state.guests.length === 0 && state.orders.length === 0 &&
     state.timingCook === null && state.completedDishes.length === 0 &&
-    state.carriedDishId === null && state.unmetDemandCount === 0;
+    state.carriedDishId === null && state.unmetDemandCount === 0 && state.pendingSeatQueue.length === 0;
 }
 
 /** Validates the serializable Service timer/lifecycle slice and, optionally, its top-level phase. */
@@ -108,7 +108,7 @@ export function validateServiceTimerState(state, { runtimePhase = null } = {}) {
       typeof state.settlementTransitionIssued !== "boolean") {
     return failure("INVALID_SERVICE_TIMER_STATE", { field: "boolean flags" });
   }
-  for (const field of ["plans", "guests", "orders", "completedDishes"]) {
+  for (const field of ["plans", "guests", "orders", "completedDishes", "pendingSeatQueue", "terminationRecords"]) {
     if (!Array.isArray(state[field])) {
       return failure("INVALID_SERVICE_TRANSIENT_COLLECTION", { field });
     }
@@ -239,6 +239,8 @@ export function createServiceTimerState({
   settlementTransitionIssued = false,
   resumeLifecycle = null,
   endReason = null,
+  pendingSeatQueue = [],
+  terminationRecords = [],
 } = {}) {
   const state = {
     lifecycle,
@@ -254,6 +256,8 @@ export function createServiceTimerState({
     completedDishes: cloneValue(completedDishes),
     carriedDishId,
     unmetDemandCount,
+    pendingSeatQueue: cloneValue(pendingSeatQueue),
+    terminationRecords: cloneValue(terminationRecords),
     startedDay,
     startedPlanId,
     startedPlanRevision,

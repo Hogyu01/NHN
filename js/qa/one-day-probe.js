@@ -211,11 +211,30 @@ export async function runOneDayBrowserProbe({ root, app }) {
       runtimePhase === "SETTLEMENT",
       { trace: scenario.trace },
     ));
+    const presentationDiagnostics = app._runtimeDiagnostics.filter(
+      (diagnostic) => diagnostic.code === "COMMITTED_EVENT_CONSUMER_FAILED",
+    );
+    const activeVfxIds = app.vfxSystem.update(app.scheduler.simulationTimeMs)
+      .map((entry) => entry.vfxId);
+    results.push(staticResult(
+      "browser-presentation-events",
+      "조리 성공과 판매 이벤트가 오류 없이 월드 VFX까지 전달된다",
+      presentationDiagnostics.length === 0 &&
+        activeVfxIds.includes("vfx.cooking_success") &&
+        activeVfxIds.includes("vfx.sale_success"),
+      { activeVfxIds, presentationDiagnostics },
+    ));
   } catch (error) {
     runtimePhase = app.store.runtimePhase;
     results.push(staticResult(
       "browser-one-day-trace",
       "browser에 실제 부팅된 단일 app에서 one-day vertical slice를 real command로 완료한다",
+      false,
+      { error: error instanceof Error ? error.message : String(error), code: error?.code },
+    ));
+    results.push(staticResult(
+      "browser-presentation-events",
+      "조리 성공과 판매 이벤트가 오류 없이 월드 VFX까지 전달된다",
       false,
       { error: error instanceof Error ? error.message : String(error), code: error?.code },
     ));

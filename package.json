@@ -1,0 +1,12 @@
+{
+  "name": "dungeon-restaurant-management-mvp",
+  "version": "0.35.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "pixi.js": "8.19.0"
+  },
+  "scripts": {
+    "validate": "node tools/validate-all.mjs"
+  }
+}

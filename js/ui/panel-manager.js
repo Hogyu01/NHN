@@ -1,4 +1,5 @@
 import { freezeDeep } from "../core/result.js";
+import { FocusManager } from "./focus-manager.js";
 
 export const STATIC_PANEL_DEFINITIONS = freezeDeep({
   board: {
@@ -61,6 +62,12 @@ export class PanelManager {
     this.activeZoneId = null;
     this.activeSemantic = null;
     this.openState = false;
+    this.focusManager = new FocusManager({
+      root,
+      container: overlay,
+      onEscape: () => this.close(),
+      returnTarget: canvas,
+    });
     this.overlay.setAttribute("aria-hidden", "true");
   }
 
@@ -68,7 +75,10 @@ export class PanelManager {
     return this.openState;
   }
 
-  open({ zoneId, semantic, label = undefined, body = undefined, projection = undefined, actions = [] }) {
+  open({
+    zoneId, semantic, label = undefined, body = undefined, projection = undefined, actions = [],
+    renderContent = null,
+  }) {
     if (typeof zoneId !== "string" || zoneId.length === 0 ||
         typeof semantic !== "string" || semantic.length === 0) {
       throw new TypeError("Panel open에는 zoneId와 semantic이 필요합니다.");
@@ -78,11 +88,18 @@ export class PanelManager {
     this.activeSemantic = semantic;
     this.openState = true;
     this.title.textContent = label ?? resolved.label;
-    this.#renderBody(body ?? resolved.body, actions);
+    if (typeof renderContent === "function") {
+      this.body.textContent = "";
+      this.overlay.querySelector(".panel")?.classList.add("panel--rich");
+      renderContent(this.body, this.root);
+    } else {
+      this.overlay.querySelector(".panel")?.classList.remove("panel--rich");
+      this.#renderBody(body ?? resolved.body, actions);
+    }
     this.overlay.classList.remove("hidden");
     this.overlay.setAttribute("aria-hidden", "false");
     this.onContextChange?.(true, this.snapshot());
-    this.closeButton.focus({ preventScroll: true });
+    this.focusManager.activate({ initialFocus: this.closeButton });
     return this.snapshot();
   }
 
@@ -124,8 +141,12 @@ export class PanelManager {
     this.overlay.classList.add("hidden");
     this.overlay.setAttribute("aria-hidden", "true");
     this.onContextChange?.(false, previous);
-    if (returnFocus) this.canvas.focus({ preventScroll: true });
+    this.focusManager.deactivate({ returnFocus });
     return previous;
+  }
+
+  destroy() {
+    this.focusManager.destroy();
   }
 
   snapshot() {

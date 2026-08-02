@@ -39,11 +39,13 @@ export function qaSeedSeatedGuest(app) {
     error.code = "QA_SEED_NO_PLAN";
     throw error;
   }
+  const authoredSeat = app.hub?.mapDefinition?.navigation?.seatPoints?.[0] ??
+    app.mapLoadReport?.activeMap?.navigation?.seatPoints?.[0];
   const guest = Object.freeze({
     guestId: plan.guestId,
     entityId: plan.entityId,
     state: "SEATED",
-    seatId: `qa-seat:${plan.guestId}`,
+    seatId: authoredSeat?.seatId ?? `qa-seat:${plan.guestId}`,
     reaction: null,
   });
   const candidate = {

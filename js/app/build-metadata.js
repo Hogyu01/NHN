@@ -8,9 +8,12 @@ export const BUILD_MODE = Object.freeze({
 
 export const DEFAULT_BUILD_METADATA = freezeDeep({
   schemaVersion: BUILD_METADATA_SCHEMA_VERSION,
-  buildId: "dungeon-restaurant-management-mvp.task-12",
+  buildId: "dungeon-restaurant-management-mvp.task-35",
   buildMode: BUILD_MODE.DEVELOPMENT,
   contentVersion: 1,
+  runtimeDependencies: {
+    pixiJs: "8.19.0",
+  },
 });
 
 function isPlainObject(value) {
@@ -44,6 +47,9 @@ export function validateBuildMetadata(input) {
     if (!Number.isSafeInteger(input.contentVersion) || input.contentVersion < 1) {
       issues.push(issue("$.contentVersion", "BUILD_CONTENT_VERSION_INVALID", "safe integer >= 1", input.contentVersion));
     }
+    if (!isPlainObject(input.runtimeDependencies) || input.runtimeDependencies.pixiJs !== "8.19.0") {
+      issues.push(issue("$.runtimeDependencies.pixiJs", "BUILD_PIXI_VERSION_INVALID", "8.19.0", input.runtimeDependencies?.pixiJs));
+    }
   }
 
   if (issues.length > 0) {
@@ -61,6 +67,9 @@ export function validateBuildMetadata(input) {
       buildId: input.buildId,
       buildMode: input.buildMode,
       contentVersion: input.contentVersion,
+      runtimeDependencies: {
+        pixiJs: input.runtimeDependencies.pixiJs,
+      },
     },
   });
 }
