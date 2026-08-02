@@ -8,7 +8,7 @@ export const BUILD_MODE = Object.freeze({
 
 export const DEFAULT_BUILD_METADATA = freezeDeep({
   schemaVersion: BUILD_METADATA_SCHEMA_VERSION,
-  buildId: "dungeon-restaurant-management-mvp.task-35",
+  buildId: "dungeon-restaurant-management-mvp.task-44",
   buildMode: BUILD_MODE.DEVELOPMENT,
   contentVersion: 1,
   runtimeDependencies: {

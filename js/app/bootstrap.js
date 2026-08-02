@@ -64,7 +64,7 @@ import { FeatureRegistry } from "./feature-registry.js";
 // assets/feedback-assets.json과 같은 값이다 — fetch 왕복 없이 boot 초기(STORE stage)에 바로
 // VfxSystem을 만들 수 있게 여기 그대로 옮겨 적었다.
 const VFX_SHEET_CONFIG = Object.freeze({
-  vfxSheet: Object.freeze({ width: 768, height: 512, columns: 3, rows: 2, frameWidth: 256, frameHeight: 256, frameCount: 6 }),
+  vfxSheet: Object.freeze({ width: 192, height: 128, columns: 3, rows: 2, frameWidth: 64, frameHeight: 64, frameCount: 6 }),
   vfx: Object.freeze([
     Object.freeze({ id: "vfx.sale_success", fps: 12, anchor: "CENTER" }),
     Object.freeze({ id: "vfx.cooking_success", fps: 10, anchor: "BOTTOM_CENTER" }),

@@ -1,0 +1,211 @@
+{
+  "assets": [
+    {
+      "assetId": "character.player",
+      "outcome": "NOT_RUN",
+      "outputHash": "eab5ba3e6d702136241f94e7ac3ed17407c8693569983b14c853946548588a85"
+    },
+    {
+      "assetId": "guest.human_adventurer",
+      "outcome": "NOT_RUN",
+      "outputHash": "f021314f00db8f27c31df84cf1f406f1eb7cfa4c34729350aa89421b1ae31834"
+    },
+    {
+      "assetId": "guest.dwarf_courier",
+      "outcome": "NOT_RUN",
+      "outputHash": "b4375aba6839850e3f2280d7c44930cb8b7c762bd19d9d50f8e819b33cba04d3"
+    },
+    {
+      "assetId": "guest.goblin_scholar",
+      "outcome": "NOT_RUN",
+      "outputHash": "1d21d30d1624d873d6fafce704f4241732ae42bd48360b54b5166f75d3a99fd7"
+    },
+    {
+      "assetId": "guest.slime_gourmand",
+      "outcome": "NOT_RUN",
+      "outputHash": "4057d2094cd75a8058cf496c8c25dbfe6d4295cadd2eacf7cf68b6a58e1c6650"
+    },
+    {
+      "assetId": "guest.kobold_porter",
+      "outcome": "NOT_RUN",
+      "outputHash": "f7d89eabf2773a0b4544b5840c0065d47514a7ccaee243ab3854ad0412da55d6"
+    },
+    {
+      "assetId": "guest.mushroom_traveler",
+      "outcome": "NOT_RUN",
+      "outputHash": "f95ff64fd099a8ff45d1bffbb907907eef0fa9aa1b40b938886da978896fd447"
+    },
+    {
+      "assetId": "tile.floor.wood",
+      "outcome": "NOT_RUN",
+      "outputHash": "5c22efd573f095b3fc4b1baacb66a440130ce513041271943e601ca36db37a2d"
+    },
+    {
+      "assetId": "tile.wall.stone",
+      "outcome": "NOT_RUN",
+      "outputHash": "f4f61be0edd16d44a48c61eb249013b75072bad5c04b90fa7e84867dccf8220f"
+    },
+    {
+      "assetId": "prop.board",
+      "outcome": "NOT_RUN",
+      "outputHash": "ba297ec1b61a68e2af8560b5eb0bff6ac81906dfe0586d05746651e2d6bb21f3"
+    },
+    {
+      "assetId": "prop.stove",
+      "outcome": "NOT_RUN",
+      "outputHash": "8124701800eb7dde374bff6bae4f2ad849910aba5af15bc178129477a29a7981"
+    },
+    {
+      "assetId": "prop.counter",
+      "outcome": "NOT_RUN",
+      "outputHash": "43133387d69deb295385536883bbb901fb07435b02f183e16b4bb81f9bc846d3"
+    },
+    {
+      "assetId": "prop.storage",
+      "outcome": "NOT_RUN",
+      "outputHash": "94657f2604f237d2e1dccdc6382b666e7b4debb3aff4c0bdb3c05314a7e02372"
+    },
+    {
+      "assetId": "prop.table",
+      "outcome": "NOT_RUN",
+      "outputHash": "c979461754d607b87d439a39e3bd3ad85e877f391a7646301128ea92877c8746"
+    },
+    {
+      "assetId": "hud.gold",
+      "outcome": "NOT_RUN",
+      "outputHash": "83e6aababc03f38d3437e7c1244f42d2456e40f1b16720274c3d31f318153cb0"
+    },
+    {
+      "assetId": "hud.reputation",
+      "outcome": "NOT_RUN",
+      "outputHash": "892bf7441896690fe4b59bf47cfb504242c0bdf50f0b78ca7555d3d552787c8d"
+    },
+    {
+      "assetId": "hud.timer",
+      "outcome": "NOT_RUN",
+      "outputHash": "deeef6e6447f25f7e72e8948085bebf964fbe315c58906c5bb47c7fc2449eb2d"
+    },
+    {
+      "assetId": "world.interaction_marker",
+      "outcome": "NOT_RUN",
+      "outputHash": "a26aef12287b512a855757d0d21b7f0c7ddbbb9b49ad0c4b2c42d5c7c10d6a31"
+    },
+    {
+      "assetId": "recipe.moonroot_pie",
+      "outcome": "NOT_RUN",
+      "outputHash": "8203f602fbb86fb34ee0bb6647ba4172bde65373f9b73ba3d28b82e1893eeeaa"
+    },
+    {
+      "assetId": "recipe.slime_stew",
+      "outcome": "NOT_RUN",
+      "outputHash": "83905b15712499dab9de6c9eb3083dd3e2371782272baa80747377bde7a6206a"
+    },
+    {
+      "assetId": "recipe.mimic_hotpot",
+      "outcome": "NOT_RUN",
+      "outputHash": "29863256820c6dc9497e20e2df70f04498c4bf7c5b7c4f85eb0e12327f20f965"
+    },
+    {
+      "assetId": "recipe.stonegrain_bowl",
+      "outcome": "NOT_RUN",
+      "outputHash": "a1af6792fce5d46bcd338fc4793593c05adca3f4b580ae2eb46eba05d34d0264"
+    },
+    {
+      "assetId": "recipe.glowcap_soup",
+      "outcome": "NOT_RUN",
+      "outputHash": "44f058e715a0d7145e7673c700d02f9559c3028bfc44f1f35e371ba194750657"
+    },
+    {
+      "assetId": "recipe.ember_egg_skewer",
+      "outcome": "NOT_RUN",
+      "outputHash": "b61ee6ad773be638981ebcb5637d393624257bbcd10cf09b4abc2f9926350e13"
+    },
+    {
+      "assetId": "ingredient.slime_gel",
+      "outcome": "NOT_RUN",
+      "outputHash": "a735035753061db987238cd1d24b0473d8e23a0d3c4c224da11123f2fabd554b"
+    },
+    {
+      "assetId": "ingredient.cave_mushroom",
+      "outcome": "NOT_RUN",
+      "outputHash": "6501365930689571c315ecdf667383857603f98fb9d06934adb5171daad57b0c"
+    },
+    {
+      "assetId": "ingredient.glow_herb",
+      "outcome": "NOT_RUN",
+      "outputHash": "c770b9ecc4e08b6bd79f7fd25faecc08d0ce12e33bc80b66b44474c10363f613"
+    },
+    {
+      "assetId": "ingredient.ember_pepper",
+      "outcome": "NOT_RUN",
+      "outputHash": "b7d5192764e19d145aab65657446842eade9544a02c93ab3b6b63d7d103aae67"
+    },
+    {
+      "assetId": "ingredient.moonroot",
+      "outcome": "NOT_RUN",
+      "outputHash": "b7d5192764e19d145aab65657446842eade9544a02c93ab3b6b63d7d103aae67"
+    },
+    {
+      "assetId": "ingredient.crystal_salt",
+      "outcome": "NOT_RUN",
+      "outputHash": "9d77588a59e3af553448797f5a60459b355559e323eb23565e84158cac9a32cc"
+    },
+    {
+      "assetId": "ingredient.stonegrain",
+      "outcome": "NOT_RUN",
+      "outputHash": "88423f325853288f6c1deab42b1ced4f1e323b4b0f8eb348217c861d2c2bd0e8"
+    },
+    {
+      "assetId": "ingredient.griffin_egg",
+      "outcome": "NOT_RUN",
+      "outputHash": "435218f3c8cdfaf35ee7f064a9f1b8cff1c2cddef46f8a5413bac524ae19675b"
+    },
+    {
+      "assetId": "ingredient.mimic_bean",
+      "outcome": "NOT_RUN",
+      "outputHash": "4a18b4912aa6ec2174b6888ed07c2dc3842b191fafc6b9124fd850ec022817ce"
+    },
+    {
+      "assetId": "ingredient.moss_cheese",
+      "outcome": "NOT_RUN",
+      "outputHash": "8eb5345be0b8f42352d9fc7062b473b99965f15dd03193ee2849c67e292d8659"
+    },
+    {
+      "assetId": "vfx.sale_success",
+      "outcome": "NOT_RUN",
+      "outputHash": "62548bfd0ea511f75aee4ed373972e24c4fa79610a9c405831db075fd44fe4fa"
+    },
+    {
+      "assetId": "vfx.cooking_success",
+      "outcome": "NOT_RUN",
+      "outputHash": "cfbabf2bdc1cce0ea282d893422039493ed36e4b9a3644dee1197887dde83b99"
+    },
+    {
+      "assetId": "vfx.cooking_waste",
+      "outcome": "NOT_RUN",
+      "outputHash": "e47f9b90165f409c0ba852efc583b3695e4afe9a805a353d614782fc205d329a"
+    },
+    {
+      "assetId": "vfx.order_failure",
+      "outcome": "NOT_RUN",
+      "outputHash": "dfbaae731025345debdf09d0963ec4aab060e33f2869a290a4b9f03da4600c3e"
+    }
+  ],
+  "buildId": "dungeon-restaurant-management-mvp.task-44",
+  "criteria": [
+    "dimensions",
+    "frame",
+    "foot-anchor",
+    "dish-anchor",
+    "clipping",
+    "jitter",
+    "silhouette",
+    "grayscale",
+    "contrast",
+    "seat-zones",
+    "originality"
+  ],
+  "reviewer": null,
+  "schemaVersion": 1,
+  "status": "NOT_RUN"
+}

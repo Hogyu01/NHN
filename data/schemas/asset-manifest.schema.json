@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AssetManifest",
+  "type": "object",
+  "required": ["schemaVersion", "buildId", "assets"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "buildId": { "type": "string", "minLength": 1 },
+    "assets": { "type": "array", "items": { "$ref": "#/$defs/asset" } }
+  },
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "required": ["assetId", "tier", "maturity", "status", "sourceKind", "target", "creator", "source", "license", "approval", "runtime", "generator", "canonicalFormat", "publicPath", "width", "height", "outputHash", "gates", "fallback"],
+      "properties": {
+        "assetId": { "type": "string", "minLength": 1 },
+        "tier": { "enum": ["A", "B", "C"] },
+        "sourceKind": { "enum": ["PROJECT_GENERATED", "EXTERNAL_APPROVED", "L0_QA_FIXTURE"] },
+        "publicPath": { "type": "string", "pattern": "^assets/generated/" },
+        "outputHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

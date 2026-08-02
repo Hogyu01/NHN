@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "dependencies": [
+    {
+      "dependencyId": "runtime.pixi-js",
+      "package": "pixi.js",
+      "version": "8.19.0",
+      "officialDistributionUrl": "https://registry.npmjs.org/pixi.js/-/pixi.js-8.19.0.tgz",
+      "verifiedAt": "2026-08-01",
+      "localEntry": "js/libs/pixijs/pixi.min.js",
+      "localSha256": "28fefb52eeb15bb3e087533456bafc53e91af70932af4dd046ff2938ec3edd0e",
+      "lockfile": "package-lock.json",
+      "manifestVersion": "8.19.0",
+      "buildMetadataVersion": "8.19.0",
+      "licenseId": "MIT",
+      "noticePath": "js/libs/pixijs/LICENSE"
+    }
+  ]
+}

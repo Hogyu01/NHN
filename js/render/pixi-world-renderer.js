@@ -1,56 +1,62 @@
 import * as PIXI from "../libs/pixijs/pixi.min.js";
+import { AssetLoader } from "../infrastructure/asset-loader.js";
 import { PixiResourceOwner } from "./pixi-resource-owner.js";
 import { resolveDirectionRow, resolveSpriteFrameRect } from "./sprite-animator.js";
 import { RECIPE_TEXTURE_PATH, resolveCarriedDishTexturePath } from "./carried-overlay.js";
 
 const VFX_TEXTURE_PATH = Object.freeze({
-  "vfx.sale_success": "assets/vfx/vfx-sale-success.png",
-  "vfx.cooking_success": "assets/vfx/vfx-cooking-success.png",
-  "vfx.cooking_waste": "assets/vfx/vfx-cooking-waste.png",
-  "vfx.order_failure": "assets/vfx/vfx-order-failure.png",
+  "vfx.sale_success": "assets/generated/vfx/sale-success.png",
+  "vfx.cooking_success": "assets/generated/vfx/cooking-success.png",
+  "vfx.cooking_waste": "assets/generated/vfx/cooking-waste.png",
+  "vfx.order_failure": "assets/generated/vfx/order-failure.png",
 });
 const HUD_ICON_PATH = Object.freeze({
-  "hud.gold": "assets/icons/hud/hud-gold.png",
-  "hud.reputation": "assets/icons/hud/hud-reputation.png",
-  "hud.timer": "assets/icons/hud/hud-timer.png",
-  "world.interaction_marker": "assets/icons/hud/world-interaction-marker.png",
+  "hud.gold": "assets/generated/ui/gold.png",
+  "hud.reputation": "assets/generated/ui/reputation.png",
+  "hud.timer": "assets/generated/ui/timer.png",
+  "world.interaction_marker": "assets/generated/ui/interaction-marker.png",
 });
 export const LOGICAL_SIZE = 480;
 const TILE_SIZE = 32;
 // 서로 다른 원본 frame을 타일 높이에 맞춰 정규화한다. 프레임을 먼저 자른 뒤 height를
 // 고정해야 Pixi가 원본 sheet 전체 크기를 기준으로 스케일을 되돌리지 않는다.
-const PLAYER_VISUAL_HEIGHT_PX = 40;
-const GUEST_VISUAL_HEIGHT_PX = 36;
+const PLAYER_VISUAL_HEIGHT_PX = 48;
+const GUEST_VISUAL_HEIGHT_PX = 44;
 
 // player_walk.png(구 L0_Placeholder, 머리 없는 프로토타입 도형)는 QA fixture 전용으로 남기고,
 // 실제 렌더링은 player_ai/*.png(팀원 제공 4방향×4프레임)을 합성한 player_walk_v2.png를 쓴다.
 // 이 sheet는 idle 프레임이 따로 없어(hasIdleColumn:false) guest sheet와 같은 규약이다.
 export const PLAYER_SHEET = Object.freeze({
-  frameWidth: 132,
-  frameHeight: 256,
+  frameWidth: 64,
+  frameHeight: 64,
   directionRowOrder: Object.freeze(["DOWN", "LEFT", "RIGHT", "UP"]),
   hasIdleColumn: false,
-  walkColumnCount: 4,
-  texturePath: "assets/sprites/player_walk_v2.png",
+  walkColumnCount: 9,
+  texturePath: "assets/generated/characters/player.png",
 });
 
 export const GUEST_SHEET = Object.freeze({
-  frameWidth: 314,
-  frameHeight: 314,
+  frameWidth: 64,
+  frameHeight: 64,
   directionRowOrder: Object.freeze(["DOWN", "LEFT", "RIGHT", "UP"]),
   hasIdleColumn: false,
-  walkColumnCount: 4,
+  walkColumnCount: 9,
 });
 
 /** guestArchetypeId → assets/sprites/guests_v2/*.png. guest-sprites-v2.json과 같은 목록이다. */
 export const GUEST_ARCHETYPE_TEXTURE = Object.freeze({
-  "guest.human_adventurer": "assets/sprites/guests_v2/human_adventurer_walk.png",
-  "guest.dwarf_courier": "assets/sprites/guests_v2/dwarf_courier_walk.png",
-  "guest.goblin_scholar": "assets/sprites/guests_v2/goblin_scholar_walk.png",
-  "guest.slime_gourmand": "assets/sprites/guests_v2/slime_gourmand_walk.png",
-  "guest.kobold_porter": "assets/sprites/guests_v2/kobold_porter_walk.png",
-  "guest.mushroom_traveler": "assets/sprites/guests_v2/mushroom_traveler_walk.png",
+  "guest.human_adventurer": "assets/generated/characters/human-adventurer.png",
+  "guest.dwarf_courier": "assets/generated/characters/dwarf-courier.png",
+  "guest.goblin_scholar": "assets/generated/characters/goblin-scholar.png",
+  "guest.slime_gourmand": "assets/generated/characters/slime-gourmand.png",
+  "guest.kobold_porter": "assets/generated/characters/kobold-porter.png",
+  "guest.mushroom_traveler": "assets/generated/characters/mushroom-traveler.png",
 });
+
+const REQUIRED_ASSET_IDS = Object.freeze([
+  "tile.floor.wood", "tile.wall.stone", "prop.board", "prop.stove", "prop.counter", "prop.storage", "prop.table",
+  "character.player", ...Object.keys(GUEST_ARCHETYPE_TEXTURE), ...Object.keys(VFX_TEXTURE_PATH), ...Object.keys(HUD_ICON_PATH), ...Object.keys(RECIPE_TEXTURE_PATH),
+]);
 
 /**
  * Task 32 — design.md 11.1. `CanvasScene`이 `PrototypeHubAdapter`에 제공하던 `scene.canvas`,
@@ -64,6 +70,7 @@ export class PixiWorldRenderer {
     if (!canvas) throw new TypeError("PixiWorldRenderer에는 canvas가 필요합니다.");
     this._canvas = canvas;
     this._assetBaseUrl = assetBaseUrl;
+    this._assetLoader = new AssetLoader({ baseUrl: assetBaseUrl });
     this._resourceOwner = new PixiResourceOwner();
     this._app = null;
     this._ready = false;
@@ -94,6 +101,7 @@ export class PixiWorldRenderer {
   }
 
   async _init() {
+    const assetReadiness = await this._assetLoader.prepare(REQUIRED_ASSET_IDS);
     this._app = new PIXI.Application();
     const initPromise = this._app.init({
       canvas: this._canvas,
@@ -147,6 +155,7 @@ export class PixiWorldRenderer {
     const playerTexture = this._textures.get(PLAYER_SHEET.texturePath);
     return {
       ready: true,
+      requiredAssetCount: assetReadiness.requiredCount,
       width: playerTexture?.source?.width ?? PLAYER_SHEET.frameWidth * PLAYER_SHEET.walkColumnCount,
       height: playerTexture?.source?.height ?? PLAYER_SHEET.frameHeight * PLAYER_SHEET.directionRowOrder.length,
     };
@@ -164,13 +173,13 @@ export class PixiWorldRenderer {
 
   async _loadCoreTextures() {
     await Promise.all([
-      this._loadTexture("assets/tiles/tileset/tile_r1_c1.png"),
-      this._loadTexture("assets/tiles/tileset/tile_r2_c2.png"),
-      this._loadTexture("assets/tiles/furniture/furniture-board.png"),
-      this._loadTexture("assets/tiles/furniture/furniture-stove.png"),
-      this._loadTexture("assets/tiles/furniture/furniture-counter.png"),
-      this._loadTexture("assets/tiles/furniture/furniture-shelf-ingredients.png"),
-      this._loadTexture("assets/tiles/furniture/furniture-table.png"),
+      this._loadTexture("assets/generated/world/floor-wood.png"),
+      this._loadTexture("assets/generated/world/wall-stone.png"),
+      this._loadTexture("assets/generated/world/board.png"),
+      this._loadTexture("assets/generated/world/stove.png"),
+      this._loadTexture("assets/generated/world/counter.png"),
+      this._loadTexture("assets/generated/world/storage.png"),
+      this._loadTexture("assets/generated/world/table.png"),
       this._loadTexture(PLAYER_SHEET.texturePath),
       ...Object.values(GUEST_ARCHETYPE_TEXTURE).map((path) => this._loadTexture(path)),
       ...Object.values(VFX_TEXTURE_PATH).map((path) => this._loadTexture(path)),
@@ -205,8 +214,8 @@ export class PixiWorldRenderer {
     this._containers.tileGround.removeChildren();
     this._containers.above.removeChildren();
 
-    const floorTexture = this._textures.get("assets/tiles/tileset/tile_r1_c1.png");
-    const wallTexture = this._textures.get("assets/tiles/tileset/tile_r2_c2.png");
+    const floorTexture = this._textures.get("assets/generated/world/floor-wood.png");
+    const wallTexture = this._textures.get("assets/generated/world/wall-stone.png");
     if (floorTexture && wallTexture) {
       for (let y = 0; y < mapDefinition.height; y += 1) {
         for (let x = 0; x < mapDefinition.width; x += 1) {
@@ -224,11 +233,11 @@ export class PixiWorldRenderer {
     }
 
     const fixtureTextureByKind = {
-      BOARD: "assets/tiles/furniture/furniture-board.png",
-      STOVE: "assets/tiles/furniture/furniture-stove.png",
-      COUNTER: "assets/tiles/furniture/furniture-counter.png",
-      STORAGE: "assets/tiles/furniture/furniture-shelf-ingredients.png",
-      TABLE: "assets/tiles/furniture/furniture-table.png",
+      BOARD: "assets/generated/world/board.png",
+      STOVE: "assets/generated/world/stove.png",
+      COUNTER: "assets/generated/world/counter.png",
+      STORAGE: "assets/generated/world/storage.png",
+      TABLE: "assets/generated/world/table.png",
     };
     const markerTexture = this._textures.get(HUD_ICON_PATH["world.interaction_marker"]);
     for (const object of mapDefinition.objects ?? []) {
