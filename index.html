@@ -11,7 +11,10 @@
 
   <header class="shell-bar" aria-label="애플리케이션 도구">
     <span class="shell-brand">마지막 화로</span>
-    <button id="btn-credits" class="btn-secondary" type="button">Credits</button>
+    <div class="shell-actions">
+      <button id="btn-settings" class="btn-secondary" type="button">설정</button>
+      <button id="btn-credits" class="btn-secondary" type="button">Credits</button>
+    </div>
   </header>
 
   <section id="screen-start" class="screen">
@@ -35,14 +38,63 @@
   </section>
 
   <section id="screen-room" class="screen hidden">
-    <canvas
-      id="game-canvas"
-      width="480"
-      height="480"
-      tabindex="0"
-      aria-label="던전 식당 프로토타입 월드"
-    ></canvas>
-    <p class="hint">방향키 또는 WASD로 이동하세요</p>
+    <div class="room-workspace">
+      <div class="room-stage">
+        <div id="campaign-hud" class="campaign-hud" aria-live="polite">
+          <span class="hud-stat hud-day-stat">
+            <img src="assets/icons/hud/hud-timer.png" alt="">
+            <span id="hud-day">Day -/-</span>
+          </span>
+          <span class="hud-stat">
+            <img src="assets/icons/hud/hud-gold.png" alt="">
+            <span id="hud-cash">현금 -G</span>
+          </span>
+          <span id="hud-debt" class="hud-debt">부채 -G</span>
+          <span class="hud-stat">
+            <img src="assets/icons/hud/hud-reputation.png" alt="">
+            <span id="hud-reputation">평판 -/100</span>
+          </span>
+          <button id="btn-pause" class="btn-secondary btn-pause" type="button">일시정지</button>
+        </div>
+        <canvas
+          id="game-canvas"
+          width="480"
+          height="480"
+          tabindex="0"
+          aria-label="던전 식당 월드"
+        ></canvas>
+      </div>
+
+      <aside class="operations-panel" aria-labelledby="operations-title" aria-live="polite">
+        <div class="operations-heading">
+          <div>
+            <p class="operations-kicker">DAY OPERATIONS</p>
+            <h2 id="operations-title">오늘의 영업</h2>
+          </div>
+          <span id="hud-phase" class="phase-badge">준비</span>
+        </div>
+        <div class="operations-objective">
+          <span>현재 목표</span>
+          <strong id="hud-objective">오늘 메뉴를 구성하세요</strong>
+        </div>
+        <p id="hud-action-status" class="hud-action-status" role="status" aria-live="polite"></p>
+        <dl class="operations-metrics">
+          <div><dt>준비 메뉴</dt><dd id="hud-menu-count">0</dd></div>
+          <div><dt>식당 손님</dt><dd id="hud-guest-count">0</dd></div>
+          <div><dt>활성 주문</dt><dd id="hud-order-count">0</dd></div>
+          <div><dt>완성 요리</dt><dd id="hud-dish-count">0</dd></div>
+        </dl>
+        <div class="operations-zones" aria-label="식당 설비">
+          <span>설비</span>
+          <ul>
+            <li><i class="zone-dot zone-board"></i>길드 게시판</li>
+            <li><i class="zone-dot zone-stove"></i>화로</li>
+            <li><i class="zone-dot zone-counter"></i>배식대</li>
+            <li><i class="zone-dot zone-storage"></i>식재료 창고</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
 
     <div
       id="panel-overlay"
@@ -59,6 +111,66 @@
       </div>
     </div>
   </section>
+
+  <div
+    id="settings-overlay"
+    class="credits-overlay hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="settings-title"
+  >
+    <div class="credits-panel settings-panel">
+      <h2 id="settings-title">오디오 설정</h2>
+      <div class="audio-settings-grid">
+        <label for="audio-master-volume">전체 음량</label>
+        <input id="audio-master-volume" type="range" min="0" max="100" step="1">
+        <output id="audio-master-value" for="audio-master-volume">100</output>
+        <label class="audio-mute"><input id="audio-master-muted" type="checkbox"> 음소거</label>
+
+        <label for="audio-sfx-volume">효과음</label>
+        <input id="audio-sfx-volume" type="range" min="0" max="100" step="1">
+        <output id="audio-sfx-value" for="audio-sfx-volume">100</output>
+        <label class="audio-mute"><input id="audio-sfx-muted" type="checkbox"> 음소거</label>
+
+        <label for="audio-bgm-volume">배경음악</label>
+        <input id="audio-bgm-volume" type="range" min="0" max="100" step="1">
+        <output id="audio-bgm-value" for="audio-bgm-volume">100</output>
+        <label class="audio-mute"><input id="audio-bgm-muted" type="checkbox"> 음소거</label>
+      </div>
+      <button id="btn-settings-close" class="btn-primary" type="button">닫기</button>
+    </div>
+  </div>
+
+  <div
+    id="onboarding-overlay"
+    class="credits-overlay hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="onboarding-title"
+  >
+    <div class="credits-panel">
+      <h2 id="onboarding-title">시작하기 전에</h2>
+      <ol id="onboarding-list" class="onboarding-list"></ol>
+      <button id="btn-onboarding-close" class="btn-primary" type="button">확인하고 시작</button>
+    </div>
+  </div>
+
+  <div
+    id="settlement-overlay"
+    class="credits-overlay hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="settlement-title"
+  >
+    <div class="credits-panel">
+      <h2 id="settlement-title">결산</h2>
+      <dl id="settlement-body" class="settlement-body"></dl>
+      <button id="btn-settlement-close" class="btn-primary" type="button">다음 날로</button>
+    </div>
+  </div>
 
   <div
     id="credits-overlay"

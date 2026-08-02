@@ -117,6 +117,7 @@ export class CreditsShell {
     this.overlay.classList.remove("hidden");
     this.overlay.setAttribute("aria-hidden", "false");
     this.root.documentElement.dataset.credits = "open";
+    this.root.documentElement.dataset.modalOpen = "open";
     const EventConstructor = this.root.defaultView?.CustomEvent;
     if (typeof EventConstructor === "function") {
       this.root.dispatchEvent(new EventConstructor("ui:modal-context-change", {
@@ -132,6 +133,7 @@ export class CreditsShell {
     this.overlay.classList.add("hidden");
     this.overlay.setAttribute("aria-hidden", "true");
     this.root.documentElement.dataset.credits = "closed";
+    this.root.documentElement.dataset.modalOpen = "closed";
     const EventConstructor = this.root.defaultView?.CustomEvent;
     if (typeof EventConstructor === "function") {
       this.root.dispatchEvent(new EventConstructor("ui:modal-context-change", {

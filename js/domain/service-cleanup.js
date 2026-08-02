@@ -16,6 +16,13 @@ import {
   SALE_SLOT_STATE,
   validateSaleSlotsState,
 } from "./sale-slots.js";
+import {
+  GUEST_CLEANUP_TIER,
+  GUEST_TERMINATION_CAUSE,
+  classifyGuestFaultTier,
+  planGuestNeutralCleanup,
+  terminateGuestInDraft,
+} from "../world/guest-cleanup.js";
 import { cancelTimingCookAtZero, TIMING_COOK_STATE } from "./timing-cook.js";
 import {
   RUNTIME_PHASE,
@@ -35,11 +42,14 @@ import {
 
 export const SERVICE_CLEANUP_COMMAND = Object.freeze({
   RELEASE_ORDERS: "service-cleanup.orders.release",
+  RELEASE_GUESTS: "service-cleanup.guests.release",
   FORCE_CLEANUP_AT_CAP: "service-cleanup.force-at-cap",
 });
 
 export const RELEASE_ORDERS_READ_SET = Object.freeze([]);
 export const RELEASE_ORDERS_WRITE_SET = Object.freeze(["service", "saleSlots"]);
+export const RELEASE_GUESTS_READ_SET = Object.freeze(["campaign"]);
+export const RELEASE_GUESTS_WRITE_SET = Object.freeze(["service", "saleSlots"]);
 export const FORCE_CLEANUP_AT_CAP_READ_SET = Object.freeze(["campaign"]);
 export const FORCE_CLEANUP_AT_CAP_WRITE_SET = Object.freeze([
   "service",
@@ -192,6 +202,79 @@ export function createReleaseActiveOrdersAtomicTransaction() {
   });
 }
 
+/**
+ * RELEASE_ORDERS 다음 단계(GUEST_CLEANUP). 이 시점에는 ACTIVE order가 이미 전부
+ * TECHNICAL_CANCELLED로 정리돼 있어야 하므로, 남은 guest는 항상 PRE_ORDER/POST_SALE
+ * tier로만 제거된다(design 10.4, Requirement 2 AC9~11).
+ */
+export function planReleaseGuests({ runtimePhase, service, saleSlots, campaign, issuedAtSimulationMs }) {
+  const cleanupGate = requireResultsClosedCleanup(runtimePhase, service);
+  if (!cleanupGate.ok) return cleanupGate;
+  return planGuestNeutralCleanup({ runtimePhase, service, saleSlots, campaign, issuedAtSimulationMs });
+}
+
+export function createReleaseGuestsAtomicTransaction() {
+  return defineAtomicTransaction({
+    name: SERVICE_CLEANUP_COMMAND.RELEASE_GUESTS,
+    readSet: RELEASE_GUESTS_READ_SET,
+    writeSet: RELEASE_GUESTS_WRITE_SET,
+    allowedPhases: [RUNTIME_PHASE.SERVICE],
+    validatePayload(ctx) {
+      return validatePayload(ctx.command.payload);
+    },
+    preflight(ctx) {
+      return planReleaseGuests({
+        runtimePhase: ctx.phase,
+        service: ctx.read("service"),
+        saleSlots: ctx.read("saleSlots"),
+        campaign: ctx.read("campaign"),
+        issuedAtSimulationMs: ctx.command.issuedAtSimulationMs,
+      });
+    },
+    mutate(draft) {
+      const planned = planReleaseGuests({
+        runtimePhase: RUNTIME_PHASE.SERVICE,
+        service: draft.read("service"),
+        saleSlots: draft.read("saleSlots"),
+        campaign: draft.read("campaign"),
+        issuedAtSimulationMs: draft.command.issuedAtSimulationMs,
+      });
+      if (!planned.ok) return planned;
+      draft.replace("service", planned.plan.service);
+      draft.replace("saleSlots", planned.plan.saleSlots);
+      return validationSuccess();
+    },
+    postconditions(before, after, ctx) {
+      const planned = planReleaseGuests({
+        runtimePhase: before.runtimePhase,
+        service: before.service,
+        saleSlots: before.saleSlots,
+        campaign: before.campaign,
+        issuedAtSimulationMs: ctx.command.issuedAtSimulationMs,
+      });
+      if (!planned.ok) return planned;
+      if (!equivalent(after.service, planned.plan.service) || !equivalent(after.saleSlots, planned.plan.saleSlots)) {
+        return failure("SERVICE_CLEANUP_POSTCONDITION_FAILED");
+      }
+      return validateServiceTimerState(after.service, { runtimePhase: after.runtimePhase });
+    },
+    events(before, _after, ctx) {
+      const planned = planReleaseGuests({
+        runtimePhase: before.runtimePhase,
+        service: before.service,
+        saleSlots: before.saleSlots,
+        campaign: before.campaign,
+        issuedAtSimulationMs: ctx.command.issuedAtSimulationMs,
+      });
+      if (!planned.ok) return [];
+      return [{
+        type: "service-cleanup.guests-released",
+        payload: { cleanupAtMs: ctx.command.issuedAtSimulationMs },
+      }];
+    },
+  });
+}
+
 function allocateMovementId(idCounters, campaign, generationId) {
   try {
     const ids = IdService.fromState(idCounters);
@@ -254,6 +337,28 @@ export function planForceCleanupAtCap(context) {
     releasedOrderIds.push(order.orderId);
   }
 
+  // guest는 이미 위에서 order를 전부 정리했으니 항상 PRE_ORDER/POST_SALE tier로만 제거된다
+  // (Requirement 2 AC10, Requirement 34 AC13 — 12초 cap 강제 종료).
+  const terminatedGuestIds = [];
+  for (const target of [
+    ...serviceCandidate.guests.map((guest) => ({ guestId: guest.guestId, entityId: guest.entityId })),
+    ...serviceCandidate.pendingSeatQueue.map((guestId) => ({ guestId, entityId: null })),
+  ]) {
+    const guest = serviceCandidate.guests.find((candidate) => candidate.guestId === target.guestId);
+    const order = serviceCandidate.orders.find((candidate) => candidate.guestId === target.guestId);
+    const tier = guest ? classifyGuestFaultTier(guest, order) : GUEST_CLEANUP_TIER.PRE_ORDER;
+    const terminated = terminateGuestInDraft(serviceCandidate, null, {
+      guestId: target.guestId,
+      entityId: target.entityId,
+      cause: GUEST_TERMINATION_CAUSE.TIMER_CAP,
+      tier,
+      day: campaign.day,
+      atMs: issuedAtSimulationMs,
+    });
+    if (!terminated.ok) return terminated;
+    terminatedGuestIds.push(target.guestId);
+  }
+
   const slotCleanup = planSaleSlotCleanup(saleSlots, inventoryCandidate);
   if (!slotCleanup.ok) return slotCleanup;
   const saleSlotsCandidate = slotCleanup.plan.saleSlots;
@@ -269,6 +374,7 @@ export function planForceCleanupAtCap(context) {
     idCounters: idCountersCandidate,
     restoredEscrow,
     releasedOrderIds,
+    terminatedGuestIds,
     releasedAssignedCount: slotCleanup.plan.releasedAssignedCount,
     releasedReservations: slotCleanup.plan.releasedReservations,
   });
@@ -358,6 +464,7 @@ export function createForceCleanupAtCapAtomicTransaction() {
         payload: {
           restoredEscrow: planned.plan.restoredEscrow,
           releasedOrderIds: planned.plan.releasedOrderIds,
+          terminatedGuestIds: planned.plan.terminatedGuestIds,
           releasedAssignedCount: planned.plan.releasedAssignedCount,
           cleanupAtMs: ctx.command.issuedAtSimulationMs,
         },
@@ -379,6 +486,7 @@ export class ServiceCleanupSystem {
   register() {
     if (this.registered) return this;
     this.commandBus.register(SERVICE_CLEANUP_COMMAND.RELEASE_ORDERS, createReleaseActiveOrdersAtomicTransaction());
+    this.commandBus.register(SERVICE_CLEANUP_COMMAND.RELEASE_GUESTS, createReleaseGuestsAtomicTransaction());
     this.commandBus.register(
       SERVICE_CLEANUP_COMMAND.FORCE_CLEANUP_AT_CAP,
       createForceCleanupAtCapAtomicTransaction(),
@@ -397,6 +505,19 @@ export class ServiceCleanupSystem {
       payload: input?.payload ?? {},
       readSet: [...RELEASE_ORDERS_READ_SET],
       writeSet: [...RELEASE_ORDERS_WRITE_SET],
+    });
+  }
+
+  releaseGuests(input) {
+    return this.commandBus.dispatch({
+      commandId: input?.commandId,
+      expectedRevision: input?.expectedRevision,
+      generationId: input?.generationId,
+      issuedAtSimulationMs: input?.issuedAtSimulationMs,
+      type: SERVICE_CLEANUP_COMMAND.RELEASE_GUESTS,
+      payload: input?.payload ?? {},
+      readSet: [...RELEASE_GUESTS_READ_SET],
+      writeSet: [...RELEASE_GUESTS_WRITE_SET],
     });
   }
 
@@ -432,6 +553,9 @@ export function planNextCleanupStep(snapshot) {
   }
   if (service.orders.some((order) => order.state === ACTIVE_ORDER_STATE.ACTIVE)) {
     return { step: "RELEASE_ORDERS" };
+  }
+  if (service.guests.length > 0 || service.pendingSeatQueue.length > 0) {
+    return { step: "GUEST_CLEANUP" };
   }
   const slotCleanup = planSaleSlotCleanup(saleSlots, inventory);
   if (slotCleanup.ok && slotCleanup.plan.changed) {

@@ -1,5 +1,29 @@
 #!/usr/bin/env node
 const ROUTES = Object.freeze({
+  "pixi-renderer": Object.freeze({
+    markerExpression: "document.body?.dataset?.pixiRendererQa ?? null",
+    stateExpression: `({
+      marker: document.body?.dataset?.pixiRendererQa ?? null,
+      passed: document.body?.dataset?.pixiRendererQaPassed ?? null,
+      total: document.body?.dataset?.pixiRendererQaTotal ?? null,
+      moduleBoot: document.documentElement.dataset.moduleBoot ?? null
+    })`,
+    assert(state) {
+      return state.marker === "pass" && state.passed === "4" && state.total === "4" && state.moduleBoot === "ready";
+    },
+  }),
+  "management-ui": Object.freeze({
+    markerExpression: "document.body?.dataset?.managementUiQa ?? null",
+    stateExpression: `({
+      marker: document.body?.dataset?.managementUiQa ?? null,
+      passed: document.body?.dataset?.managementUiQaPassed ?? null,
+      total: document.body?.dataset?.managementUiQaTotal ?? null,
+      moduleBoot: document.documentElement.dataset.moduleBoot ?? null
+    })`,
+    assert(state) {
+      return state.marker === "pass" && state.passed === "6" && state.total === "6" && state.moduleBoot === "ready";
+    },
+  }),
   "day-loop": Object.freeze({
     markerExpression: "document.body?.dataset?.dayLoopQa ?? null",
     stateExpression: `({
@@ -46,8 +70,8 @@ const ROUTES = Object.freeze({
     })`,
     assert(state) {
       return state.marker === "pass" &&
-        state.passed === "1" &&
-        state.total === "1" &&
+        state.passed === "2" &&
+        state.total === "2" &&
         state.moduleBoot === "ready" &&
         state.runtimePhase === "SETTLEMENT";
     },

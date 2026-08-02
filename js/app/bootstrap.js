@@ -25,21 +25,31 @@ import { registerServiceCleanupSystem } from "../domain/service-cleanup.js";
 import { registerCampaignOutcomeSystem } from "../domain/terminal-result.js";
 import { registerDayInitializationSystem } from "../domain/day-initialization.js";
 import { CampaignManager } from "../domain/campaign.js";
+import { registerGuestFlowSystem } from "../world/guest-flow.js";
+import { registerGuestOutcomeSystem } from "../world/guest-outcomes.js";
+import { createGuestPassabilityGrid } from "../world/passability-grid.js";
 import { StorageAdapter } from "../infrastructure/storage-adapter.js";
 import { createRecipeState, RecipeSystem } from "../domain/recipe.js";
 import { createSaleSlotsState } from "../domain/sale-slots.js";
 import { createSalesState } from "../domain/sales.js";
-import { createServiceTimerState } from "../domain/timer-state.js";
+import { createServiceTimerState, RUNTIME_PHASE } from "../domain/timer-state.js";
 import { CANONICAL_CONTENT_SPECIFICATIONS } from "../infrastructure/canonical-content.js";
 import { DataLoader } from "../infrastructure/data-loader.js";
-import { BASE_MAP_ID } from "../world/map-schema.js";
+import { BASE_MAP_ID, navigationPointToWorld } from "../world/map-schema.js";
 import { MapLoader, mapLoadReportToBootOutcome } from "../world/map-loader.js";
-import { CanvasScene } from "../ui/canvas-scene.js";
+import { PixiSceneAdapter } from "../render/pixi-scene-adapter.js";
+import { GuestMotionTracker } from "../render/guest-motion-tracker.js";
+import { VfxSystem } from "../render/vfx-system.js";
+import { AudioSystem } from "../infrastructure/audio-system.js";
+import { AUDIO_CUE, MUST_CUE_EVENT_BINDINGS } from "../infrastructure/audio-cues.js";
 import { CreditsShell } from "../ui/credits-shell.js";
 import { ErrorScreen } from "../ui/error-screen.js";
+import { SettingsOverlay, SettlementOverlay } from "../ui/management-ui.js";
+import { OnboardingGuide } from "../ui/onboarding.js";
 import { PrototypeHubAdapter } from "../ui/prototype-hub-adapter.js";
-import { runPrototypeRegression } from "../qa/prototype-regression.js";
+import { WORLD_INTERACTION_COMMAND_TYPE } from "../world/interaction-router.js";
 import { SimulationLoop } from "./simulation-loop.js";
+import { createRuntimeComposition } from "./runtime-composition.js";
 import {
   DEFAULT_BUILD_METADATA,
   validateBuildMetadata,
@@ -51,6 +61,18 @@ import {
 } from "./feature-flags.js";
 import { FeatureRegistry } from "./feature-registry.js";
 
+// assets/feedback-assets.json과 같은 값이다 — fetch 왕복 없이 boot 초기(STORE stage)에 바로
+// VfxSystem을 만들 수 있게 여기 그대로 옮겨 적었다.
+const VFX_SHEET_CONFIG = Object.freeze({
+  vfxSheet: Object.freeze({ width: 768, height: 512, columns: 3, rows: 2, frameWidth: 256, frameHeight: 256, frameCount: 6 }),
+  vfx: Object.freeze([
+    Object.freeze({ id: "vfx.sale_success", fps: 12, anchor: "CENTER" }),
+    Object.freeze({ id: "vfx.cooking_success", fps: 10, anchor: "BOTTOM_CENTER" }),
+    Object.freeze({ id: "vfx.cooking_waste", fps: 10, anchor: "BOTTOM_CENTER" }),
+    Object.freeze({ id: "vfx.order_failure", fps: 12, anchor: "BOTTOM_CENTER" }),
+  ]),
+});
+
 const PROTOTYPE_QA_ROUTE = "prototype-baseline";
 const DETERMINISTIC_CORE_QA_ROUTE = "deterministic-core";
 const DATA_VALIDATION_QA_ROUTE = "data-validation";
@@ -60,6 +82,8 @@ const PLAYER_WORLD_QA_ROUTE = "player-world";
 const DAY_LOOP_QA_ROUTE = "day-loop";
 const ONE_DAY_QA_ROUTE = "one-day";
 const TIMER_SYSTEM_QA_ROUTE = "timer-system";
+const PIXI_RENDERER_QA_ROUTE = "pixi-renderer";
+const MANAGEMENT_UI_QA_ROUTE = "management-ui";
 
 export const BOOT_STAGE = Object.freeze({
   SHELL: "SHELL",
@@ -355,6 +379,7 @@ export function createStartupShell(root = document) {
   startButton.disabled = true;
   startButton.setAttribute("aria-disabled", "true");
   root.documentElement.dataset.credits = "closed";
+  root.documentElement.dataset.modalOpen = "closed";
   root.documentElement.dataset.campaignStart = "booting";
   return Object.freeze({
     credits,
@@ -420,6 +445,12 @@ export class AppBootstrap {
     this.campaignOutcomeSystem = null;
     this.dayInitializationSystem = null;
     this.campaignManager = null;
+    this.guestFlowSystem = null;
+    this.guestOutcomeSystem = null;
+    this.guestMotionTracker = null;
+    this.vfxSystem = null;
+    this.audioSystem = null;
+    this.settingsOverlay = null;
     this.scheduler = null;
     this.simulationLoop = null;
     this.reputationSystem = null;
@@ -434,6 +465,8 @@ export class AppBootstrap {
     this._interactionsBound = false;
     this._destroyed = false;
     this._runtimeDiagnostics = [];
+    this._saveQueued = false;
+    this._lastSavedRevision = -1;
 
     this.projection = new BootStateProjection({
       onChange: (snapshot) => this.#publishProjection(snapshot),
@@ -599,9 +632,9 @@ export class AppBootstrap {
         const panelTitle = requireElement(this.root, "#panel-title");
         const panelBody = requireElement(this.root, "#panel-body");
         const panelCloseButton = requireElement(this.root, "#btn-panel-close");
-        const spriteUrl = new URL("../../assets/sprites/player_walk.png", import.meta.url);
-        this.scene = new CanvasScene({ canvas, spriteUrl });
-        const sprite = await this.scene.loadSprite();
+        const assetBaseUrl = new URL("../../", import.meta.url);
+        this.scene = new PixiSceneAdapter({ canvas, assetBaseUrl });
+        const ready = await this.scene.loadSprite();
         this.hub = new PrototypeHubAdapter({
           scene: this.scene,
           panelOverlay,
@@ -611,11 +644,13 @@ export class AppBootstrap {
           mapDefinition: this.mapLoadReport.activeMap,
           inputTarget: this.root.defaultView,
           getApp: () => (this.commandBus ? this : null),
+          onInteractionCommand: (command) => this.#queueWorldInteraction(command),
+          externalFrameDriver: true,
         });
         return bootStagePass({ scene: this.scene, hub: this.hub }, {
-          assetId: "prototype.player_walk.l0",
-          width: sprite.width,
-          height: sprite.height,
+          rendererPackage: "pixi.js",
+          rendererVersion: "8.19.0",
+          ready: ready.ready === true,
         }, "PROTOTYPE_ASSET_READY");
       },
       [BOOT_STAGE.SAVE]: async () => {
@@ -701,6 +736,10 @@ export class AppBootstrap {
             !balanceDocument || !guestDocument) {
           throw new Error("MarketSystem, ContractSystem, Recipe/MenuSystem, ReputationSystem, EventSystem, DayLoopController(DemandSystem) composition에 canonical ingredients/recipes/upgrades/events/balance/guests가 필요합니다.");
         }
+        // Task 33 — ManagementUI가 이름/가격 표시용으로 조회한다(GameStore state가 아니라
+        // 정적 catalog 참조라 여기서 한 번만 저장해둔다).
+        this.ingredientCatalog = ingredientDocument.ingredients;
+        this.recipeCatalog = recipeDocument.recipes;
 
         const masterSeed = 0x4e484e01;
         const day = 1;
@@ -746,7 +785,7 @@ export class AppBootstrap {
         });
         const menu = createMenuState({ day, recipes });
         const saleSlots = createSaleSlotsState({ day });
-        this.store = new GameStore({
+        const freshState = {
           formatVersion: 1,
           revision: 0,
           runtimePhase: "TITLE",
@@ -802,7 +841,40 @@ export class AppBootstrap {
               activeValidityCode: maps.activeMapValidity.code,
             } : null,
           },
-        });
+        };
+        const checkpoint = context[BOOT_STAGE.SAVE]?.checkpoint ?? null;
+        let initialState = freshState;
+        if (checkpoint) {
+          const { saleSlots: _embeddedSaleSlots, ...restoredMenu } = checkpoint.menu;
+          initialState = {
+            ...freshState,
+            formatVersion: checkpoint.formatVersion,
+            runtimePhase: checkpoint.checkpointPhase === "TERMINAL" ? "TERMINAL" : "PLANNING",
+            checkpointPhase: checkpoint.checkpointPhase,
+            generationId: checkpoint.idCounters.generationId,
+            campaign: checkpoint.campaign,
+            recipes: checkpoint.recipes,
+            menu: restoredMenu,
+            saleSlots: checkpoint.saleSlots,
+            facilities: checkpoint.facilities,
+            progression: checkpoint.progression,
+            events: checkpoint.events,
+            market: checkpoint.market,
+            contracts: checkpoint.contracts,
+            economy: checkpoint.economy,
+            inventory: checkpoint.inventory,
+            inventoryAccounting: checkpoint.inventoryAccounting,
+            sales: checkpoint.sales,
+            rng: checkpoint.rng,
+            idCounters: checkpoint.idCounters,
+            extensions: checkpoint.extensions,
+            service: createServiceTimerState({
+              durationMs: balanceDocument.service.durationMs,
+              cleanupOvertimeMs: balanceDocument.service.cleanupOvertimeMs,
+            }),
+          };
+        }
+        this.store = new GameStore(initialState);
         this.commandBus = new CommandBus({
           store: this.store,
           commandGuards: [this.featureRegistry.createCommandGuard()],
@@ -847,6 +919,108 @@ export class AppBootstrap {
           contractSystem: this.contractSystem,
           dayLoopController: this.dayLoopController,
         });
+        this.guestFlowSystem = registerGuestFlowSystem(this.commandBus, {
+          seatPoints: this.mapLoadReport.activeMap.navigation.seatPoints,
+          spawnPoint: this.mapLoadReport.activeMap.navigation.spawnPoint,
+          guestPassabilityGrid: createGuestPassabilityGrid(this.mapLoadReport.activeMap),
+        });
+        this.guestOutcomeSystem = registerGuestOutcomeSystem(this.commandBus, {
+          seatPoints: this.mapLoadReport.activeMap.navigation.seatPoints,
+          exitPoint: this.mapLoadReport.activeMap.navigation.exitPoint,
+          guestPassabilityGrid: createGuestPassabilityGrid(this.mapLoadReport.activeMap),
+        });
+        this.guestMotionTracker = new GuestMotionTracker({
+          seatPoints: this.mapLoadReport.activeMap.navigation.seatPoints,
+          spawnPoint: this.mapLoadReport.activeMap.navigation.spawnPoint,
+          exitPoint: this.mapLoadReport.activeMap.navigation.exitPoint,
+          guestPassabilityGrid: createGuestPassabilityGrid(this.mapLoadReport.activeMap),
+        });
+        this.commandBus.subscribeEvent("guest-flow.moving-to-seat", (event) => {
+          this.guestMotionTracker.recordMovingToSeat({
+            guestId: event.payload.guestId,
+            seatId: event.payload.seatId,
+            startedAtMs: event.simulationTimeMs,
+            travelTimeMs: event.payload.travelTimeMs,
+          });
+        });
+        this.commandBus.subscribeEvent("guest-flow.seated", (event) => {
+          this.guestMotionTracker.clear(event.payload.guestId);
+        });
+        this.commandBus.subscribeEvent("guest-flow.moving-to-exit", (event) => {
+          const guest = this.store.getSnapshot().service.guests.find((g) => g.guestId === event.payload.guestId);
+          this.guestMotionTracker.recordMovingToExit({
+            guestId: event.payload.guestId,
+            seatId: guest?.seatId ?? null,
+            startedAtMs: event.simulationTimeMs,
+            travelTimeMs: event.payload.travelTimeMs,
+          });
+        });
+        this.commandBus.subscribeEvent("guest-flow.exited", (event) => {
+          this.guestMotionTracker.clear(event.payload.guestId);
+        });
+        this.commandBus.subscribeEvent("guest-flow.exit-path-fault", (event) => {
+          this.guestMotionTracker.clear(event.payload.guestId);
+        });
+        this.vfxSystem = new VfxSystem(VFX_SHEET_CONFIG);
+        const seatWorldPointForGuest = (guestId) => {
+          const guest = this.store.getSnapshot().service.guests.find((g) => g.guestId === guestId);
+          const seat = guest
+            ? this.mapLoadReport.activeMap.navigation.seatPoints.find((point) => point.seatId === guest.seatId)
+            : null;
+          return seat ? navigationPointToWorld(seat) : navigationPointToWorld(this.mapLoadReport.activeMap.navigation.spawnPoint);
+        };
+        this.commandBus.subscribeEvent("direct-service.sale-committed", (event) => {
+          const world = seatWorldPointForGuest(event.payload.guestId);
+          this.vfxSystem.spawn({ vfxId: "vfx.sale_success", x: world.x, y: world.y, atMs: event.simulationTimeMs });
+        });
+        this.commandBus.subscribeEvent("*", () => this.#queueCheckpointSave());
+        const stoveWorldPoint = () => {
+          const stoveZone = this.mapLoadReport.activeMap.zones.find((zone) => zone.semantic === "stove");
+          return stoveZone
+            ? { x: stoveZone.rect.x + stoveZone.rect.width / 2, y: stoveZone.rect.y + stoveZone.rect.height / 2 }
+            : { x: 0, y: 0 };
+        };
+        this.commandBus.subscribeEvent("direct-service.cook-completed", (event) => {
+          const world = stoveWorldPoint();
+          this.vfxSystem.spawn({ vfxId: "vfx.cooking_success", x: world.x, y: world.y, atMs: event.simulationTimeMs });
+        });
+        this.commandBus.subscribeEvent("direct-service.cook-failed", (event) => {
+          const world = stoveWorldPoint();
+          this.vfxSystem.spawn({ vfxId: "vfx.cooking_waste", x: world.x, y: world.y, atMs: event.simulationTimeMs });
+        });
+        this.commandBus.subscribeEvent("direct-service.dish-wasted", (event) => {
+          const world = stoveWorldPoint();
+          this.vfxSystem.spawn({ vfxId: "vfx.cooking_waste", x: world.x, y: world.y, atMs: event.simulationTimeMs });
+        });
+        this.commandBus.subscribeEvent("order.stockout", (event) => {
+          const world = seatWorldPointForGuest(event.payload.guestId);
+          this.vfxSystem.spawn({ vfxId: "vfx.order_failure", x: world.x, y: world.y, atMs: event.simulationTimeMs });
+        });
+        this.commandBus.subscribeEvent("order.timed-out", (event) => {
+          const world = seatWorldPointForGuest(event.payload.guestId);
+          this.vfxSystem.spawn({ vfxId: "vfx.order_failure", x: world.x, y: world.y, atMs: event.simulationTimeMs });
+        });
+        const win = this.root.defaultView;
+        const AudioContextCtor = win?.AudioContext ?? win?.webkitAudioContext ?? null;
+        this.audioSystem = new AudioSystem({
+          audioContextFactory: AudioContextCtor ? () => new AudioContextCtor() : null,
+          fetchImpl: win?.fetch ? win.fetch.bind(win) : null,
+          storage: win?.localStorage ?? null,
+        });
+        this.audioSystem.resumeOnFirstGesture(win);
+        Promise.all([
+          this.audioSystem.registerBgm("assets/generated/audio/bgm-tavern.wav"),
+          this.audioSystem.registerCue(AUDIO_CUE.PURCHASE, "assets/generated/audio/sfx-purchase.wav"),
+          this.audioSystem.registerCue(AUDIO_CUE.COOK_SUCCESS, "assets/generated/audio/sfx-cook-success.wav"),
+          this.audioSystem.registerCue(AUDIO_CUE.COOK_FAILURE, "assets/generated/audio/sfx-cook-failure.wav"),
+          this.audioSystem.registerCue(AUDIO_CUE.ORDER_COMPLETE, "assets/generated/audio/sfx-order-complete.wav"),
+          this.audioSystem.registerCue(AUDIO_CUE.SETTLEMENT, "assets/generated/audio/sfx-settlement.wav"),
+        ]).catch(() => undefined);
+        for (const eventType of Object.keys(MUST_CUE_EVENT_BINDINGS)) {
+          this.commandBus.subscribeEvent(eventType, (event) => {
+            this.audioSystem.handleDomainEvent(event);
+          });
+        }
         this.scheduler = new Scheduler();
         this.simulationLoop = new SimulationLoop({
           store: this.store,
@@ -856,19 +1030,71 @@ export class AppBootstrap {
           menuSystem: this.menuSystem,
           serviceCleanupSystem: this.serviceCleanupSystem,
           dayLoopController: this.dayLoopController,
+          guestFlowSystem: this.guestFlowSystem,
+          guestOutcomeSystem: this.guestOutcomeSystem,
+          orderSystem: this.orderSystem,
           requestAnimationFrame: this.root.defaultView.requestAnimationFrame.bind(this.root.defaultView),
           cancelAnimationFrame: this.root.defaultView.cancelAnimationFrame.bind(this.root.defaultView),
           visibilityTarget: this.root,
+          onPresentationFrame: (elapsedMs) => {
+            if (this.hub?.running) this.hub.step(elapsedMs);
+          },
+        });
+        this.commandBus.subscribeEvent("order.stockout", (event) => {
+          this.simulationLoop.timerSystem.armGuestReaction({ guestId: event.payload.guestId });
+        });
+        this.commandBus.subscribeEvent("order.created", (event) => {
+          this.simulationLoop.timerSystem.armOrderTimeout({
+            orderId: event.payload.orderId,
+            createdAtMs: event.payload.createdAtMs,
+            patienceRemainingMs: event.payload.patienceRemainingMs,
+          });
+        });
+        this.commandBus.subscribeEvent("order.timed-out", (event) => {
+          this.simulationLoop.timerSystem.disarmOrderTimeout(event.payload.orderId, "ORDER_TIMED_OUT");
+          this.simulationLoop.timerSystem.armGuestReaction({ guestId: event.payload.guestId });
+        });
+        this.commandBus.subscribeEvent("direct-service.sale-committed", (event) => {
+          this.simulationLoop.timerSystem.disarmOrderTimeout(event.payload.orderId, "ORDER_SOLD");
+          this.simulationLoop.timerSystem.armGuestReaction({ guestId: event.payload.guestId });
+        });
+        this.commandBus.subscribeEvent("direct-service.wrong-served", (event) => {
+          const order = this.store.getSnapshot().service.orders.find(
+            (candidate) => candidate.orderId === event.payload.targetOrderId,
+          );
+          if (order) {
+            this.simulationLoop.timerSystem.armOrderTimeout({
+              orderId: order.orderId,
+              createdAtMs: order.createdAtMs,
+              patienceRemainingMs: order.patienceRemainingMs,
+            });
+          }
+        });
+        this.commandBus.subscribeEvent("direct-service.wrong-serve-timeout", (event) => {
+          const order = this.store.getSnapshot().service.orders.find(
+            (candidate) => candidate.orderId === event.payload.targetOrderId,
+          );
+          this.simulationLoop.timerSystem.disarmOrderTimeout(event.payload.targetOrderId, "WRONG_SERVE_TIMEOUT");
+          if (order) this.simulationLoop.timerSystem.armGuestReaction({ guestId: order.guestId });
         });
         this.commandBus.subscribeEvent("day-loop.service-started", (event) => {
           this.simulationLoop.timerSystem.armServiceTimer({
             serviceToken: event.payload.transitionToken,
             durationMs: event.payload.durationMs,
           });
+          this.simulationLoop.timerSystem.armGuestArrivals({
+            plans: this.store.getSnapshot().service.plans,
+          });
         });
         this.commandBus.subscribeEvent("day-loop.service-results-closed", (event) => {
           const transitionToken = event.payload.transitionToken;
           this.simulationLoop.timerSystem.disarmServiceTimer(transitionToken);
+          this.simulationLoop.timerSystem.disarmGuestArrivals({
+            plans: this.store.getSnapshot().service.plans,
+          });
+          this.simulationLoop.timerSystem.disarmGuestOutcomes({
+            guests: this.store.getSnapshot().service.guests,
+          });
           this.simulationLoop.timerSystem.armCleanupCap({ serviceToken: transitionToken });
           // CommandBus는 post-commit event 전달 중 재진입 dispatch를 거절하므로(REENTRANT_
           // DISPATCH_FORBIDDEN), 실제 cleanup dispatch는 이 handler 바깥, 다음 macrotask로
@@ -926,6 +1152,8 @@ export class AppBootstrap {
           campaignOutcomeSystem: this.campaignOutcomeSystem,
           dayInitializationSystem: this.dayInitializationSystem,
           campaignManager: this.campaignManager,
+          guestFlowSystem: this.guestFlowSystem,
+          guestOutcomeSystem: this.guestOutcomeSystem,
           scheduler: this.scheduler,
           simulationLoop: this.simulationLoop,
           reputationSystem: this.reputationSystem,
@@ -966,6 +1194,40 @@ export class AppBootstrap {
     const startButton = requireElement(this.root, "#btn-start");
     const canvas = requireElement(this.root, "#game-canvas");
     const panelCloseButton = requireElement(this.root, "#btn-panel-close");
+    const pauseButton = requireElement(this.root, "#btn-pause");
+    const settingsButton = requireElement(this.root, "#btn-settings");
+
+    let storage = null;
+    try {
+      storage = this.root.defaultView?.localStorage ?? null;
+    } catch {
+      storage = null;
+    }
+    this.onboardingGuide = new OnboardingGuide({
+      root: this.root,
+      overlay: requireElement(this.root, "#onboarding-overlay"),
+      list: requireElement(this.root, "#onboarding-list"),
+      closeButton: requireElement(this.root, "#btn-onboarding-close"),
+      storage,
+    });
+    this.settlementOverlay = new SettlementOverlay({
+      root: this.root,
+      overlay: requireElement(this.root, "#settlement-overlay"),
+      body: requireElement(this.root, "#settlement-body"),
+      closeButton: requireElement(this.root, "#btn-settlement-close"),
+      onClose: () => canvas.focus({ preventScroll: true }),
+    });
+    this.settingsOverlay = new SettingsOverlay({
+      root: this.root,
+      overlay: requireElement(this.root, "#settings-overlay"),
+      closeButton: requireElement(this.root, "#btn-settings-close"),
+      audioSystem: this.audioSystem,
+    });
+    this.commandBus.subscribeEvent("settlement.day-sealed", (event) => {
+      const sealed = this.store.getSnapshot().campaign.canonicalDayResults
+        .find((result) => result.resultId === event.payload.resultId);
+      if (sealed) this.settlementOverlay.open(sealed, { totalDays: 14 });
+    });
 
     this.enterPrototype = async () => {
       if (this.shell.errorScreen.blocked || this.getBootState().status !== BOOT_STATUS.READY) return null;
@@ -982,17 +1244,49 @@ export class AppBootstrap {
           this._runtimeDiagnostics.push(...transition.diagnostics);
           return transition;
         }
+        if (this.onboardingGuide.shouldShow()) await this.onboardingGuide.show();
       }
       this.shell.credits.close();
       showScreen(this.root, "screen-room");
+      const activeMap = this.mapLoadReport.activeMap;
+      const authoredStart = activeMap.navigation?.playerStart;
+      const currentPlayer = this.hub.getState().player;
+      const authoredStartX = authoredStart
+        ? authoredStart.tileX * activeMap.tileSize + authoredStart.offsetX
+        : null;
+      const authoredStartY = authoredStart
+        ? authoredStart.tileY * activeMap.tileSize + authoredStart.offsetY
+        : null;
+      const welcomePoint = activeMap.navigation?.approachPoints?.find(
+        (point) => point.pointId === "approach.zone.stove",
+      );
+      if (welcomePoint && currentPlayer.x === authoredStartX && currentPlayer.y === authoredStartY) {
+        this.hub.setPlayerPosition(
+          welcomePoint.tileX * activeMap.tileSize + welcomePoint.offsetX,
+          welcomePoint.tileY * activeMap.tileSize + welcomePoint.offsetY + activeMap.tileSize * 2,
+        );
+      }
       this.hub.start();
+      this.audioSystem?.startBgm();
       canvas.focus({ preventScroll: true });
       return Object.freeze({ ok: true, runtimePhase: this.store.runtimePhase });
     };
     this.closePanel = () => this.hub.closePanel();
+    this.togglePause = async () => {
+      const phase = this.store.runtimePhase;
+      if (phase === RUNTIME_PHASE.SERVICE) await this.simulationLoop.pause();
+      else if (phase === RUNTIME_PHASE.PAUSED) await this.simulationLoop.resume();
+      canvas.focus({ preventScroll: true });
+    };
     this.handlePageHide = () => this.destroy();
+    this.openSettings = () => {
+      this.shell.credits.close();
+      this.settingsOverlay.open(settingsButton);
+    };
     startButton.addEventListener("click", this.enterPrototype);
     panelCloseButton.addEventListener("click", this.closePanel);
+    pauseButton.addEventListener("click", this.togglePause);
+    settingsButton.addEventListener("click", this.openSettings);
     this.root.defaultView.addEventListener("pagehide", this.handlePageHide, { once: true });
     this._interactionsBound = true;
   }
@@ -1047,11 +1341,37 @@ export class AppBootstrap {
       return report;
     }
 
+    if (qaMode === MANAGEMENT_UI_QA_ROUTE) {
+      showScreen(this.root, "screen-room");
+      this.hub.setMapDefinition(this.mapLoadReport.activeMap);
+      this.hub.activate();
+      const { runManagementUiBrowserProbe } = await import("../qa/management-ui-browser-probe.js");
+      return runManagementUiBrowserProbe({ root: this.root, app: this });
+    }
+
+    if (qaMode === PIXI_RENDERER_QA_ROUTE) {
+      showScreen(this.root, "screen-room");
+      this.hub.setMapDefinition(this.mapLoadReport.activeMap);
+      this.hub.activate();
+      const { runPixiRendererBrowserProbe } = await import("../qa/pixi-renderer-browser-probe.js");
+      return runPixiRendererBrowserProbe({ root: this.root, app: this });
+    }
+
     if (qaMode === PROTOTYPE_QA_ROUTE) {
       showScreen(this.root, "screen-room");
       this.hub.usePrototypeRegressionMap();
       this.hub.activate();
-      const report = await runPrototypeRegression({ root: this.root, scene: this.scene, hub: this.hub });
+      const { CanvasScene } = await import("../qa/raw-canvas-fixture.js");
+      const fixtureCanvas = this.root.createElement("canvas");
+      fixtureCanvas.width = 480;
+      fixtureCanvas.height = 480;
+      fixtureCanvas.dataset.qaFixture = "raw-canvas-l0";
+      const rawCanvasFixture = new CanvasScene({
+        canvas: fixtureCanvas,
+        spriteUrl: new URL("../../assets/sprites/player_walk.png", import.meta.url),
+      });
+      const { runPrototypeRegression } = await import("../qa/prototype-regression.js");
+      const report = await runPrototypeRegression({ root: this.root, scene: rawCanvasFixture, hub: this.hub });
       this.hub.setMapDefinition(this.mapLoadReport.activeMap);
       this.hub.start();
       canvas.focus({ preventScroll: true });
@@ -1169,17 +1489,123 @@ export class AppBootstrap {
     return null;
   }
 
+  #queueCheckpointSave() {
+    if (!this.storageAdapter || this._saveQueued) return;
+    this._saveQueued = true;
+    this.root.defaultView.setTimeout(async () => {
+      this._saveQueued = false;
+      const snapshot = this.store?.getSnapshot();
+      if (!snapshot || snapshot.revision === this._lastSavedRevision ||
+          !["PLANNING_READY", "TERMINAL"].includes(snapshot.checkpointPhase)) return;
+      try {
+        const saved = await this.storageAdapter.writeCurrentWithRotation(snapshot);
+        if (saved.ok) {
+          this._lastSavedRevision = snapshot.revision;
+          this.root.documentElement.dataset.saveStatus = "saved";
+          return;
+        }
+        this.root.documentElement.dataset.saveDetail = (saved.details?.diagnostics ?? [])
+          .map((diagnostic) => `${diagnostic.code ?? "UNKNOWN"}:${diagnostic.path ?? diagnostic.details?.path ?? diagnostic.field ?? diagnostic.details?.field ?? "?"}`)
+          .slice(0, 4)
+          .join("|");
+        throw Object.assign(new Error(saved.code), { code: saved.code });
+      } catch (error) {
+        this.root.documentElement.dataset.saveStatus = "failed";
+        this.root.documentElement.dataset.saveCode = error?.code ?? "CHECKPOINT_SAVE_FAILED";
+        this._runtimeDiagnostics.push(diagnosticFromError(error, {
+          severity: DIAGNOSTIC_SEVERITY.DEGRADED_EFFECT,
+          subsystem: "app.save-lifecycle",
+          code: error?.code ?? "CHECKPOINT_SAVE_FAILED",
+          errorType: "CheckpointSaveError",
+        }));
+      }
+    }, 0);
+  }
+
+  #setActionStatus(message, tone = "neutral") {
+    const status = this.root.querySelector("#hud-action-status");
+    if (!status) return;
+    status.textContent = message;
+    status.dataset.tone = tone;
+  }
+
+  #queueWorldInteraction(command) {
+    this.root.defaultView.setTimeout(async () => {
+      try {
+        const composition = createRuntimeComposition(this);
+        let result = null;
+        if (command.type === WORLD_INTERACTION_COMMAND_TYPE.GUEST_ORDER) {
+          const target = this.hub.guestOrderTargets.find(
+            (candidate) => candidate.targetId === command.payload.targetId,
+          );
+          const guest = target
+            ? this.store.getSnapshot().service.guests.find((candidate) => candidate.entityId === target.entityId)
+            : null;
+          if (!guest) {
+            this.#setActionStatus("주문할 손님을 찾지 못했습니다.", "danger");
+            return;
+          }
+          result = await composition.createOrder({ guestId: guest.guestId });
+          this.#setActionStatus(
+            result.ok ? "주문을 접수했습니다. 화로에서 조리하세요." : `주문 접수 실패 (${result.code})`,
+            result.ok ? "success" : "danger",
+          );
+        } else if (command.type === WORLD_INTERACTION_COMMAND_TYPE.TABLE_SERVICE) {
+          const tableTarget = this.hub.interactionRouter.authoredTableTargets.find(
+            (candidate) => candidate.targetId === command.payload.targetId,
+          );
+          const snapshot = this.store.getSnapshot();
+          const seatIds = new Set(this.mapLoadReport.activeMap.navigation.seatPoints
+            .filter((seat) => seat.tableId === tableTarget?.tableId)
+            .map((seat) => seat.seatId));
+          const guestIds = new Set(snapshot.service.guests
+            .filter((guest) => seatIds.has(guest.seatId))
+            .map((guest) => guest.guestId));
+          const order = snapshot.service.orders.find(
+            (candidate) => candidate.state === "ACTIVE" && guestIds.has(candidate.guestId),
+          );
+          if (!order) {
+            this.#setActionStatus("이 테이블에는 서빙할 주문이 없습니다.", "danger");
+            return;
+          }
+          result = await composition.serveOrder({ targetOrderId: order.orderId });
+          this.#setActionStatus(
+            result.ok ? "요리를 서빙했습니다." : `서빙 실패 (${result.code})`,
+            result.ok ? "success" : "danger",
+          );
+        }
+        this.hub.render();
+      } catch (error) {
+        this.#setActionStatus("상호작용을 처리하지 못했습니다.", "danger");
+        this._runtimeDiagnostics.push(diagnosticFromError(error, {
+          severity: DIAGNOSTIC_SEVERITY.DEGRADED_EFFECT,
+          subsystem: "app.world-interaction",
+          code: "WORLD_INTERACTION_FAILED",
+          errorType: "WorldInteractionError",
+        }));
+      }
+    }, 0);
+  }
+
   destroy() {
     if (this._destroyed) return;
     this._destroyed = true;
     this.simulationLoop?.stop();
     this.hub?.destroy();
     this.shell?.credits.destroy();
+    this.settingsOverlay?.destroy();
+    this.settlementOverlay?.destroy();
+    this.onboardingGuide?.destroy();
+    this.audioSystem?.destroy();
     if (this._interactionsBound) {
       const startButton = this.root.querySelector("#btn-start");
       const panelCloseButton = this.root.querySelector("#btn-panel-close");
+      const pauseButton = this.root.querySelector("#btn-pause");
+      const settingsButton = this.root.querySelector("#btn-settings");
       startButton?.removeEventListener("click", this.enterPrototype);
       panelCloseButton?.removeEventListener("click", this.closePanel);
+      pauseButton?.removeEventListener("click", this.togglePause);
+      settingsButton?.removeEventListener("click", this.openSettings);
       this.root.defaultView?.removeEventListener("pagehide", this.handlePageHide);
     }
   }
@@ -1226,6 +1652,8 @@ export function bootstrapPrototypeApp(root = document, options = {}) {
     get campaignOutcomeSystem() { return app.campaignOutcomeSystem; },
     get dayInitializationSystem() { return app.dayInitializationSystem; },
     get campaignManager() { return app.campaignManager; },
+    get guestFlowSystem() { return app.guestFlowSystem; },
+    get guestOutcomeSystem() { return app.guestOutcomeSystem; },
     get settlementSystem() { return app.settlementSystem; },
     get scheduler() { return app.scheduler; },
     get simulationLoop() { return app.simulationLoop; },

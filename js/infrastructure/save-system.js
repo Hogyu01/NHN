@@ -74,6 +74,17 @@ export function buildSavePayload(snapshot) {
   if (snapshot.menu && snapshot.saleSlots) {
     payload.menu = { ...snapshot.menu, saleSlots: snapshot.saleSlots.slots };
   }
+  if (snapshot.inventory) {
+    payload.inventory = {
+      ...snapshot.inventory,
+      lots: snapshot.inventory.lots.map((lot) => {
+        const reservedQuantity = snapshot.inventory.reservations
+          .filter((reservation) => reservation.lotId === lot.lotId)
+          .reduce((sum, reservation) => sum + reservation.quantity, 0);
+        return { ...lot, unreservedQuantity: lot.quantity - reservedQuantity };
+      }),
+    };
+  }
   return payload;
 }
 

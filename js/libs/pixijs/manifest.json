@@ -1,0 +1,17 @@
+{
+  "package": "pixi.js",
+  "version": "8.19.0",
+  "license": "MIT",
+  "resolvedFrom": "https://registry.npmjs.org/pixi.js/-/pixi.js-8.19.0.tgz",
+  "tarballSha1": "4a0e9056f88ee61293f092723c8cbc2e083c8a7f",
+  "tarballIntegrity": "sha512-pq1O6emA/GFjjeF+8d3Pb5t7knD8FsnfWGqQcRjYjsqFZ7QdzG1XgjLDUu0DFJRbafjV5+g8iNLFBx0b9649lg==",
+  "vendoredFile": "js/libs/pixijs/pixi.min.js",
+  "vendoredFrom": "package/dist/pixi.min.mjs (official npm-published prebuilt ESM bundle, not a rebuild; renamed .mjs→.js locally only so Python's http.server serves the correct JS MIME type for local dev — content is untouched)",
+  "confirmedAt": "2026-08-02",
+  "confirmedSources": [
+    "https://registry.npmjs.org/pixi.js/latest",
+    "https://registry.npmjs.org/pixi.js (dist-tags, no newer stable tag present)",
+    "https://github.com/pixijs/pixijs/releases/latest (tag v8.19.0)"
+  ],
+  "notes": "No CDN/runtime fetch. tarball SHA1 verified locally against the registry-reported value before vendoring. See PROGRESS.md ADR-001 Task 32.1 entry."
+}

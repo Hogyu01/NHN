@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "sheet": {
+    "width": 1256,
+    "height": 1256,
+    "columns": 4,
+    "rows": 4,
+    "frameWidth": 314,
+    "frameHeight": 314,
+    "framesPerDirection": 4,
+    "directionRows": ["DOWN", "LEFT", "RIGHT", "UP"],
+    "background": "transparent"
+  },
+  "sprites": [
+    {
+      "guestArchetypeId": "guest.human_adventurer",
+      "assetId": "sprite.guest.human_adventurer",
+      "file": "game_ready/human_adventurer_walk.png"
+    },
+    {
+      "guestArchetypeId": "guest.dwarf_courier",
+      "assetId": "sprite.guest.dwarf_courier",
+      "file": "game_ready/dwarf_courier_walk.png"
+    },
+    {
+      "guestArchetypeId": "guest.goblin_scholar",
+      "assetId": "sprite.guest.goblin_scholar",
+      "file": "game_ready/goblin_scholar_walk.png"
+    },
+    {
+      "guestArchetypeId": "guest.slime_gourmand",
+      "assetId": "sprite.guest.slime_gourmand",
+      "file": "game_ready/slime_gourmand_walk.png"
+    },
+    {
+      "guestArchetypeId": "guest.kobold_porter",
+      "assetId": "sprite.guest.kobold_porter",
+      "file": "game_ready/kobold_porter_walk.png"
+    },
+    {
+      "guestArchetypeId": "guest.mushroom_traveler",
+      "assetId": "sprite.guest.mushroom_traveler",
+      "file": "game_ready/mushroom_traveler_walk.png"
+    }
+  ]
+}

@@ -17,9 +17,13 @@ export class SimulationLoop {
     menuSystem,
     serviceCleanupSystem,
     dayLoopController,
+    guestFlowSystem,
+    guestOutcomeSystem,
+    orderSystem,
     requestAnimationFrame: raf,
     cancelAnimationFrame: caf,
     visibilityTarget = null,
+    onPresentationFrame = null,
   }) {
     if (!store || !commandBus || !scheduler) {
       throw new TypeError("SimulationLoop에는 store/commandBus/scheduler가 필요합니다.");
@@ -37,11 +41,18 @@ export class SimulationLoop {
       menuSystem,
       serviceCleanupSystem,
       dayLoopController,
+      guestFlowSystem,
+      guestOutcomeSystem,
+      orderSystem,
     });
     this.clock = new SimulationClock({ simulationTimeMs: scheduler.simulationTimeMs });
     this._raf = raf;
     this._caf = caf;
     this._visibilityTarget = visibilityTarget;
+    if (onPresentationFrame !== null && typeof onPresentationFrame !== "function") {
+      throw new TypeError("SimulationLoop onPresentationFrame은 함수 또는 null이어야 합니다.");
+    }
+    this._onPresentationFrame = onPresentationFrame;
     this._frameHandle = null;
     this._lastFrameTimeMs = null;
     this._running = false;
@@ -108,6 +119,7 @@ export class SimulationLoop {
       if (!this._running) return;
       await this.timerSystem.tick(step.simulationTimeMs);
     }
+    this._onPresentationFrame?.(elapsedMs);
   }
 
   async _onVisibilityChange() {
