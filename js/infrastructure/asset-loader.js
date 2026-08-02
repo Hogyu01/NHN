@@ -25,20 +25,31 @@ export class AssetLoader {
   }
 
   async prepare(requiredAssetIds) {
-    const dependency = await loadRuntimeDependencies(this.baseUrl, this.fetchImpl);
-    await this.#verifyBytes(dependency.pixi.localEntry, dependency.pixi.localSha256);
-    const manifestResult = await loadAssetManifest(this.baseUrl, this.fetchImpl);
-    this.manifest = manifestResult.manifest;
-    for (const assetId of requiredAssetIds) {
-      const asset = manifestResult.byId.get(assetId);
-      if (!asset) throw new Error(`REQUIRED_ASSET_UNREGISTERED:${assetId}`);
-      if (asset.tier !== "A" || asset.sourceKind !== "PROJECT_GENERATED" || asset.status !== "GENERATED") throw new Error(`REQUIRED_ASSET_PROVENANCE_INVALID:${assetId}`);
-      const bytes = await this.#verifyBytes(asset.publicPath, asset.outputHash);
-      const dimensions = pngDimensions(bytes);
-      if (dimensions.width !== asset.width || dimensions.height !== asset.height) throw new Error(`REQUIRED_ASSET_DIMENSION_MISMATCH:${assetId}`);
-      this.handles.set(assetId, Object.freeze({ assetId, path: asset.publicPath, url: new URL(asset.publicPath, this.baseUrl).href, ...dimensions }));
+    this.manifest = null;
+    this.handles = new Map();
+    if (new Set(requiredAssetIds).size !== requiredAssetIds.length) throw new Error("REQUIRED_ASSET_ID_DUPLICATE");
+    const stagedHandles = new Map();
+    try {
+      const dependency = await loadRuntimeDependencies(this.baseUrl, this.fetchImpl);
+      await this.#verifyBytes(dependency.pixi.localEntry, dependency.pixi.localSha256);
+      const manifestResult = await loadAssetManifest(this.baseUrl, this.fetchImpl);
+      for (const assetId of requiredAssetIds) {
+        const asset = manifestResult.byId.get(assetId);
+        if (!asset) throw new Error(`REQUIRED_ASSET_UNREGISTERED:${assetId}`);
+        if (asset.tier !== "A" || asset.sourceKind !== "PROJECT_GENERATED" || asset.status !== "GENERATED") throw new Error(`REQUIRED_ASSET_PROVENANCE_INVALID:${assetId}`);
+        const bytes = await this.#verifyBytes(asset.publicPath, asset.outputHash);
+        const dimensions = pngDimensions(bytes);
+        if (dimensions.width !== asset.width || dimensions.height !== asset.height) throw new Error(`REQUIRED_ASSET_DIMENSION_MISMATCH:${assetId}`);
+        stagedHandles.set(assetId, Object.freeze({ assetId, path: asset.publicPath, url: new URL(asset.publicPath, this.baseUrl).href, ...dimensions }));
+      }
+      this.manifest = manifestResult.manifest;
+      this.handles = stagedHandles;
+      return Object.freeze({ ready: true, requiredCount: this.handles.size, dependency: dependency.pixi, handles: this.handles });
+    } catch (error) {
+      this.manifest = null;
+      this.handles = new Map();
+      throw error;
     }
-    return Object.freeze({ ready: true, requiredCount: this.handles.size, dependency: dependency.pixi, handles: this.handles });
   }
 
   get(assetId) {

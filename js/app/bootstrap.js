@@ -496,6 +496,12 @@ export class AppBootstrap {
     }
 
     this.#bindPrototypeInteractions();
+    const startButton = requireElement(this.root, "#btn-start");
+    startButton.textContent = this.store.runtimePhase === RUNTIME_PHASE.TERMINAL
+      ? "결과 보기"
+      : this.store.runtimePhase === RUNTIME_PHASE.TITLE
+        ? "시작하기"
+        : "이어하기";
     this.shell.errorScreen.clear({ enableStart: true });
     this.root.documentElement.dataset.buildId = this.buildMetadataInput.buildId;
     this.root.documentElement.dataset.featureFlagsEnabled = String(

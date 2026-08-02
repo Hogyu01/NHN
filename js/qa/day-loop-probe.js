@@ -12,7 +12,7 @@ import {
 import { createRngRegistryState } from "../core/rng.js";
 import { createEventState } from "../domain/events.js";
 import { createFacilityState } from "../domain/facility.js";
-import { createInventoryState } from "../domain/inventory.js";
+import { COMPLETED_DISH_STATE, createCompletedDish, createInventoryState } from "../domain/inventory.js";
 import { createMenuState, registerMenuSystem } from "../domain/menu.js";
 import { createRecipeState } from "../domain/recipe.js";
 import {
@@ -508,12 +508,43 @@ async function explicitStartInvariants(configuration) {
     "reservation 불일치 Service Start",
   );
 
+  const historicalDishState = cloneValue(plannedSnapshot);
+  historicalDishState.inventory.completedDishes.push(createCompletedDish({
+    dishId: "qa.day-loop.historical-sold-dish",
+    recipeId: activeRecipe(plannedSnapshot).recipeId,
+    quality: 70,
+    bookCostG: 0,
+    recognizedBookCostG: 4,
+    state: COMPLETED_DISH_STATE.SOLD,
+  }));
+  const historicalDish = createHarness({ ...configuration, snapshot: historicalDishState });
+  const historicalStart = await confirmServiceStart(historicalDish, "qa:day-loop:historical-dish:start");
+  assert(historicalStart.ok, `이전 판매 요리 이력이 다음 Service를 막았습니다: ${historicalStart.code}`);
+
+  const carriedDishState = cloneValue(plannedSnapshot);
+  carriedDishState.inventory.completedDishes.push(createCompletedDish({
+    dishId: "qa.day-loop.carried-dish",
+    recipeId: activeRecipe(plannedSnapshot).recipeId,
+    quality: 70,
+    bookCostG: 4,
+    recognizedBookCostG: 0,
+    state: COMPLETED_DISH_STATE.CARRIED,
+  }));
+  const carriedDish = createHarness({ ...configuration, snapshot: carriedDishState });
+  await assertRejectedUnchanged(
+    carriedDish,
+    () => confirmServiceStart(carriedDish, "qa:day-loop:carried-dish:start"),
+    "SERVICE_START_TRANSIENTS_NOT_EMPTY",
+    "미서빙 CARRIED dish가 남은 Service Start",
+  );
+
   return {
-    invalidCases: 5,
-    exactPreservationCases: 5,
+    invalidCases: 6,
+    exactPreservationCases: 6,
     enabledRecipeInvariant: true,
     availableSlotInvariant: true,
     fullReservationInvariant: true,
+    historicalTerminalDishAllowed: true,
   };
 }
 

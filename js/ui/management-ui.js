@@ -87,7 +87,9 @@ export function updateCampaignHud(root, {
   const activeOrderCount = (snapshot.service?.orders ?? []).filter(
     (order) => order.state === "ACTIVE",
   ).length;
-  const dishCount = snapshot.inventory?.completedDishes?.length ?? 0;
+  const dishCount = (snapshot.inventory?.completedDishes ?? []).filter(
+    (dish) => dish.state === "CARRIED",
+  ).length;
   const phaseEl = root.querySelector("#hud-phase");
   if (phaseEl) {
     phaseEl.textContent = PHASE_LABELS[phase] ?? phase;

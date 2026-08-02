@@ -18,7 +18,8 @@ for (const path of await files(resolve(root, "js"))) {
   const source = await readFile(path, "utf8");
   if (/from\s+["']https?:|import\s*\(\s*["']https?:/.test(source)) failures.push(`${path}:REMOTE_IMPORT`);
   const rawCanvasImports = source.match(/(?:from\s+|import\s*\()\s*["'][^"']*raw-canvas-fixture[^"']*["']/g) ?? [];
-  const qaOnlyImport = path.endsWith("js\\app\\bootstrap.js") && rawCanvasImports.length === 1 && source.includes("PROTOTYPE_QA_ROUTE");
+  const normalizedPath = path.replaceAll("\\", "/");
+  const qaOnlyImport = normalizedPath.endsWith("js/app/bootstrap.js") && rawCanvasImports.length === 1 && source.includes("PROTOTYPE_QA_ROUTE");
   if (rawCanvasImports.length > 0 && !qaOnlyImport) failures.push(`${path}:RAW_CANVAS_IMPORT`);
 }
 console.log(`Runtime import scan: ${failures.length === 0 ? "PASS" : "FAIL"}`);

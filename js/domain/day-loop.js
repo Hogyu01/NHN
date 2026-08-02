@@ -3,7 +3,7 @@ import { defineAtomicTransaction, isStableIdentifier } from "../core/transaction
 import { planScheduledGuestGeneration } from "./demand.js";
 import { validateEventState } from "./events.js";
 import { validateFacilityState } from "./facility.js";
-import { validateInventoryState } from "./inventory.js";
+import { COMPLETED_DISH_STATE, validateInventoryState } from "./inventory.js";
 import {
   prepareMenuForServiceDraft,
   validateMenuPlanReconciliation,
@@ -325,10 +325,13 @@ function validateServiceStartContext(ctx) {
   if (!serviceValidation.ok || service.lifecycle !== SERVICE_LIFECYCLE.INACTIVE) {
     return failure("SERVICE_START_STATE_INVALID", { cause: serviceValidation.code, lifecycle: service.lifecycle });
   }
-  if (inventory.cookEscrows.length > 0 || inventory.completedDishes.length > 0) {
+  const carriedDishCount = inventory.completedDishes.filter(
+    (dish) => dish.state === COMPLETED_DISH_STATE.CARRIED,
+  ).length;
+  if (inventory.cookEscrows.length > 0 || carriedDishCount > 0) {
     return failure("SERVICE_START_TRANSIENTS_NOT_EMPTY", {
       cookEscrowCount: inventory.cookEscrows.length,
-      completedDishCount: inventory.completedDishes.length,
+      carriedDishCount,
     });
   }
 

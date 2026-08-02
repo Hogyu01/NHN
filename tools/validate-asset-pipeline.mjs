@@ -30,6 +30,12 @@ for (const asset of manifest.assets) {
 const requiredAssetIds = manifest.assets.filter((asset) => asset.target === "PUBLIC_RUNTIME").map((asset) => asset.assetId);
 const gate = evaluateReleaseGate({ manifest, dependencies, requiredAssetIds });
 if (gate.status !== "NOT_RUN") failures.push(`RELEASE_GATE_TRUTH_EXPECTED_NOT_RUN:${gate.status}`);
+const invalidQualityManifest = structuredClone(manifest);
+invalidQualityManifest.assets[0].gates.quality = "PENDING";
+if (evaluateReleaseGate({ manifest: invalidQualityManifest, dependencies, requiredAssetIds }).status !== "FAIL") failures.push("INVALID_QUALITY_STATUS_NOT_REJECTED");
+const forgedQualityManifest = structuredClone(manifest);
+forgedQualityManifest.assets[0].gates.quality = "PASS";
+if (evaluateReleaseGate({ manifest: forgedQualityManifest, dependencies, requiredAssetIds }).status !== "FAIL") failures.push("QUALITY_PASS_WITHOUT_EVIDENCE_NOT_REJECTED");
 console.log(`Asset pipeline: ${failures.length === 0 ? "PASS" : "FAIL"} (${manifest.assets.length} canonical assets, release gate ${gate.status})`);
 if (failures.length > 0) console.log(failures.join("\n"));
 process.exit(failures.length === 0 ? 0 : 1);
