@@ -662,13 +662,22 @@ export class AppBootstrap {
         }, "PROTOTYPE_ASSET_READY");
       },
       [BOOT_STAGE.SAVE]: async () => {
+        const win = this.root.defaultView;
+        const requestUrl = new URL(win.location.href);
+        const newCampaignRequested = requestUrl.searchParams.get("newGame") === "1";
+        const consumeNewCampaignRequest = () => {
+          if (!newCampaignRequested) return;
+          requestUrl.searchParams.delete("newGame");
+          win.history.replaceState(null, "", `${requestUrl.pathname}${requestUrl.search}${requestUrl.hash}`);
+        };
         let storage;
         try {
-          storage = this.root.defaultView.localStorage;
+          storage = win.localStorage;
         } catch {
           storage = null;
         }
         if (!storage) {
+          consumeNewCampaignRequest();
           return bootStagePass(
             Object.freeze({ checkpoint: null, recovery: "NEW_CAMPAIGN" }),
             { reason: "STORAGE_UNAVAILABLE" },
@@ -676,6 +685,16 @@ export class AppBootstrap {
           );
         }
         this.storageAdapter = new StorageAdapter({ storage });
+        if (newCampaignRequested) {
+          const cleared = this.storageAdapter.clearCampaign();
+          if (!cleared.ok) throw Object.assign(new Error(cleared.message), { code: cleared.code });
+          consumeNewCampaignRequest();
+          return bootStagePass(
+            Object.freeze({ checkpoint: null, recovery: "NEW_CAMPAIGN" }),
+            { clearedKeys: cleared.clearedKeys },
+            "SAVE_NEW_CAMPAIGN_RESET",
+          );
+        }
         const current = await this.storageAdapter.readCurrent();
         if (current.ok) {
           return bootStagePass(
@@ -1294,13 +1313,11 @@ export class AppBootstrap {
     };
     this.startNewCampaign = () => {
       const win = this.root.defaultView;
-      if (!win?.confirm("기존 진행 상황을 지우고 새 게임을 시작할까요?")) return;
-      const cleared = this.storageAdapter?.clearCampaign();
-      if (cleared && !cleared.ok) {
-        win.alert(cleared.message);
-        return;
-      }
-      win.location.reload();
+      if (!win) return;
+      const url = new URL(win.location.href);
+      url.searchParams.delete("qa");
+      url.searchParams.set("newGame", "1");
+      win.location.assign(url.href);
     };
     startButton.addEventListener("click", this.enterPrototype);
     newGameButton.addEventListener("click", this.startNewCampaign);
