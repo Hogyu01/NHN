@@ -188,6 +188,45 @@ body {
   font-size: 0.9rem;
 }
 
+.market-offer-card {
+  min-height: 68px;
+  padding: 8px !important;
+  border: 1px solid #4b4d55;
+  background: #25272d !important;
+}
+
+.market-offer-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.market-offer-details {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 2px;
+}
+
+.market-offer-details strong {
+  color: #f3e7d0;
+  font-size: 0.88rem;
+}
+
+.market-offer-details span,
+.market-offer-details small {
+  color: #aeb4be !important;
+  font-size: 0.74rem !important;
+}
+
+.market-offer-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .panel-qty-input {
   width: 56px;
   padding: 2px 4px;
@@ -601,6 +640,60 @@ body {
   letter-spacing: 0;
 }
 
+.phase-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.phase-rail li {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border: 1px solid #464950;
+  background: #1c1e23;
+  color: #858b95;
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.phase-rail li[data-state="done"] {
+  border-color: #5d816c;
+  color: #add0b6;
+}
+
+.phase-rail li[data-state="active"] {
+  border-color: #d0a458;
+  background: #3c3025;
+  color: #f2d08d;
+  font-weight: 700;
+}
+
+.operations-next-action {
+  margin: 0 0 12px;
+  padding: 10px;
+  border: 1px solid #3f474b;
+  background: #1d2324;
+}
+
+.operations-next-action span,
+.operations-section-heading span:first-child {
+  color: #999fa9;
+  font-size: 0.72rem;
+}
+
+.operations-next-action strong {
+  display: block;
+  margin-top: 4px;
+  color: #dce9db;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
 .hud-action-status {
   min-height: 1.35em;
   margin: 8px 0 0;
@@ -641,6 +734,78 @@ body {
   font-size: 1rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+.operations-orders {
+  margin-top: 16px;
+  border-top: 1px solid #40434a;
+}
+
+.operations-section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0 8px;
+}
+
+.operations-section-heading span:last-child {
+  color: #e3c27d;
+  font-size: 0.72rem;
+}
+
+.hud-order-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hud-order-list:empty::after {
+  content: "손님이 주문하면 이곳에 표시됩니다";
+  color: #818791;
+  font-size: 0.76rem;
+}
+
+.hud-order-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 8px;
+  padding: 8px;
+  border: 1px solid #454850;
+  background: #1d1f24;
+}
+
+.hud-order-list strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #eef0ec;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hud-order-list span {
+  color: #c5c9d0;
+  font-size: 0.76rem;
+}
+
+.hud-order-list em {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: #e4bd6b;
+  font-size: 0.7rem;
+  font-style: normal;
+}
+
+.hud-order-list .hud-order-failure {
+  border-color: #925b58;
+  background: #332525;
+}
+
+.hud-order-list .hud-order-failure em {
+  color: #efaaa1;
 }
 
 .operations-zones {

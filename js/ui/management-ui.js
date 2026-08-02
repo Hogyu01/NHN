@@ -53,6 +53,71 @@ function projectObjective(snapshot, { activeOrderCount, dishCount }) {
   }
 }
 
+function projectNextAction(snapshot, { activeOrderCount, dishCount }) {
+  switch (snapshot?.runtimePhase) {
+    case "PLANNING":
+      return snapshot.menu?.locked ? "길드 게시판에서 영업을 시작하세요" : "길드 게시판에서 재료와 메뉴를 준비하세요";
+    case "SERVICE":
+      if (snapshot.service?.carriedDishId) return "배식대에서 같은 주문을 선택해 서빙하세요";
+      if (dishCount > 0) return "배식대에서 완성 요리를 드세요";
+      if (activeOrderCount > 0) return "화로에서 대기 주문을 조리하세요";
+      return "손님이 자리에 앉으면 주문을 접수하세요";
+    case "PAUSED":
+      return "일시정지를 해제하면 영업을 계속합니다";
+    case "SETTLEMENT":
+      return "결산을 확인하고 다음 날로 넘어가세요";
+    default:
+      return "오늘의 준비 상태를 확인하세요";
+  }
+}
+
+function updatePhaseRail(root, phase, { activeOrderCount, dishCount }) {
+  const activeStep = phase === "PLANNING" ? "PLANNING"
+    : phase === "SERVICE" && (activeOrderCount > 0 || dishCount > 0) ? "COOK"
+      : phase === "SERVICE" || phase === "PAUSED" ? "SERVICE"
+        : phase === "SETTLEMENT" || phase === "TERMINAL" ? "SETTLEMENT"
+          : "PLANNING";
+  for (const item of root.querySelectorAll("[data-phase-step]")) {
+    const step = item.dataset.phaseStep;
+    item.dataset.state = step === activeStep ? "active"
+      : ["PLANNING", "SERVICE", "COOK", "SETTLEMENT"].indexOf(step) < ["PLANNING", "SERVICE", "COOK", "SETTLEMENT"].indexOf(activeStep) ? "done"
+        : "pending";
+  }
+}
+
+function updateOrderTickets(root, snapshot, guestCatalog) {
+  const list = root.querySelector("#hud-order-list");
+  const summary = root.querySelector("#hud-order-summary");
+  if (!list || !summary) return;
+  list.textContent = "";
+  const activeOrders = (snapshot.service?.orders ?? []).filter((order) => order.state === "ACTIVE");
+  const planByGuestId = new Map((snapshot.service?.plans ?? []).map((plan) => [plan.guestId, plan]));
+  const guestByArchetype = new Map((guestCatalog ?? []).map((guest) => [guest.guestArchetypeId, guest]));
+  const guestName = (guestId) => guestByArchetype.get(planByGuestId.get(guestId)?.archetypeId)?.displayName ?? "손님";
+  const recipeName = (recipeId) => snapshot.recipes?.definitions?.find((recipe) => recipe.recipeId === recipeId)?.displayName ?? recipeId;
+  const reactingGuests = (snapshot.service?.guests ?? []).filter((guest) => guest.reaction?.kind?.startsWith("FAILURE_"));
+  const appendTicket = (name, detail, status, className = "") => {
+    const item = root.createElement("li");
+    item.className = className;
+    const nameEl = root.createElement("strong");
+    nameEl.textContent = name;
+    const detailEl = root.createElement("span");
+    detailEl.textContent = detail;
+    const statusEl = root.createElement("em");
+    statusEl.textContent = status;
+    item.append(nameEl, detailEl, statusEl);
+    list.append(item);
+  };
+  summary.textContent = activeOrders.length > 0 ? `${activeOrders.length}건 대기` : reactingGuests.length > 0 ? "실패 반응" : "대기 없음";
+  for (const order of activeOrders) {
+    appendTicket(guestName(order.guestId), recipeName(order.recipeId), "조리 대기");
+  }
+  for (const guest of reactingGuests) {
+    const reason = guest.reaction.kind === "FAILURE_STOCKOUT" ? "품절" : "시간 초과";
+    appendTicket(guestName(guest.guestId), reason, "곧 퇴장", "hud-order-failure");
+  }
+}
+
 export function updateCampaignHud(root, {
   day,
   totalDays,
@@ -61,6 +126,7 @@ export function updateCampaignHud(root, {
   reputation,
   paused,
   snapshot = null,
+  guestCatalog = [],
 }) {
   const dayEl = root.querySelector("#hud-day");
   const cashEl = root.querySelector("#hud-cash");
@@ -100,6 +166,9 @@ export function updateCampaignHud(root, {
   setText(root, "#hud-order-count", activeOrderCount);
   setText(root, "#hud-dish-count", dishCount);
   setText(root, "#hud-objective", projectObjective(snapshot, { activeOrderCount, dishCount }));
+  setText(root, "#hud-next-action", projectNextAction(snapshot, { activeOrderCount, dishCount }));
+  updatePhaseRail(root, phase, { activeOrderCount, dishCount });
+  updateOrderTickets(root, snapshot, guestCatalog);
 }
 
 export class SettlementOverlay {

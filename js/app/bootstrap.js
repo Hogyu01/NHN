@@ -921,6 +921,7 @@ export class AppBootstrap {
         this.dayLoopController = registerDayLoopController(this.commandBus, {
           guestArchetypes: guestDocument.guestArchetypes,
         });
+        this.guestCatalog = guestDocument.guestArchetypes;
         this.directServiceSystem = registerDirectServiceSystem(this.commandBus, {
           wrongServePenaltyMs: balanceDocument.service.wrongServePenaltyMs,
           reactionDurationMs: balanceDocument.service.reactionFrameMs *

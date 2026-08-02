@@ -26,6 +26,19 @@ import { InputRouter } from "./input-router.js";
 import { updateCampaignHud } from "./management-ui.js";
 import { PanelManager, STATIC_PANEL_DEFINITIONS } from "./panel-manager.js";
 
+const INGREDIENT_ICON_PATH = Object.freeze({
+  "ingredient.slime_gel": "assets/generated/ingredients/slime-gel.png",
+  "ingredient.cave_mushroom": "assets/generated/ingredients/cave-mushroom.png",
+  "ingredient.glow_herb": "assets/generated/ingredients/glow-herb.png",
+  "ingredient.ember_pepper": "assets/generated/ingredients/ember-pepper.png",
+  "ingredient.moonroot": "assets/generated/ingredients/moonroot.png",
+  "ingredient.crystal_salt": "assets/generated/ingredients/crystal-salt.png",
+  "ingredient.stonegrain": "assets/generated/ingredients/stonegrain.png",
+  "ingredient.griffin_egg": "assets/generated/ingredients/fire-lizard-meat.png",
+  "ingredient.mimic_bean": "assets/generated/ingredients/acid-berry.png",
+  "ingredient.moss_cheese": "assets/generated/ingredients/frost-boar-meat.png",
+});
+
 export const PROTOTYPE_WORLD_CONTRACT = Object.freeze({
   tileSize: 32,
   widthTiles: 15,
@@ -200,8 +213,9 @@ function renderBoardPanel(app, bodyEl, root, initialMessage = "") {
   section("시장 — 재료 구매");
   const snapshot = app.store.getSnapshot();
   const planningPhase = snapshot.runtimePhase === "PLANNING";
-  const ingredientName = (ingredientId) =>
-    app.ingredientCatalog?.find((entry) => entry.ingredientId === ingredientId)?.displayName ?? ingredientId;
+  const ingredient = (ingredientId) =>
+    app.ingredientCatalog?.find((entry) => entry.ingredientId === ingredientId) ?? null;
+  const ingredientName = (ingredientId) => ingredient(ingredientId)?.displayName ?? ingredientId;
   const offerList = el("ul", { className: "panel-list" });
   for (const offer of snapshot.market?.offers ?? []) {
     const soldOut = offer.availableQuantity <= 0;
@@ -221,11 +235,19 @@ function renderBoardPanel(app, bodyEl, root, initialMessage = "") {
       const result = await composition.buyMarketOffer({ offerId: offer.offerId, quantity });
       rerender(boardResultMessage(result, `구매 완료: ${ingredientName(offer.ingredientId)} x${quantity}`));
     });
-    const row = el("li", {}, [
-      el("span", { textContent: `${ingredientName(offer.ingredientId)} · ${offer.unitPriceG}G · 품질 ${offer.quality} · 재고 ${offer.availableQuantity}` }),
-      qtyInput,
-      buyButton,
+    const definition = ingredient(offer.ingredientId);
+    const icon = el("img", {
+      className: "market-offer-icon",
+      src: INGREDIENT_ICON_PATH[offer.ingredientId] ?? "",
+      alt: "",
+    });
+    const details = el("div", { className: "market-offer-details" }, [
+      el("strong", { textContent: ingredientName(offer.ingredientId) }),
+      el("span", { textContent: `${definition?.flavorProfile ?? "특제"} · 품질 ${offer.quality}` }),
+      el("small", { textContent: `재고 ${offer.availableQuantity} · 개당 ${offer.unitPriceG}G` }),
     ]);
+    const controls = el("div", { className: "market-offer-controls" }, [qtyInput, buyButton]);
+    const row = el("li", { className: "market-offer-card" }, [icon, details, controls]);
     offerList.append(row);
   }
   if ((snapshot.market?.offers ?? []).length === 0) offerList.append(el("li", { textContent: "오늘은 더 구매할 재료가 없습니다." }));
@@ -991,6 +1013,7 @@ export class PrototypeHubAdapter {
         reputation: snapshot.campaign.reputation,
         paused: snapshot.runtimePhase === RUNTIME_PHASE.PAUSED,
         snapshot,
+        guestCatalog: app.guestCatalog,
       });
     }
     this.scene.render({
