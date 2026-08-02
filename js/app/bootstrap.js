@@ -458,6 +458,7 @@ export class AppBootstrap {
     this.eventSystem = null;
     this.featureRegistry = null;
     this.canonicalContent = null;
+    this.serviceConfiguration = null;
     this.mapLoadReport = null;
     this.mapRegistry = null;
     this.bootResult = null;
@@ -767,6 +768,7 @@ export class AppBootstrap {
         // 정적 catalog 참조라 여기서 한 번만 저장해둔다).
         this.ingredientCatalog = ingredientDocument.ingredients;
         this.recipeCatalog = recipeDocument.recipes;
+        this.serviceConfiguration = balanceDocument.service;
 
         const masterSeed = 0x4e484e01;
         const day = 1;
@@ -1588,6 +1590,12 @@ export class AppBootstrap {
             result.ok ? "주문을 접수했습니다. 화로에서 조리하세요." : `주문 접수 실패 (${result.code})`,
             result.ok ? "success" : "danger",
           );
+          if (result.events?.some((event) => event.type === "order.stockout")) {
+            this.#setActionStatus(
+              "준비한 메뉴가 모두 소진되어 이 손님은 품절로 퇴장합니다. 다음 날에는 인분을 더 준비하세요.",
+              "danger",
+            );
+          }
         } else if (command.type === WORLD_INTERACTION_COMMAND_TYPE.TABLE_SERVICE) {
           const tableTarget = this.hub.interactionRouter.authoredTableTargets.find(
             (candidate) => candidate.targetId === command.payload.targetId,

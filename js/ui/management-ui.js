@@ -38,6 +38,10 @@ function projectObjective(snapshot, { activeOrderCount, dishCount }) {
         ? "준비가 끝났습니다. 영업을 시작하세요"
         : "길드 게시판에서 오늘 메뉴를 구성하세요";
     case "SERVICE":
+      if ((snapshot.saleSlots?.slots ?? []).length > 0 &&
+          (snapshot.saleSlots?.slots ?? []).every((slot) => slot.state === "SOLD")) {
+        return "준비한 음식이 모두 팔렸습니다. 남은 손님은 품절 처리될 수 있습니다.";
+      }
       if (snapshot.service?.carriedDishId) return "완성 요리를 주문한 손님에게 전달하세요";
       if (dishCount > 0) return "배식대에서 완성 요리를 확인하세요";
       if (activeOrderCount > 0) return "화로에서 들어온 주문을 조리하세요";

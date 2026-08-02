@@ -426,6 +426,21 @@ function renderBoardPanel(app, bodyEl, root, initialMessage = "") {
     startButton.disabled = false;
   });
   bodyEl.append(serviceGuide);
+  if (!serviceInProgress && menuPlanReady) {
+    const plannedServings = positiveConfirmedEntries.reduce(
+      (total, entry) => total + entry.plannedQuantity,
+      0,
+    );
+    const expectedGuestCount = app.serviceConfiguration?.defaultGuestCount ?? 6;
+    const capacityGuide = el("p", {
+      className: "panel-service-guide",
+      textContent: plannedServings < expectedGuestCount
+        ? `오늘 예정 손님 ${expectedGuestCount}명 · 준비 ${plannedServings}인분 · ${expectedGuestCount - plannedServings}명은 품절로 떠납니다`
+        : `오늘 예정 손님 ${expectedGuestCount}명 · 준비 ${plannedServings}인분`,
+    });
+    if (plannedServings < expectedGuestCount) capacityGuide.dataset.tone = "warning";
+    bodyEl.append(capacityGuide);
+  }
   bodyEl.append(startButton);
 
 }

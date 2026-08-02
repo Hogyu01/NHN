@@ -253,6 +253,10 @@ body {
   line-height: 1.45;
 }
 
+.panel-service-guide[data-tone="warning"] {
+  color: #ffd166;
+}
+
 .cook-timing-progress {
   width: 100%;
   height: 18px;
