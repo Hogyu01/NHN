@@ -28,8 +28,14 @@ for (const asset of manifest.assets) {
   if (!png.ok || png.width !== asset.width || png.height !== asset.height) failures.push(`${asset.assetId}:PNG_CONTRACT_INVALID`);
 }
 const requiredAssetIds = manifest.assets.filter((asset) => asset.target === "PUBLIC_RUNTIME").map((asset) => asset.assetId);
-const gate = evaluateReleaseGate({ manifest, dependencies, requiredAssetIds });
+const visualEvidence = await readJson("reports/evidence/visual-review.json");
+// texture-ready 검증은 아직 실제 브라우저 실행 리포트가 없어 NOT_RUN이 정상이다(quality가 evidence로
+// PASS 승격된 뒤에도 마찬가지). evidence 없이 부르면 manifest가 quality:PASS를 선언해도 gate는
+// 반드시 FAIL로 거절해야 한다 — declared PASS를 evidence 증빙 없이는 신뢰하지 않는다는 계약이다.
+const gate = evaluateReleaseGate({ manifest, dependencies, requiredAssetIds, visualEvidence });
 if (gate.status !== "NOT_RUN") failures.push(`RELEASE_GATE_TRUTH_EXPECTED_NOT_RUN:${gate.status}`);
+const gateWithoutEvidence = evaluateReleaseGate({ manifest, dependencies, requiredAssetIds });
+if (gateWithoutEvidence.status !== "FAIL") failures.push(`RELEASE_GATE_WITHOUT_EVIDENCE_NOT_REJECTED:${gateWithoutEvidence.status}`);
 const invalidQualityManifest = structuredClone(manifest);
 invalidQualityManifest.assets[0].gates.quality = "PENDING";
 if (evaluateReleaseGate({ manifest: invalidQualityManifest, dependencies, requiredAssetIds }).status !== "FAIL") failures.push("INVALID_QUALITY_STATUS_NOT_REJECTED");

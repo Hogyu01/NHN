@@ -3,8 +3,8 @@ export const RECIPE_TEXTURE_PATH = Object.freeze({
   "recipe.stonegrain_bowl": "assets/generated/recipes/mushroom-medley.png",
   "recipe.glowcap_soup": "assets/generated/recipes/mushroom-stew.png",
   "recipe.ember_egg_skewer": "assets/generated/recipes/spiced-crawfish.png",
-  "recipe.moonroot_pie": "assets/generated/recipes/berry-salad.png",
-  "recipe.mimic_hotpot": "assets/generated/recipes/meat-hotpot.png",
+  "recipe.moonroot_pie": "assets/generated/recipes/meat-hotpot.png",
+  "recipe.mimic_hotpot": "assets/generated/recipes/berry-salad.png",
 });
 
 export function resolveCarriedDishTexturePath(carriedDish) {

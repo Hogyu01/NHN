@@ -37,7 +37,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 256,
@@ -91,7 +91,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 256,
@@ -145,7 +145,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 256,
@@ -199,7 +199,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 256,
@@ -253,7 +253,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 256,
@@ -307,7 +307,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 256,
@@ -361,7 +361,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 256,
@@ -393,7 +393,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 32,
@@ -425,7 +425,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 32,
@@ -457,7 +457,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
@@ -489,7 +489,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
@@ -521,7 +521,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
@@ -553,7 +553,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
@@ -585,7 +585,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
@@ -617,7 +617,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -649,7 +649,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -681,7 +681,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -713,7 +713,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 32,
@@ -745,17 +745,17 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
       "license": "PROJECT_OWNED",
       "maturity": "L1_BASELINE",
-      "outputHash": "8203f602fbb86fb34ee0bb6647ba4172bde65373f9b73ba3d28b82e1893eeeaa",
-      "publicPath": "assets/generated/recipes/berry-salad.png",
+      "outputHash": "29863256820c6dc9497e20e2df70f04498c4bf7c5b7c4f85eb0e12327f20f965",
+      "publicPath": "assets/generated/recipes/meat-hotpot.png",
       "runtime": "pixi.js@8.19.0",
-      "source": "assets/icons/dishes/dish-berry-salad.png",
-      "sourceHash": "0121da688fa1dd2d9028bbd7abf9b630150351aa8e3e83447e14aa6e36577a52",
+      "source": "assets/icons/dishes/dish-meat-hotpot.png",
+      "sourceHash": "9d75d7b8f5017d130896a82821bbb9e0d6641109564b05da6cbdb3c7645283e5",
       "sourceKind": "PROJECT_GENERATED",
       "status": "GENERATED",
       "target": "PUBLIC_RUNTIME",
@@ -777,7 +777,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
@@ -809,17 +809,17 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
       "license": "PROJECT_OWNED",
       "maturity": "L1_BASELINE",
-      "outputHash": "29863256820c6dc9497e20e2df70f04498c4bf7c5b7c4f85eb0e12327f20f965",
-      "publicPath": "assets/generated/recipes/meat-hotpot.png",
+      "outputHash": "8203f602fbb86fb34ee0bb6647ba4172bde65373f9b73ba3d28b82e1893eeeaa",
+      "publicPath": "assets/generated/recipes/berry-salad.png",
       "runtime": "pixi.js@8.19.0",
-      "source": "assets/icons/dishes/dish-meat-hotpot.png",
-      "sourceHash": "9d75d7b8f5017d130896a82821bbb9e0d6641109564b05da6cbdb3c7645283e5",
+      "source": "assets/icons/dishes/dish-berry-salad.png",
+      "sourceHash": "0121da688fa1dd2d9028bbd7abf9b630150351aa8e3e83447e14aa6e36577a52",
       "sourceKind": "PROJECT_GENERATED",
       "status": "GENERATED",
       "target": "PUBLIC_RUNTIME",
@@ -841,7 +841,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
@@ -873,7 +873,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
@@ -905,7 +905,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 64,
@@ -937,7 +937,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -969,7 +969,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -1001,7 +1001,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -1033,17 +1033,17 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
       "license": "PROJECT_OWNED",
       "maturity": "L1_BASELINE",
-      "outputHash": "b7d5192764e19d145aab65657446842eade9544a02c93ab3b6b63d7d103aae67",
+      "outputHash": "40abf9374026928b4f0087edc6121277a00f43776fb55e1c5558ef8caecf4fc9",
       "publicPath": "assets/generated/ingredients/ember-pepper.png",
       "runtime": "pixi.js@8.19.0",
-      "source": "assets/icons/ingredients/ing-carrot.png",
-      "sourceHash": "7cacf1fbed5bd180c0d152015cd497b7f74360b5910d77344284a839ff89bcc5",
+      "source": "assets/icons/ingredients/ing-cabbage.png",
+      "sourceHash": "81036c0c56bfa16ac9645922acdb1dcf7fc63f1818b792b9d0c8d874e890a269",
       "sourceKind": "PROJECT_GENERATED",
       "status": "GENERATED",
       "target": "PUBLIC_RUNTIME",
@@ -1065,7 +1065,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -1097,7 +1097,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -1129,7 +1129,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -1161,7 +1161,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -1193,7 +1193,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -1225,7 +1225,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 48,
@@ -1262,7 +1262,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 128,
@@ -1299,7 +1299,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 128,
@@ -1336,7 +1336,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 128,
@@ -1373,7 +1373,7 @@
       "gates": {
         "hash": "PASS",
         "provenance": "PASS",
-        "quality": "NOT_RUN"
+        "quality": "PASS"
       },
       "generator": "nhn.canonical-assets@1.0.0",
       "height": 128,
