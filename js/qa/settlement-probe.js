@@ -97,7 +97,7 @@ function buildSettlementSnapshot({ day = 1 } = {}) {
       }],
     }),
     service: createServiceTimerState({
-      durationMs: 105_000, cleanupOvertimeMs: 12_000, lifecycle: SERVICE_LIFECYCLE.RESULTS_CLOSED_CLEANUP,
+      durationMs: 180_000, cleanupOvertimeMs: 12_000, lifecycle: SERVICE_LIFECYCLE.RESULTS_CLOSED_CLEANUP,
       remainingMs: 0, resultsClosed: true, unmetDemandCount: 1,
       startedDay: day, startedPlanId: "menu.plan.1", startedPlanRevision: 1,
       settlementTransitionToken: "qa.settlement.token.1", endReason: "TIMER_ZERO",

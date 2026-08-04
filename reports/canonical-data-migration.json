@@ -32,7 +32,7 @@
       "contentId": "content.ingredients",
       "schemaName": "ingredient-registry.canonical.v1",
       "schemaVersion": 1,
-      "sha256": "54f96de50d6c01288c26945fb06199efd18dc069f724583383165c4cbb78a700"
+      "sha256": "b9f2dc2ced402096b52cd6d20e91ae78103bf251190ee0f04dc0e95729952281"
     },
     {
       "filename": "data/recipes.json",
@@ -74,7 +74,7 @@
       "contentId": "content.balance",
       "schemaName": "balance-config.v1",
       "schemaVersion": 1,
-      "sha256": "53bebc54f9cf77beb478b7a1d6c30f3f2646b1e9274371dffc2fe216ddbdaaac"
+      "sha256": "d4b38367835626e609723631f7245ec17e32b4023318578305f742cc6695769f"
     },
     {
       "filename": "data/content-manifest.json",
