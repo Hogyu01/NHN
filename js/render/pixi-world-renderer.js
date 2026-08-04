@@ -20,8 +20,10 @@ export const LOGICAL_SIZE = 480;
 const TILE_SIZE = 32;
 // 서로 다른 원본 frame을 타일 높이에 맞춰 정규화한다. 프레임을 먼저 자른 뒤 height를
 // 고정해야 Pixi가 원본 sheet 전체 크기를 기준으로 스케일을 되돌리지 않는다.
-const PLAYER_VISUAL_HEIGHT_PX = 64;
-const GUEST_VISUAL_HEIGHT_PX = 64;
+// 64px(native)는 TILE_SIZE(32)의 2배라 화면에서 캐릭터가 타일을 2칸 덮어 과대해 보인다.
+// 플레이어 1.5타일, 손님 1.375타일 비율로 낮춰 원래 튜닝값(48/44)을 복원한다.
+const PLAYER_VISUAL_HEIGHT_PX = TILE_SIZE * 1.5;
+const GUEST_VISUAL_HEIGHT_PX = TILE_SIZE * 1.375;
 
 // player_walk.png(구 L0_Placeholder, 머리 없는 프로토타입 도형)는 QA fixture 전용으로 남기고,
 // 실제 렌더링은 player_ai/*.png(팀원 제공 4방향×4프레임)을 합성한 player_walk_v2.png를 쓴다.
@@ -53,7 +55,7 @@ export const GUEST_ARCHETYPE_TEXTURE = Object.freeze({
   "guest.mushroom_traveler": "assets/generated/characters/mushroom-traveler.png",
 });
 
-const REQUIRED_ASSET_IDS = Object.freeze([
+export const REQUIRED_ASSET_IDS = Object.freeze([
   "tile.floor.wood", "tile.wall.stone", "prop.board", "prop.stove", "prop.counter", "prop.storage", "prop.table",
   "character.player", ...Object.keys(GUEST_ARCHETYPE_TEXTURE), ...Object.keys(VFX_TEXTURE_PATH), ...Object.keys(HUD_ICON_PATH), ...Object.keys(RECIPE_TEXTURE_PATH),
 ]);
@@ -293,7 +295,7 @@ export class PixiWorldRenderer {
   render(snapshot) {
     if (!this._ready) return;
     const cameraOrigin = snapshot.camera?.origin ?? { x: 0, y: 0 };
-    for (const name of ["tileGround", "tileBelow", "shadow", "entity", "above", "overlay"]) {
+    for (const name of ["tileGround", "tileBelow", "shadow", "entity", "above", "overlay", "vfx"]) {
       this._containers[name].position.set(-cameraOrigin.x, -cameraOrigin.y);
     }
 

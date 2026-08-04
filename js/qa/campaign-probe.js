@@ -24,6 +24,7 @@ import { createSalesState } from "../domain/sales.js";
 import { registerServiceCleanupSystem } from "../domain/service-cleanup.js";
 import { registerCampaignOutcomeSystem, TERMINAL_TYPE } from "../domain/terminal-result.js";
 import { createServiceTimerState, RUNTIME_PHASE } from "../domain/timer-state.js";
+import { COOK_TRIGGER } from "../domain/timing-cook.js";
 import { TimerSystem } from "../domain/timer-system.js";
 import { registerSettlementSystem } from "../domain/settlement.js";
 import { createProgressionState, createUnlockCatalog } from "../domain/unlocks.js";
@@ -129,7 +130,7 @@ function createHarness({ recipes, facilities, ingredients, events, balance, gues
     wrongServePenaltyMs: balance.service.wrongServePenaltyMs,
     reactionDurationMs: balance.service.reactionFrameMs * balance.service.reactionFrameCount,
   });
-  registerOrderSystem(bus);
+  const orderSystem = registerOrderSystem(bus);
   const serviceCleanupSystem = registerServiceCleanupSystem(bus);
   const settlementSystem = registerSettlementSystem(bus);
   const campaignOutcomeSystem = registerCampaignOutcomeSystem(bus);
@@ -143,7 +144,7 @@ function createHarness({ recipes, facilities, ingredients, events, balance, gues
   });
   return {
     store, bus, marketSystem, contractSystem, menuSystem, dayLoopController, directServiceSystem,
-    serviceCleanupSystem, settlementSystem, campaignOutcomeSystem, dayInitializationSystem, scheduler, timerSystem,
+    serviceCleanupSystem, settlementSystem, campaignOutcomeSystem, dayInitializationSystem, orderSystem, scheduler, timerSystem,
     campaignManager, recipes,
   };
 }
@@ -160,6 +161,29 @@ function commandInput(harness, commandId, payload) {
 
 function activeRecipe(snapshot) {
   return snapshot.recipes.definitions.find((recipe) => snapshot.recipes.unlockedRecipeIds.includes(recipe.recipeId));
+}
+
+function seedSeatedGuest(harness) {
+  const snapshot = harness.store.getSnapshot();
+  const plan = snapshot.service.plans[0];
+  assert(plan, "service start did not create a guest plan");
+  harness.store.commit({
+    ...snapshot,
+    service: {
+      ...snapshot.service,
+      guests: [...snapshot.service.guests, {
+        guestId: plan.guestId,
+        entityId: plan.entityId,
+        state: "SEATED",
+        seatId: `qa-seat:${plan.guestId}`,
+        reaction: null,
+      }],
+    },
+  }, {
+    commandId: `qa:seed-seated-guest:${harness.store.revision}`,
+    expectedRevision: harness.store.revision,
+  });
+  return plan.guestId;
 }
 
 /** PLANNING부터 SETTLEMENT(결산까지)를 손님/조리 없이 최단 경로로 밀어붙인다. */
@@ -222,7 +246,140 @@ export async function runCampaignProbe({ recipes, facilities, ingredients, event
       assert(snapshot.runtimePhase === RUNTIME_PHASE.PLANNING, "PLANNING으로 돌아오지 못했습니다.");
       assert(snapshot.checkpointPhase === "PLANNING_READY", "checkpointPhase가 PLANNING_READY가 아닙니다.");
       assert(snapshot.market.day === 2 && snapshot.contracts.day === 2, "market/contracts day가 갱신되지 않았습니다.");
+      assert(snapshot.menu.day === 2 && !snapshot.menu.locked && !snapshot.menu.cleanupComplete,
+        "Day 2 메뉴 초안이 새로 열리지 않았습니다.");
+      assert(snapshot.saleSlots.day === 2 && snapshot.saleSlots.slots.length === 0,
+        "Day 2 판매 슬롯이 초기화되지 않았습니다.");
       return { day: snapshot.campaign.day };
+    },
+  ));
+
+  results.push(await runCase(
+    "day2-order-can-start-cooking",
+    "Day 2 menu confirmation and service start after settlement still allow an accepted order to start cooking.",
+    "Regression: Day 2 service cook start",
+    async () => {
+      const harness = createHarness(base);
+      await runMinimalDayToSettlement(harness);
+      const advance = await harness.campaignManager.advanceAfterSettlement();
+      assert(advance.ok && !advance.terminal, "failed to advance to Day 2");
+
+      const recipe = activeRecipe(harness.store.getSnapshot());
+      const edited = await harness.menuSystem.editEntry(commandInput(harness, `day2:edit:${harness.store.revision}`, {
+        recipeId: recipe.recipeId, enabled: true, priceG: recipe.basePriceG, plannedQuantity: 1,
+      }));
+      assert(edited.ok, `Day 2 menu edit failed: ${edited.code}`);
+      const confirmed = await harness.menuSystem.confirmPlan(commandInput(harness, `day2:confirm:${harness.store.revision}`, {
+        day: 2,
+      }));
+      assert(confirmed.ok, `Day 2 menu confirmation failed: ${confirmed.code}`);
+      const started = await harness.dayLoopController.confirmServiceStart(commandInput(harness, `day2:start:${harness.store.revision}`, {
+        day: 2,
+      }));
+      assert(started.ok, `Day 2 service start failed: ${started.code}`);
+
+      const guestId = seedSeatedGuest(harness);
+      const order = await harness.orderSystem.createOrder(commandInput(harness, `day2:order:${harness.store.revision}`, {
+        guestId,
+      }));
+      assert(order.ok, `Day 2 order failed: ${order.code}`);
+      const activeOrder = harness.store.getSnapshot().service.orders.find((candidate) => candidate.state === "ACTIVE");
+      assert(activeOrder, "Day 2 active order was not created");
+      const cook = await harness.directServiceSystem.startCook(commandInput(harness, `day2:cook:${harness.store.revision}`, {
+        recipeId: activeOrder.recipeId,
+        saleSlotId: activeOrder.saleSlotId,
+        sourceOrderId: activeOrder.orderId,
+        trigger: COOK_TRIGGER.PLAYER,
+      }));
+      assert(cook.ok, `Day 2 cook start failed: ${cook.code}`);
+      return { day: harness.store.getSnapshot().campaign.day, cookId: harness.store.getSnapshot().service.timingCook.cookId };
+    },
+  ));
+
+  results.push(await runCase(
+    "day2-cook-after-day1-dish-sold",
+    "Day 1에 조리·완판까지 마쳐도, service.completedDishes가 매일 새로 시작하는 것과 달리 inventory.completedDishes의 SOLD 이력이 남아있어 Day 2 조리 시작이 CARRIED_DISH_REFERENCE_MISMATCH로 막히면 안 된다.",
+    "Regression: DISH_MIRROR_MISMATCH after a fully-served prior day",
+    async () => {
+      const harness = createHarness(base);
+      const recipe = activeRecipe(harness.store.getSnapshot());
+      const edited = await harness.menuSystem.editEntry(commandInput(harness, `d1:edit:${harness.store.revision}`, {
+        recipeId: recipe.recipeId, enabled: true, priceG: recipe.basePriceG, plannedQuantity: 1,
+      }));
+      assert(edited.ok, `Day 1 menu edit failed: ${edited.code}`);
+      const confirmed = await harness.menuSystem.confirmPlan(commandInput(harness, `d1:confirm:${harness.store.revision}`, { day: 1 }));
+      assert(confirmed.ok, `Day 1 menu confirm failed: ${confirmed.code}`);
+      const started = await harness.dayLoopController.confirmServiceStart(commandInput(harness, `d1:start:${harness.store.revision}`, { day: 1 }));
+      assert(started.ok, `Day 1 service start failed: ${started.code}`);
+
+      const guestId = seedSeatedGuest(harness);
+      const order = await harness.orderSystem.createOrder(commandInput(harness, `d1:order:${harness.store.revision}`, { guestId }));
+      assert(order.ok, `Day 1 order failed: ${order.code}`);
+      const activeOrder = harness.store.getSnapshot().service.orders.find((candidate) => candidate.state === "ACTIVE");
+      assert(activeOrder, "Day 1 active order was not created");
+      const cook = await harness.directServiceSystem.startCook(commandInput(harness, `d1:cook-start:${harness.store.revision}`, {
+        recipeId: activeOrder.recipeId, saleSlotId: activeOrder.saleSlotId, sourceOrderId: activeOrder.orderId, trigger: COOK_TRIGGER.PLAYER,
+      }));
+      assert(cook.ok, `Day 1 cook start failed: ${cook.code}`);
+
+      const targetAtMs = harness.store.getSnapshot().service.timingCook.targetAtMs;
+      const completed = await harness.directServiceSystem.completeCook({
+        commandId: `d1:cook-complete:${harness.store.revision}`,
+        expectedRevision: harness.store.revision,
+        generationId: harness.store.generationId,
+        issuedAtSimulationMs: targetAtMs,
+        payload: { inputAtMs: targetAtMs },
+      });
+      assert(completed.ok, `Day 1 cook complete failed: ${completed.code}`);
+
+      const served = await harness.directServiceSystem.serve(commandInput(harness, `d1:serve:${harness.store.revision}`, {
+        targetOrderId: activeOrder.orderId,
+      }));
+      assert(served.ok, `Day 1 serve failed: ${served.code}`);
+      assert(harness.store.getSnapshot().service.carriedDishId === null, "serve 뒤에도 carriedDishId가 남아있습니다.");
+      assert(harness.store.getSnapshot().inventory.completedDishes.some((dish) => dish.state === "SOLD"),
+        "Day 1에 SOLD dish가 기록되지 않았습니다.");
+
+      const durationMs = harness.store.getSnapshot().service.durationMs;
+      const transitionToken = harness.store.getSnapshot().service.settlementTransitionToken;
+      const targetMs = harness.scheduler.simulationTimeMs + durationMs;
+      harness.timerSystem.armServiceTimer({ serviceToken: transitionToken, durationMs });
+      const zero = await harness.timerSystem.tick(targetMs);
+      assert(zero.dispatched.length === 1 && zero.dispatched[0].result.ok, "TIMER_ZERO 실패");
+      const cleanup = await harness.timerSystem.runCleanupToCompletion({ transitionToken });
+      assert(cleanup.completion.ok, `cleanup 완료 실패: ${cleanup.completion.code}`);
+      const settled = await harness.settlementSystem.settleDay(commandInput(harness, `d1:settle:${harness.store.revision}`, {
+        day: harness.store.getSnapshot().campaign.day,
+      }));
+      assert(settled.ok, `Day 1 결산 실패: ${settled.code}`);
+
+      const advance = await harness.campaignManager.advanceAfterSettlement();
+      assert(advance.ok && !advance.terminal, "failed to advance to Day 2");
+      assert(harness.store.getSnapshot().campaign.day === 2, "Day 2로 넘어가지 못했습니다.");
+
+      const recipe2 = activeRecipe(harness.store.getSnapshot());
+      const edited2 = await harness.menuSystem.editEntry(commandInput(harness, `d2:edit:${harness.store.revision}`, {
+        recipeId: recipe2.recipeId, enabled: true, priceG: recipe2.basePriceG, plannedQuantity: 1,
+      }));
+      assert(edited2.ok, `Day 2 menu edit failed: ${edited2.code}`);
+      const confirmed2 = await harness.menuSystem.confirmPlan(commandInput(harness, `d2:confirm:${harness.store.revision}`, { day: 2 }));
+      assert(confirmed2.ok, `Day 2 menu confirm failed: ${confirmed2.code}`);
+      const started2 = await harness.dayLoopController.confirmServiceStart(commandInput(harness, `d2:start:${harness.store.revision}`, { day: 2 }));
+      assert(started2.ok, `Day 2 service start failed: ${started2.code}`);
+
+      const guestId2 = seedSeatedGuest(harness);
+      const order2 = await harness.orderSystem.createOrder(commandInput(harness, `d2:order:${harness.store.revision}`, { guestId: guestId2 }));
+      assert(order2.ok, `Day 2 order failed: ${order2.code}`);
+      const activeOrder2 = harness.store.getSnapshot().service.orders.find((candidate) => candidate.state === "ACTIVE");
+      assert(activeOrder2, "Day 2 active order was not created");
+      const cook2 = await harness.directServiceSystem.startCook(commandInput(harness, `d2:cook-start:${harness.store.revision}`, {
+        recipeId: activeOrder2.recipeId, saleSlotId: activeOrder2.saleSlotId, sourceOrderId: activeOrder2.orderId, trigger: COOK_TRIGGER.PLAYER,
+      }));
+      assert(cook2.ok, `Day 2 cook start failed (${cook2.code}) — 하루 전 판매 이력 때문에 조리가 막히면 안 됩니다.`);
+      return {
+        day: harness.store.getSnapshot().campaign.day,
+        cook2Id: harness.store.getSnapshot().service.timingCook.cookId,
+      };
     },
   ));
 

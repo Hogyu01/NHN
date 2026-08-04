@@ -2,6 +2,7 @@ import { IdService } from "../core/ids.js";
 import { cloneValue, freezeDeep, validationFailure, validationSuccess } from "../core/result.js";
 import { defineAtomicTransaction, isStableIdentifier } from "../core/transaction.js";
 import {
+  applyDishToWasteDraft,
   applyEscrowRestoreToDraft,
   validateCostMovementAppendOnly,
   validateInventoryAccountingState,
@@ -288,6 +289,20 @@ function allocateMovementId(idCounters, campaign, generationId) {
   }
 }
 
+function allocateMovementAndCauseIds(idCounters, campaign, generationId) {
+  try {
+    const ids = IdService.fromState(idCounters);
+    if (ids.campaignId !== campaign.campaignId || ids.day !== campaign.day || ids.generationId !== generationId) {
+      return failure("SERVICE_CLEANUP_ID_STATE_INVALID");
+    }
+    const movementId = ids.next("movement", { day: campaign.day });
+    const causeId = ids.next("cause", { day: campaign.day });
+    return success({ movementId, causeId, idCounters: ids.snapshot() });
+  } catch {
+    return failure("SERVICE_CLEANUP_ID_STATE_INVALID");
+  }
+}
+
 /**
  * 12초 cap에서 남아 있는 모든 것(RUNNING_ESCROW cook, ACTIVE order, ASSIGNED slot,
  * 미사용 reservation)을 단일 transaction으로 강제 해제한다. cash/inventory total
@@ -326,6 +341,28 @@ export function planForceCleanupAtCap(context) {
     const cancelled = cancelTimingCookAtZero(serviceCandidate.timingCook, { cancelledAtMs: issuedAtSimulationMs });
     if (!cancelled.ok) return cancelled;
     serviceCandidate.timingCook = cancelled.plan.timingCook;
+    serviceCandidate.completedDishes = cloneValue(inventoryCandidate.completedDishes);
+    serviceCandidate.carriedDishId = null;
+  }
+
+  // 위 escrow 복구는 timer-zero에 아직 조리 중이던 dish만 다룬다. 이미 조리를 완료해
+  // CARRIED 상태로 들고 있지만 서빙하지 못한 dish는 여기서 다루지 않으면 carriedDishId가
+  // inventory.completedDishes의 CARRIED 항목과 어긋난 채 다음 날로 넘어가(다음 SERVICE_START
+  // precondition·startCook의 CARRIED_DISH_REFERENCE_MISMATCH로 이어진다), 12초 cap에서
+  // 같은 waste 경로로 강제 정리한다.
+  let wastedCarriedDishId = null;
+  if (serviceCandidate.carriedDishId !== null) {
+    const allocated = allocateMovementAndCauseIds(idCountersCandidate, campaign, generationId);
+    if (!allocated.ok) return allocated;
+    idCountersCandidate = allocated.plan.idCounters;
+    const wasted = applyDishToWasteDraft(inventoryCandidate, inventoryAccountingCandidate, {
+      movementId: allocated.plan.movementId,
+      day: campaign.day,
+      causeId: allocated.plan.causeId,
+      dishId: serviceCandidate.carriedDishId,
+    });
+    if (!wasted.ok) return wasted;
+    wastedCarriedDishId = serviceCandidate.carriedDishId;
     serviceCandidate.completedDishes = cloneValue(inventoryCandidate.completedDishes);
     serviceCandidate.carriedDishId = null;
   }
@@ -373,6 +410,7 @@ export function planForceCleanupAtCap(context) {
     inventoryAccounting: inventoryAccountingCandidate,
     idCounters: idCountersCandidate,
     restoredEscrow,
+    wastedCarriedDishId,
     releasedOrderIds,
     terminatedGuestIds,
     releasedAssignedCount: slotCleanup.plan.releasedAssignedCount,
@@ -463,6 +501,7 @@ export function createForceCleanupAtCapAtomicTransaction() {
         type: "service-cleanup.forced-at-cap",
         payload: {
           restoredEscrow: planned.plan.restoredEscrow,
+          wastedCarriedDishId: planned.plan.wastedCarriedDishId,
           releasedOrderIds: planned.plan.releasedOrderIds,
           terminatedGuestIds: planned.plan.terminatedGuestIds,
           releasedAssignedCount: planned.plan.releasedAssignedCount,
