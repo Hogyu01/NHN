@@ -25,9 +25,9 @@ export const SERVICE_END_REASON = Object.freeze({
 });
 
 export const SERVICE_TIMER_LIMITS = Object.freeze({
-  minimumDurationMs: 90_000,
-  maximumDurationMs: 105_000,
-  defaultDurationMs: 105_000,
+  minimumDurationMs: 120_000,
+  maximumDurationMs: 180_000,
+  defaultDurationMs: 180_000,
   maximumCleanupOvertimeMs: 12_000,
   defaultCleanupOvertimeMs: 12_000,
 });

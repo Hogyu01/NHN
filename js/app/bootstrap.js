@@ -875,6 +875,9 @@ export class AppBootstrap {
         let initialState = freshState;
         if (checkpoint) {
           const { saleSlots: _embeddedSaleSlots, ...restoredMenu } = checkpoint.menu;
+          const restoreRequiresPlanningRepair = checkpoint.checkpointPhase === "PLANNING_READY" &&
+            (restoredMenu.day !== checkpoint.campaign.day || restoredMenu.locked || restoredMenu.cleanupComplete ||
+              checkpoint.saleSlots.day !== checkpoint.campaign.day);
           initialState = {
             ...freshState,
             formatVersion: checkpoint.formatVersion,
@@ -883,8 +886,14 @@ export class AppBootstrap {
             generationId: checkpoint.idCounters.generationId,
             campaign: checkpoint.campaign,
             recipes: checkpoint.recipes,
-            menu: restoredMenu,
-            saleSlots: checkpoint.saleSlots,
+            // Builds before the Day 2 fix persisted Day 1's locked menu at a new planning
+            // checkpoint. Repair only that impossible planning state while restoring the save.
+            menu: restoreRequiresPlanningRepair
+              ? createMenuState({ day: checkpoint.campaign.day, recipes: checkpoint.recipes })
+              : restoredMenu,
+            saleSlots: restoreRequiresPlanningRepair
+              ? createSaleSlotsState({ day: checkpoint.campaign.day })
+              : checkpoint.saleSlots,
             facilities: checkpoint.facilities,
             progression: checkpoint.progression,
             events: checkpoint.events,
@@ -1136,6 +1145,30 @@ export class AppBootstrap {
                 subsystem: "app.simulation-loop",
                 code: "CLEANUP_ORCHESTRATION_FAILED",
                 errorType: "ServiceCleanupError",
+              })));
+          }, 0);
+        });
+        this.commandBus.subscribeEvent("day-loop.settlement-transition-issued", () => {
+          // Settlement phase is entered after service cleanup. Dispatch on the next task so the
+          // command bus is no longer delivering the day-loop transition event.
+          this.root.defaultView.setTimeout(() => {
+            createRuntimeComposition(this).settleDay()
+              .then((result) => {
+                if (result.ok) return;
+                this._runtimeDiagnostics.push(createDiagnostic({
+                  diagnosticId: `settlement:seal-failed:${this.store.revision}`,
+                  severity: DIAGNOSTIC_SEVERITY.DEGRADED_EFFECT,
+                  subsystem: "app.settlement",
+                  code: result.code ?? "SETTLEMENT_SEAL_FAILED",
+                  errorType: "SettlementError",
+                  details: result,
+                }));
+              })
+              .catch((error) => this._runtimeDiagnostics.push(diagnosticFromError(error, {
+                severity: DIAGNOSTIC_SEVERITY.DEGRADED_EFFECT,
+                subsystem: "app.settlement",
+                code: "SETTLEMENT_SEAL_THREW",
+                errorType: "SettlementError",
               })));
           }, 0);
         });
