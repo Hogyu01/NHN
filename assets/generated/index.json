@@ -1,0 +1,735 @@
+{
+  "generated": [
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 9,
+        "dishAnchor": [
+          32,
+          10
+        ],
+        "footAnchor": [
+          32,
+          54
+        ],
+        "height": 64,
+        "rows": 4,
+        "width": 64
+      },
+      "hash": "eab5ba3e6d702136241f94e7ac3ed17407c8693569983b14c853946548588a85",
+      "height": 256,
+      "id": "character.player",
+      "kind": "SPRITE_SHEET",
+      "ok": true,
+      "path": "assets/generated/characters/player.png",
+      "sourceHash": "9723ab1e4e6adab54daffce8e4e18ce846d39fde984e67abb1a5e5ba4419a926",
+      "sourcePath": "assets/sprites/player_walk_v2.png",
+      "width": 576
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 9,
+        "dishAnchor": [
+          32,
+          10
+        ],
+        "footAnchor": [
+          32,
+          54
+        ],
+        "height": 64,
+        "rows": 4,
+        "width": 64
+      },
+      "hash": "f021314f00db8f27c31df84cf1f406f1eb7cfa4c34729350aa89421b1ae31834",
+      "height": 256,
+      "id": "guest.human_adventurer",
+      "kind": "SPRITE_SHEET",
+      "ok": true,
+      "path": "assets/generated/characters/human-adventurer.png",
+      "sourceHash": "1e0f92ef4c55a08c65c25d4f7916a8f087e6be61c2ecbbc562200035cebcb70b",
+      "sourcePath": "assets/sprites/guests_v2/human_adventurer_walk.png",
+      "width": 576
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 9,
+        "dishAnchor": [
+          32,
+          10
+        ],
+        "footAnchor": [
+          32,
+          54
+        ],
+        "height": 64,
+        "rows": 4,
+        "width": 64
+      },
+      "hash": "b4375aba6839850e3f2280d7c44930cb8b7c762bd19d9d50f8e819b33cba04d3",
+      "height": 256,
+      "id": "guest.dwarf_courier",
+      "kind": "SPRITE_SHEET",
+      "ok": true,
+      "path": "assets/generated/characters/dwarf-courier.png",
+      "sourceHash": "bc58314b7fedd30886e2431d1cd875c6023fe0bfa59b80551dd5737e8be033ad",
+      "sourcePath": "assets/sprites/guests_v2/dwarf_courier_walk.png",
+      "width": 576
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 9,
+        "dishAnchor": [
+          32,
+          10
+        ],
+        "footAnchor": [
+          32,
+          54
+        ],
+        "height": 64,
+        "rows": 4,
+        "width": 64
+      },
+      "hash": "1d21d30d1624d873d6fafce704f4241732ae42bd48360b54b5166f75d3a99fd7",
+      "height": 256,
+      "id": "guest.goblin_scholar",
+      "kind": "SPRITE_SHEET",
+      "ok": true,
+      "path": "assets/generated/characters/goblin-scholar.png",
+      "sourceHash": "8a52fac888c2aa06e9b77ca075f0365bb0c4513ed67d0eecdce9d2d50aab4ab3",
+      "sourcePath": "assets/sprites/guests_v2/goblin_scholar_walk.png",
+      "width": 576
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 9,
+        "dishAnchor": [
+          32,
+          10
+        ],
+        "footAnchor": [
+          32,
+          54
+        ],
+        "height": 64,
+        "rows": 4,
+        "width": 64
+      },
+      "hash": "4057d2094cd75a8058cf496c8c25dbfe6d4295cadd2eacf7cf68b6a58e1c6650",
+      "height": 256,
+      "id": "guest.slime_gourmand",
+      "kind": "SPRITE_SHEET",
+      "ok": true,
+      "path": "assets/generated/characters/slime-gourmand.png",
+      "sourceHash": "205759be191085926929a098ec74a8182b3c543dba5fb97a90936223fbfda2b4",
+      "sourcePath": "assets/sprites/guests_v2/slime_gourmand_walk.png",
+      "width": 576
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 9,
+        "dishAnchor": [
+          32,
+          10
+        ],
+        "footAnchor": [
+          32,
+          54
+        ],
+        "height": 64,
+        "rows": 4,
+        "width": 64
+      },
+      "hash": "f7d89eabf2773a0b4544b5840c0065d47514a7ccaee243ab3854ad0412da55d6",
+      "height": 256,
+      "id": "guest.kobold_porter",
+      "kind": "SPRITE_SHEET",
+      "ok": true,
+      "path": "assets/generated/characters/kobold-porter.png",
+      "sourceHash": "274712bded8271b2347bcfb9a2782dd6bc0353cdb13d1606ebbf00456c448d4a",
+      "sourcePath": "assets/sprites/guests_v2/kobold_porter_walk.png",
+      "width": 576
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 9,
+        "dishAnchor": [
+          32,
+          10
+        ],
+        "footAnchor": [
+          32,
+          54
+        ],
+        "height": 64,
+        "rows": 4,
+        "width": 64
+      },
+      "hash": "f95ff64fd099a8ff45d1bffbb907907eef0fa9aa1b40b938886da978896fd447",
+      "height": 256,
+      "id": "guest.mushroom_traveler",
+      "kind": "SPRITE_SHEET",
+      "ok": true,
+      "path": "assets/generated/characters/mushroom-traveler.png",
+      "sourceHash": "518793e8dd87039f0b5b0ec3e6afec1d8ff01782001554db36de5b60d5debeb6",
+      "sourcePath": "assets/sprites/guests_v2/mushroom_traveler_walk.png",
+      "width": 576
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "5c22efd573f095b3fc4b1baacb66a440130ce513041271943e601ca36db37a2d",
+      "height": 32,
+      "id": "tile.floor.wood",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/world/floor-wood.png",
+      "sourceHash": "6354393c27ec4a86eefd40ad973ab0d95f9e035250506c49fefee671b7448d1d",
+      "sourcePath": "assets/tiles/tileset/tile_r1_c1.png",
+      "width": 32
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "f4f61be0edd16d44a48c61eb249013b75072bad5c04b90fa7e84867dccf8220f",
+      "height": 32,
+      "id": "tile.wall.stone",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/world/wall-stone.png",
+      "sourceHash": "bd2271f1512d9e59b05537975567d1b8bc0b8c66244edd0ba741729254294f40",
+      "sourcePath": "assets/tiles/tileset/tile_r2_c2.png",
+      "width": 32
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "ba297ec1b61a68e2af8560b5eb0bff6ac81906dfe0586d05746651e2d6bb21f3",
+      "height": 64,
+      "id": "prop.board",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/world/board.png",
+      "sourceHash": "5d252c522126ec2b9594e5dc33c9121bb5c48b68e1915d94f1f1ff41456d77e9",
+      "sourcePath": "assets/tiles/furniture/furniture-board.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "8124701800eb7dde374bff6bae4f2ad849910aba5af15bc178129477a29a7981",
+      "height": 64,
+      "id": "prop.stove",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/world/stove.png",
+      "sourceHash": "ff6892ec0fea1ee9a43292f4c53ceb0ac41ca0ea4593e4e35dd0c9226e016824",
+      "sourcePath": "assets/tiles/furniture/furniture-stove.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "43133387d69deb295385536883bbb901fb07435b02f183e16b4bb81f9bc846d3",
+      "height": 64,
+      "id": "prop.counter",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/world/counter.png",
+      "sourceHash": "8cf67169df7ec49a60a4e402fa1a1590de65bbbec2f3939b93be47d00d260461",
+      "sourcePath": "assets/tiles/furniture/furniture-counter.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "94657f2604f237d2e1dccdc6382b666e7b4debb3aff4c0bdb3c05314a7e02372",
+      "height": 64,
+      "id": "prop.storage",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/world/storage.png",
+      "sourceHash": "87d3057ea2efefbd9b6292a4313ebb04298f72a78c70b787f2c499bc78a91030",
+      "sourcePath": "assets/tiles/furniture/furniture-shelf-ingredients.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "c979461754d607b87d439a39e3bd3ad85e877f391a7646301128ea92877c8746",
+      "height": 64,
+      "id": "prop.table",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/world/table.png",
+      "sourceHash": "2632d3ba21ca5ed2eee75d3ba2d222ef437320577740a0a255e32630eced1e07",
+      "sourcePath": "assets/tiles/furniture/furniture-table.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "83e6aababc03f38d3437e7c1244f42d2456e40f1b16720274c3d31f318153cb0",
+      "height": 48,
+      "id": "hud.gold",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ui/gold.png",
+      "sourceHash": "08bb62ddedcdcfdc934f2a731a13ac3d2c4609bff4b3b79a3083d55827d1975f",
+      "sourcePath": "assets/icons/hud/hud-gold.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "892bf7441896690fe4b59bf47cfb504242c0bdf50f0b78ca7555d3d552787c8d",
+      "height": 48,
+      "id": "hud.reputation",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ui/reputation.png",
+      "sourceHash": "1a787a74237fbd256ee86cb172d98e8af3af0d2fea4c7921338e1b2ccd4eec0d",
+      "sourcePath": "assets/icons/hud/hud-reputation.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "deeef6e6447f25f7e72e8948085bebf964fbe315c58906c5bb47c7fc2449eb2d",
+      "height": 48,
+      "id": "hud.timer",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ui/timer.png",
+      "sourceHash": "22a2809cd48abf9d632b4df00c40a57900131a8fd29e5c219d5ade64a72e19b2",
+      "sourcePath": "assets/icons/hud/hud-timer.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "a26aef12287b512a855757d0d21b7f0c7ddbbb9b49ad0c4b2c42d5c7c10d6a31",
+      "height": 32,
+      "id": "world.interaction_marker",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ui/interaction-marker.png",
+      "sourceHash": "27f85c6d2d5834cf484d320e342551bb5d2a88d59887182ccc8360e6781d1d04",
+      "sourcePath": "assets/icons/hud/world-interaction-marker.png",
+      "width": 32
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "29863256820c6dc9497e20e2df70f04498c4bf7c5b7c4f85eb0e12327f20f965",
+      "height": 64,
+      "id": "recipe.moonroot_pie",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/recipes/meat-hotpot.png",
+      "sourceHash": "9d75d7b8f5017d130896a82821bbb9e0d6641109564b05da6cbdb3c7645283e5",
+      "sourcePath": "assets/icons/dishes/dish-meat-hotpot.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "83905b15712499dab9de6c9eb3083dd3e2371782272baa80747377bde7a6206a",
+      "height": 64,
+      "id": "recipe.slime_stew",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/recipes/slime-jelly.png",
+      "sourceHash": "da141f6b209357f2ae35a906aa10511376ba471a782b527aba0da85751f6a9af",
+      "sourcePath": "assets/icons/dishes/dish-jelly-bowl.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "8203f602fbb86fb34ee0bb6647ba4172bde65373f9b73ba3d28b82e1893eeeaa",
+      "height": 64,
+      "id": "recipe.mimic_hotpot",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/recipes/berry-salad.png",
+      "sourceHash": "0121da688fa1dd2d9028bbd7abf9b630150351aa8e3e83447e14aa6e36577a52",
+      "sourcePath": "assets/icons/dishes/dish-berry-salad.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "a1af6792fce5d46bcd338fc4793593c05adca3f4b580ae2eb46eba05d34d0264",
+      "height": 64,
+      "id": "recipe.stonegrain_bowl",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/recipes/mushroom-medley.png",
+      "sourceHash": "d5971490dc997ebfa3ec96f1cbe6a6529d95302ed24d42f67430704c217a3caa",
+      "sourcePath": "assets/icons/dishes/dish-mushroom-medley.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "44f058e715a0d7145e7673c700d02f9559c3028bfc44f1f35e371ba194750657",
+      "height": 64,
+      "id": "recipe.glowcap_soup",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/recipes/mushroom-stew.png",
+      "sourceHash": "7409813bed1b7bca9fb432be8d08ac97e2819d56e934299ab604caf47c9a6c09",
+      "sourcePath": "assets/icons/dishes/dish-mushroom-stew.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "b61ee6ad773be638981ebcb5637d393624257bbcd10cf09b4abc2f9926350e13",
+      "height": 64,
+      "id": "recipe.ember_egg_skewer",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/recipes/spiced-crawfish.png",
+      "sourceHash": "cd73190f176d3a8a4ee0c9eeb06d744d04252ec211d8bb8bb990d18d9baf89bd",
+      "sourcePath": "assets/icons/dishes/dish-spiced-crawfish.png",
+      "width": 64
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "a735035753061db987238cd1d24b0473d8e23a0d3c4c224da11123f2fabd554b",
+      "height": 48,
+      "id": "ingredient.slime_gel",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ingredients/slime-gel.png",
+      "sourceHash": "0696c973aa97ddff0ea479052aea6a3ac368c2c7bef5f2bcb211b231534793cc",
+      "sourcePath": "assets/icons/ingredients/ing-crystal-blue.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "6501365930689571c315ecdf667383857603f98fb9d06934adb5171daad57b0c",
+      "height": 48,
+      "id": "ingredient.cave_mushroom",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ingredients/cave-mushroom.png",
+      "sourceHash": "d435cab97b90d4c0902911aa92f422f8f9469150c355b066220b17c8017d7f01",
+      "sourcePath": "assets/icons/ingredients/ing-mushroom-red.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "c770b9ecc4e08b6bd79f7fd25faecc08d0ce12e33bc80b66b44474c10363f613",
+      "height": 48,
+      "id": "ingredient.glow_herb",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ingredients/glow-herb.png",
+      "sourceHash": "13c89d6a686d88b9d1b8a6a7a59694b1a57e42bff146d56529d0e4806bb05467",
+      "sourcePath": "assets/icons/ingredients/ing-herb-flower.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "40abf9374026928b4f0087edc6121277a00f43776fb55e1c5558ef8caecf4fc9",
+      "height": 48,
+      "id": "ingredient.ember_pepper",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ingredients/ember-pepper.png",
+      "sourceHash": "81036c0c56bfa16ac9645922acdb1dcf7fc63f1818b792b9d0c8d874e890a269",
+      "sourcePath": "assets/icons/ingredients/ing-cabbage.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "b7d5192764e19d145aab65657446842eade9544a02c93ab3b6b63d7d103aae67",
+      "height": 48,
+      "id": "ingredient.moonroot",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ingredients/moonroot.png",
+      "sourceHash": "7cacf1fbed5bd180c0d152015cd497b7f74360b5910d77344284a839ff89bcc5",
+      "sourcePath": "assets/icons/ingredients/ing-carrot.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "9d77588a59e3af553448797f5a60459b355559e323eb23565e84158cac9a32cc",
+      "height": 48,
+      "id": "ingredient.crystal_salt",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ingredients/crystal-salt.png",
+      "sourceHash": "74c2301e324360e8e92cbb98a1686f7dd5ba55a5a2093fe4a9b0ff18eed290ff",
+      "sourcePath": "assets/icons/ingredients/ing-crystal-amber.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "88423f325853288f6c1deab42b1ced4f1e323b4b0f8eb348217c861d2c2bd0e8",
+      "height": 48,
+      "id": "ingredient.stonegrain",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ingredients/stonegrain.png",
+      "sourceHash": "9eae532ee8162fead183f9e6b2efba3d89d5e604acaadec768a5c04dc4926539",
+      "sourcePath": "assets/icons/ingredients/ing-herb-mint.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "435218f3c8cdfaf35ee7f064a9f1b8cff1c2cddef46f8a5413bac524ae19675b",
+      "height": 48,
+      "id": "ingredient.griffin_egg",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ingredients/fire-lizard-meat.png",
+      "sourceHash": "a6bc5e62d1ce00b36cea0154ff22cc0a3fdbc4773c337ccb9e50f439ab93ac80",
+      "sourcePath": "assets/icons/ingredients/ing-fire-lizard-meat.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "4a18b4912aa6ec2174b6888ed07c2dc3842b191fafc6b9124fd850ec022817ce",
+      "height": 48,
+      "id": "ingredient.mimic_bean",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ingredients/acid-berry.png",
+      "sourceHash": "4dbaf8916f23f602f1c5c60425d559bb3ab575c65b21545ecc3dbebe6555e9b6",
+      "sourcePath": "assets/icons/ingredients/ing-acid-berry.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "hash": "8eb5345be0b8f42352d9fc7062b473b99965f15dd03193ee2849c67e292d8659",
+      "height": 48,
+      "id": "ingredient.moss_cheese",
+      "kind": "IMAGE",
+      "ok": true,
+      "path": "assets/generated/ingredients/frost-boar-meat.png",
+      "sourceHash": "e4bf0d2e2af8e841c0aaf295643c1fda95cddab23c2abc8570eb623aa9d00720",
+      "sourcePath": "assets/icons/ingredients/ing-meat-monster.png",
+      "width": 48
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 3,
+        "height": 64,
+        "rows": 2,
+        "width": 64
+      },
+      "hash": "62548bfd0ea511f75aee4ed373972e24c4fa79610a9c405831db075fd44fe4fa",
+      "height": 128,
+      "id": "vfx.sale_success",
+      "kind": "VFX_SHEET",
+      "ok": true,
+      "path": "assets/generated/vfx/sale-success.png",
+      "sourceHash": "2ec35da0c3ca1f21478d2119f53d3f8a71c10fca3c568c1a7e3d0a1104692db6",
+      "sourcePath": "assets/vfx/vfx-sale-success.png",
+      "width": 192
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 3,
+        "height": 64,
+        "rows": 2,
+        "width": 64
+      },
+      "hash": "cfbabf2bdc1cce0ea282d893422039493ed36e4b9a3644dee1197887dde83b99",
+      "height": 128,
+      "id": "vfx.cooking_success",
+      "kind": "VFX_SHEET",
+      "ok": true,
+      "path": "assets/generated/vfx/cooking-success.png",
+      "sourceHash": "14e5fc4085f376de4c323eb6a806aaf769c6f46f4e4ac3916646e2c47e73aed0",
+      "sourcePath": "assets/vfx/vfx-cooking-success.png",
+      "width": 192
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 3,
+        "height": 64,
+        "rows": 2,
+        "width": 64
+      },
+      "hash": "e47f9b90165f409c0ba852efc583b3695e4afe9a805a353d614782fc205d329a",
+      "height": 128,
+      "id": "vfx.cooking_waste",
+      "kind": "VFX_SHEET",
+      "ok": true,
+      "path": "assets/generated/vfx/cooking-waste.png",
+      "sourceHash": "1ae0798fdf34364e8fc397591a30008dc7e65d36d34bb66c0cf7a5cb582106ec",
+      "sourcePath": "assets/vfx/vfx-cooking-waste.png",
+      "width": 192
+    },
+    {
+      "chunks": [
+        "IHDR",
+        "IDAT",
+        "IEND"
+      ],
+      "frame": {
+        "columns": 3,
+        "height": 64,
+        "rows": 2,
+        "width": 64
+      },
+      "hash": "dfbaae731025345debdf09d0963ec4aab060e33f2869a290a4b9f03da4600c3e",
+      "height": 128,
+      "id": "vfx.order_failure",
+      "kind": "VFX_SHEET",
+      "ok": true,
+      "path": "assets/generated/vfx/order-failure.png",
+      "sourceHash": "63d719b5cc2141155333c55f7bfea06e69a242865f5d19fd4228fade048a8d79",
+      "sourcePath": "assets/vfx/vfx-order-failure.png",
+      "width": 192
+    }
+  ],
+  "schemaVersion": 1
+}

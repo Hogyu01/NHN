@@ -1,0 +1,16 @@
+{
+  "assets": [],
+  "buildId": "dungeon-restaurant-management-mvp.task-44",
+  "criteria": [
+    "three-loops",
+    "clicks",
+    "clipping",
+    "sfx-distinction",
+    "three-timbres",
+    "phase-bus"
+  ],
+  "reason": "Audio content intentionally deferred by product decision; AudioSystem remains UNAVAILABLE/degraded.",
+  "reviewer": null,
+  "schemaVersion": 1,
+  "status": "DEFERRED"
+}

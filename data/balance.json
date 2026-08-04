@@ -3,7 +3,7 @@
   "schemaVersion": 1,
   "campaign": {
     "days": 14,
-    "startCashG": 300,
+    "startCashG": 500,
     "startDebtG": 500,
     "startReputation": 30,
     "targetReputation": 70
@@ -13,12 +13,12 @@
     "consecutiveArrearsThreshold": 2
   },
   "economy": {
-    "fixedCostG": 40
+    "fixedCostG": 20
   },
   "service": {
-    "durationMs": 105000,
-    "minimumDurationMs": 90000,
-    "maximumDurationMs": 105000,
+    "durationMs": 180000,
+    "minimumDurationMs": 120000,
+    "maximumDurationMs": 180000,
     "defaultGuestCount": 6,
     "minimumGuestCount": 4,
     "maximumGuestCount": 12,

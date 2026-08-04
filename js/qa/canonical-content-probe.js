@@ -96,6 +96,14 @@ export async function runCanonicalContentProbe(loadReport) {
         const starting = recipes.recipes.filter((entry) => entry.unlock.type === "STARTING").length;
         const human = guests.guestArchetypes.filter((entry) => entry.classification === "HUMAN").length;
         const friendly = guests.guestArchetypes.filter((entry) => entry.classification !== "HUMAN").length;
+        const starterIngredientIds = new Set([
+          "ingredient.slime_gel", "ingredient.mimic_bean",
+          "ingredient.crystal_salt", "ingredient.cave_mushroom",
+        ]);
+        const unavailableStarter = ingredients.ingredients.filter((ingredient) =>
+          starterIngredientIds.has(ingredient.ingredientId) && ingredient.marketAvailabilityRate !== 100,
+        );
+        assert(unavailableStarter.length === 0, "시작 레시피 재료는 매일 시장에 있어야 합니다.");
         assert(ingredients.ingredients.length === 10, "ingredient count가 10이 아닙니다.");
         assert(recipes.recipes.length === 6 && starting >= 2, "Recipe count/start contract가 잘못됐습니다.");
         assert(guests.guestArchetypes.length === 6 && human >= 1 && friendly >= 3, "Guest composition이 잘못됐습니다.");
@@ -111,16 +119,16 @@ export async function runCanonicalContentProbe(loadReport) {
         const documents = acceptedDocuments(loadReport);
         const balance = documentData(documents, "data/balance.json");
         assert(balance.campaign.days === 14, "campaign days가 14가 아닙니다.");
-        assert(balance.campaign.startCashG === 300 && balance.campaign.startDebtG === 500, "start economy가 다릅니다.");
+        assert(balance.campaign.startCashG === 500 && balance.campaign.startDebtG === 500, "start economy가 다릅니다.");
         assert(balance.campaign.startReputation === 30 && balance.campaign.targetReputation === 70, "reputation goal이 다릅니다.");
-        assert(balance.economy.fixedCostG === 40, "fixed cost가 40G가 아닙니다.");
-        assert(balance.service.durationMs === 105000 && balance.service.defaultGuestCount === 6, "service default가 다릅니다.");
+        assert(balance.economy.fixedCostG === 20, "fixed cost가 20G가 아닙니다.");
+        assert(balance.service.durationMs === 180000 && balance.service.defaultGuestCount === 6, "service default가 다릅니다.");
         assert(JSON.stringify(balance.contract.riskTiers) === JSON.stringify([
           { risk: "LOW", successRate: 90, discountPercent: 5 },
           { risk: "MEDIUM", successRate: 70, discountPercent: 15 },
           { risk: "HIGH", successRate: 50, discountPercent: 30 },
         ]), "contract risk table이 다릅니다.");
-        return { campaignDays: 14, fixedCostG: 40, serviceDurationMs: 105000 };
+        return { campaignDays: 14, fixedCostG: 20, serviceDurationMs: 180000 };
       },
     ),
     runCase(

@@ -618,7 +618,7 @@ const BALANCE_CONFIG_SCHEMA = {
       additionalProperties: false,
       properties: {
         days: { type: "integer", const: 14 },
-        startCashG: { type: "integer", const: 300 },
+        startCashG: { type: "integer", const: 500 },
         startDebtG: { type: "integer", const: 500 },
         startReputation: { type: "integer", const: 30, format: "quality" },
         targetReputation: { type: "integer", const: 70, format: "quality" },
@@ -637,7 +637,7 @@ const BALANCE_CONFIG_SCHEMA = {
       type: "object",
       required: ["fixedCostG"],
       additionalProperties: false,
-      properties: { fixedCostG: { type: "integer", const: 40, minimum: 20, maximum: 80 } },
+      properties: { fixedCostG: { type: "integer", const: 20, minimum: 20, maximum: 80 } },
     },
     service: {
       type: "object",
@@ -659,9 +659,9 @@ const BALANCE_CONFIG_SCHEMA = {
       ],
       additionalProperties: false,
       properties: {
-        durationMs: { type: "integer", const: 105000 },
-        minimumDurationMs: { type: "integer", const: 90000 },
-        maximumDurationMs: { type: "integer", const: 105000 },
+        durationMs: { type: "integer", const: 180000 },
+        minimumDurationMs: { type: "integer", const: 120000 },
+        maximumDurationMs: { type: "integer", const: 180000 },
         defaultGuestCount: { type: "integer", const: 6 },
         minimumGuestCount: { type: "integer", const: 4 },
         maximumGuestCount: { type: "integer", const: 12 },

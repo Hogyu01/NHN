@@ -4,6 +4,8 @@ import { defineAtomicTransaction } from "../core/transaction.js";
 import { createContractState, generateDailyContractOffers } from "./contract.js";
 import { createEventState, generateDailyEvent } from "./events.js";
 import { generateDailyMarket } from "./market.js";
+import { createMenuState } from "./menu.js";
+import { createSaleSlotsState } from "./sale-slots.js";
 import { RUNTIME_PHASE } from "./timer-state.js";
 
 /**
@@ -17,9 +19,11 @@ export const DAY_INITIALIZATION_COMMAND = Object.freeze({
   INITIALIZE: "campaign.day.initialize",
 });
 
-export const DAY_INITIALIZATION_READ_SET = Object.freeze([]);
+export const DAY_INITIALIZATION_READ_SET = Object.freeze([
+  "campaign", "market", "contracts", "events", "rng", "idCounters", "recipes",
+]);
 export const DAY_INITIALIZATION_WRITE_SET = Object.freeze([
-  "campaign", "market", "contracts", "events", "rng", "idCounters",
+  "campaign", "market", "contracts", "events", "rng", "idCounters", "menu", "saleSlots",
 ]);
 
 const MESSAGE_BY_CODE = Object.freeze({
@@ -65,7 +69,9 @@ function validatePayload(payload) {
   return isPlainRecord(payload) ? validationSuccess() : failure("INVALID_DAY_INITIALIZATION_PAYLOAD");
 }
 
-export function planDayInitialization({ runtimePhase, campaign, market, contracts, events, rng, idCounters }, configuration) {
+export function planDayInitialization({
+  runtimePhase, campaign, market, contracts, events, rng, idCounters, recipes,
+}, configuration) {
   if (runtimePhase !== RUNTIME_PHASE.SETTLEMENT) {
     return failure("DAY_INITIALIZATION_REQUIRES_SETTLEMENT", { runtimePhase });
   }
@@ -109,6 +115,17 @@ export function planDayInitialization({ runtimePhase, campaign, market, contract
     { day: nextDay, eventId: eventGeneration.event.eventId },
   ];
 
+  let menu;
+  let saleSlots;
+  try {
+    menu = createMenuState({ day: nextDay, recipes });
+    saleSlots = createSaleSlotsState({ day: nextDay });
+  } catch (error) {
+    return failure("DAY_INITIALIZATION_POSTCONDITION_FAILED", {
+      cause: error?.code ?? "NEXT_DAY_MENU_INITIALIZATION_FAILED",
+    });
+  }
+
   return success({
     campaign: campaignCandidate,
     market: marketGeneration.market,
@@ -116,6 +133,8 @@ export function planDayInitialization({ runtimePhase, campaign, market, contract
     events: createEventState({ activeEvent: eventGeneration.event, history: nextHistory }),
     rng: eventGeneration.rngState,
     idCounters: idCountersCandidate,
+    menu,
+    saleSlots,
     nextDay,
   });
 }
@@ -149,6 +168,7 @@ export function createDayInitializationAtomicTransaction({ ingredients, eventDef
         events: ctx.read("events"),
         rng: ctx.read("rng"),
         idCounters: ctx.read("idCounters"),
+        recipes: ctx.read("recipes"),
       }, configuration);
     },
     mutate(draft) {
@@ -160,6 +180,7 @@ export function createDayInitializationAtomicTransaction({ ingredients, eventDef
         events: draft.read("events"),
         rng: draft.read("rng"),
         idCounters: draft.read("idCounters"),
+        recipes: draft.read("recipes"),
       }, configuration);
       if (!planned.ok) return planned;
       draft.replace("campaign", planned.plan.campaign);
@@ -168,6 +189,8 @@ export function createDayInitializationAtomicTransaction({ ingredients, eventDef
       draft.replace("events", planned.plan.events);
       draft.replace("rng", planned.plan.rng);
       draft.replace("idCounters", planned.plan.idCounters);
+      draft.replace("menu", planned.plan.menu);
+      draft.replace("saleSlots", planned.plan.saleSlots);
       return validationSuccess();
     },
     postconditions(before, after) {
@@ -179,9 +202,10 @@ export function createDayInitializationAtomicTransaction({ ingredients, eventDef
         events: before.events,
         rng: before.rng,
         idCounters: before.idCounters,
+        recipes: before.recipes,
       }, configuration);
       if (!planned.ok) return planned;
-      for (const slice of ["campaign", "market", "contracts", "events", "rng", "idCounters"]) {
+      for (const slice of ["campaign", "market", "contracts", "events", "rng", "idCounters", "menu", "saleSlots"]) {
         if (!equivalent(after[slice], planned.plan[slice])) {
           return failure("DAY_INITIALIZATION_POSTCONDITION_FAILED", { slice });
         }
@@ -197,6 +221,7 @@ export function createDayInitializationAtomicTransaction({ ingredients, eventDef
         events: before.events,
         rng: before.rng,
         idCounters: before.idCounters,
+        recipes: before.recipes,
       }, configuration);
       if (!planned.ok) return [];
       return [{

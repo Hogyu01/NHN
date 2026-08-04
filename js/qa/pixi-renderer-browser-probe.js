@@ -34,12 +34,18 @@ export async function runPixiRendererBrowserProbe({ root, app }) {
     return { width: app.scene.canvas.width, height: app.scene.canvas.height };
   });
 
+  let readyTexturePaths = [];
   await check("container-order-and-nearest", () => {
     const order = renderer._app.stage.children.map((child) => child.label);
     assert(JSON.stringify(order) === JSON.stringify(EXPECTED_CONTAINERS), `container 순서가 다릅니다: ${order}`);
     assert([...renderer._textures.values()].every((texture) => texture.source.scaleMode === "nearest"), "nearest가 아닌 texture가 있습니다.");
-    return { order };
+    readyTexturePaths = [...renderer._textures.keys()];
+    return { order, readyTextureCount: readyTexturePaths.length };
   });
+  // Task 44 texture-ready evidence: destroy 체크가 뒤에서 _textures를 비우기 전에, 실제로
+  // Pixi texture로 로드 완료된 publicPath 목록을 DOM에 남겨 tools/capture-texture-readiness.mjs가
+  // release-gate readyAssetIds로 소비할 수 있게 한다.
+  root.body.dataset.pixiRendererReadyPaths = JSON.stringify(readyTexturePaths);
 
   await check("render-permutation-domain-neutral", () => {
     const before = domainDigest(app);

@@ -20,7 +20,10 @@
   <section id="screen-start" class="screen">
     <h1 class="title">던전 식당</h1>
     <p class="subtitle">실패한 모험가, 던전 앞 식당을 차리다</p>
-    <button id="btn-start" class="btn-primary">시작하기</button>
+    <div class="start-actions">
+      <button id="btn-start" class="btn-primary" type="button">시작하기</button>
+      <button id="btn-new-game" class="btn-secondary hidden" type="button">새 게임</button>
+    </div>
   </section>
 
   <section
@@ -77,6 +80,16 @@
           <span>현재 목표</span>
           <strong id="hud-objective">오늘 메뉴를 구성하세요</strong>
         </div>
+        <ol class="phase-rail" aria-label="오늘 영업 진행 단계">
+          <li data-phase-step="PLANNING">조달·메뉴</li>
+          <li data-phase-step="SERVICE">영업</li>
+          <li data-phase-step="COOK">조리·서빙</li>
+          <li data-phase-step="SETTLEMENT">결산</li>
+        </ol>
+        <div class="operations-next-action">
+          <span>다음 행동</span>
+          <strong id="hud-next-action">길드 게시판을 확인하세요</strong>
+        </div>
         <p id="hud-action-status" class="hud-action-status" role="status" aria-live="polite"></p>
         <dl class="operations-metrics">
           <div><dt>준비 메뉴</dt><dd id="hud-menu-count">0</dd></div>
@@ -84,6 +97,13 @@
           <div><dt>활성 주문</dt><dd id="hud-order-count">0</dd></div>
           <div><dt>완성 요리</dt><dd id="hud-dish-count">0</dd></div>
         </dl>
+        <section class="operations-orders" aria-labelledby="hud-orders-title">
+          <div class="operations-section-heading">
+            <span id="hud-orders-title">주문 현황</span>
+            <span id="hud-order-summary">대기 없음</span>
+          </div>
+          <ul id="hud-order-list" class="hud-order-list"></ul>
+        </section>
         <div class="operations-zones" aria-label="식당 설비">
           <span>설비</span>
           <ul>

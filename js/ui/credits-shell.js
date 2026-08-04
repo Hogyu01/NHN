@@ -8,6 +8,14 @@ export const DEFAULT_CREDIT_ENTRIES = Object.freeze([
     status: "REGISTERED",
   }),
   Object.freeze({
+    assetId: "runtime.pixi-js",
+    label: "PixiJS 렌더링 런타임 8.19.0",
+    creator: "PixiJS contributors",
+    source: "https://www.npmjs.com/package/pixi.js/v/8.19.0",
+    license: "MIT",
+    status: "LOCAL_VERIFIED",
+  }),
+  Object.freeze({
     assetId: "l0.player.universal-lpc",
     label: "개발용 Player L0 스프라이트",
     creator: "Universal LPC Spritesheet contributors",

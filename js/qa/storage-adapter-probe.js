@@ -118,6 +118,27 @@ export async function runStorageAdapterProbe({ recipes, facilities, ingredients,
     },
   ));
 
+  results.push(await runCase(
+    "clear-campaign-removes-save-slots-only",
+    "새 게임은 current/previous/temp 저장만 지우고 별도 설정은 유지한다",
+    "New campaign reset",
+    async () => {
+      const storage = new InMemoryStorage();
+      const adapter = new StorageAdapter({ storage });
+      storage.setItem(SAVE_STORAGE_KEYS.CURRENT, "current");
+      storage.setItem(SAVE_STORAGE_KEYS.PREVIOUS, "previous");
+      storage.setItem(SAVE_STORAGE_KEYS.TEMP, "temp");
+      storage.setItem(SAVE_STORAGE_KEYS.AUDIO_SETTINGS, "audio");
+      const cleared = adapter.clearCampaign();
+      assert(cleared.ok, `저장 삭제 실패: ${cleared.code}`);
+      assert(storage.getItem(SAVE_STORAGE_KEYS.CURRENT) === null, "current가 남았습니다.");
+      assert(storage.getItem(SAVE_STORAGE_KEYS.PREVIOUS) === null, "previous가 남았습니다.");
+      assert(storage.getItem(SAVE_STORAGE_KEYS.TEMP) === null, "temp가 남았습니다.");
+      assert(storage.getItem(SAVE_STORAGE_KEYS.AUDIO_SETTINGS) === "audio", "오디오 설정까지 삭제됐습니다.");
+      return { clearedKeys: cleared.clearedKeys };
+    },
+  ));
+
   const passed = results.filter((result) => result.status === "PASS").length;
   return freezeDeep({
     status: passed === results.length ? "PASS" : "FAIL",

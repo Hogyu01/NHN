@@ -64,7 +64,7 @@ import { FeatureRegistry } from "./feature-registry.js";
 // assets/feedback-assets.json과 같은 값이다 — fetch 왕복 없이 boot 초기(STORE stage)에 바로
 // VfxSystem을 만들 수 있게 여기 그대로 옮겨 적었다.
 const VFX_SHEET_CONFIG = Object.freeze({
-  vfxSheet: Object.freeze({ width: 768, height: 512, columns: 3, rows: 2, frameWidth: 256, frameHeight: 256, frameCount: 6 }),
+  vfxSheet: Object.freeze({ width: 192, height: 128, columns: 3, rows: 2, frameWidth: 64, frameHeight: 64, frameCount: 6 }),
   vfx: Object.freeze([
     Object.freeze({ id: "vfx.sale_success", fps: 12, anchor: "CENTER" }),
     Object.freeze({ id: "vfx.cooking_success", fps: 10, anchor: "BOTTOM_CENTER" }),
@@ -458,6 +458,7 @@ export class AppBootstrap {
     this.eventSystem = null;
     this.featureRegistry = null;
     this.canonicalContent = null;
+    this.serviceConfiguration = null;
     this.mapLoadReport = null;
     this.mapRegistry = null;
     this.bootResult = null;
@@ -496,6 +497,14 @@ export class AppBootstrap {
     }
 
     this.#bindPrototypeInteractions();
+    const startButton = requireElement(this.root, "#btn-start");
+    const newGameButton = requireElement(this.root, "#btn-new-game");
+    startButton.textContent = this.store.runtimePhase === RUNTIME_PHASE.TERMINAL
+      ? "결과 보기"
+      : this.store.runtimePhase === RUNTIME_PHASE.TITLE
+        ? "시작하기"
+        : "이어하기";
+    newGameButton.classList.toggle("hidden", this.store.runtimePhase === RUNTIME_PHASE.TITLE);
     this.shell.errorScreen.clear({ enableStart: true });
     this.root.documentElement.dataset.buildId = this.buildMetadataInput.buildId;
     this.root.documentElement.dataset.featureFlagsEnabled = String(
@@ -654,13 +663,22 @@ export class AppBootstrap {
         }, "PROTOTYPE_ASSET_READY");
       },
       [BOOT_STAGE.SAVE]: async () => {
+        const win = this.root.defaultView;
+        const requestUrl = new URL(win.location.href);
+        const newCampaignRequested = requestUrl.searchParams.get("newGame") === "1";
+        const consumeNewCampaignRequest = () => {
+          if (!newCampaignRequested) return;
+          requestUrl.searchParams.delete("newGame");
+          win.history.replaceState(null, "", `${requestUrl.pathname}${requestUrl.search}${requestUrl.hash}`);
+        };
         let storage;
         try {
-          storage = this.root.defaultView.localStorage;
+          storage = win.localStorage;
         } catch {
           storage = null;
         }
         if (!storage) {
+          consumeNewCampaignRequest();
           return bootStagePass(
             Object.freeze({ checkpoint: null, recovery: "NEW_CAMPAIGN" }),
             { reason: "STORAGE_UNAVAILABLE" },
@@ -668,6 +686,16 @@ export class AppBootstrap {
           );
         }
         this.storageAdapter = new StorageAdapter({ storage });
+        if (newCampaignRequested) {
+          const cleared = this.storageAdapter.clearCampaign();
+          if (!cleared.ok) throw Object.assign(new Error(cleared.message), { code: cleared.code });
+          consumeNewCampaignRequest();
+          return bootStagePass(
+            Object.freeze({ checkpoint: null, recovery: "NEW_CAMPAIGN" }),
+            { clearedKeys: cleared.clearedKeys },
+            "SAVE_NEW_CAMPAIGN_RESET",
+          );
+        }
         const current = await this.storageAdapter.readCurrent();
         if (current.ok) {
           return bootStagePass(
@@ -740,6 +768,7 @@ export class AppBootstrap {
         // 정적 catalog 참조라 여기서 한 번만 저장해둔다).
         this.ingredientCatalog = ingredientDocument.ingredients;
         this.recipeCatalog = recipeDocument.recipes;
+        this.serviceConfiguration = balanceDocument.service;
 
         const masterSeed = 0x4e484e01;
         const day = 1;
@@ -846,6 +875,9 @@ export class AppBootstrap {
         let initialState = freshState;
         if (checkpoint) {
           const { saleSlots: _embeddedSaleSlots, ...restoredMenu } = checkpoint.menu;
+          const restoreRequiresPlanningRepair = checkpoint.checkpointPhase === "PLANNING_READY" &&
+            (restoredMenu.day !== checkpoint.campaign.day || restoredMenu.locked || restoredMenu.cleanupComplete ||
+              checkpoint.saleSlots.day !== checkpoint.campaign.day);
           initialState = {
             ...freshState,
             formatVersion: checkpoint.formatVersion,
@@ -854,8 +886,14 @@ export class AppBootstrap {
             generationId: checkpoint.idCounters.generationId,
             campaign: checkpoint.campaign,
             recipes: checkpoint.recipes,
-            menu: restoredMenu,
-            saleSlots: checkpoint.saleSlots,
+            // Builds before the Day 2 fix persisted Day 1's locked menu at a new planning
+            // checkpoint. Repair only that impossible planning state while restoring the save.
+            menu: restoreRequiresPlanningRepair
+              ? createMenuState({ day: checkpoint.campaign.day, recipes: checkpoint.recipes })
+              : restoredMenu,
+            saleSlots: restoreRequiresPlanningRepair
+              ? createSaleSlotsState({ day: checkpoint.campaign.day })
+              : checkpoint.saleSlots,
             facilities: checkpoint.facilities,
             progression: checkpoint.progression,
             events: checkpoint.events,
@@ -894,6 +932,7 @@ export class AppBootstrap {
         this.dayLoopController = registerDayLoopController(this.commandBus, {
           guestArchetypes: guestDocument.guestArchetypes,
         });
+        this.guestCatalog = guestDocument.guestArchetypes;
         this.directServiceSystem = registerDirectServiceSystem(this.commandBus, {
           wrongServePenaltyMs: balanceDocument.service.wrongServePenaltyMs,
           reactionDurationMs: balanceDocument.service.reactionFrameMs *
@@ -1109,6 +1148,30 @@ export class AppBootstrap {
               })));
           }, 0);
         });
+        this.commandBus.subscribeEvent("day-loop.settlement-transition-issued", () => {
+          // Settlement phase is entered after service cleanup. Dispatch on the next task so the
+          // command bus is no longer delivering the day-loop transition event.
+          this.root.defaultView.setTimeout(() => {
+            createRuntimeComposition(this).settleDay()
+              .then((result) => {
+                if (result.ok) return;
+                this._runtimeDiagnostics.push(createDiagnostic({
+                  diagnosticId: `settlement:seal-failed:${this.store.revision}`,
+                  severity: DIAGNOSTIC_SEVERITY.DEGRADED_EFFECT,
+                  subsystem: "app.settlement",
+                  code: result.code ?? "SETTLEMENT_SEAL_FAILED",
+                  errorType: "SettlementError",
+                  details: result,
+                }));
+              })
+              .catch((error) => this._runtimeDiagnostics.push(diagnosticFromError(error, {
+                severity: DIAGNOSTIC_SEVERITY.DEGRADED_EFFECT,
+                subsystem: "app.settlement",
+                code: "SETTLEMENT_SEAL_THREW",
+                errorType: "SettlementError",
+              })));
+          }, 0);
+        });
         this.commandBus.subscribeEvent("settlement.day-sealed", () => {
           // 같은 reentrant-dispatch 제약(REENTRANT_DISPATCH_FORBIDDEN) 때문에 다음
           // macrotask로 미룬다 — Task 26의 cleanup 자동화와 동일한 이유다.
@@ -1192,6 +1255,7 @@ export class AppBootstrap {
   #bindPrototypeInteractions() {
     if (this._interactionsBound) return;
     const startButton = requireElement(this.root, "#btn-start");
+    const newGameButton = requireElement(this.root, "#btn-new-game");
     const canvas = requireElement(this.root, "#game-canvas");
     const panelCloseButton = requireElement(this.root, "#btn-panel-close");
     const pauseButton = requireElement(this.root, "#btn-pause");
@@ -1283,7 +1347,16 @@ export class AppBootstrap {
       this.shell.credits.close();
       this.settingsOverlay.open(settingsButton);
     };
+    this.startNewCampaign = () => {
+      const win = this.root.defaultView;
+      if (!win) return;
+      const url = new URL(win.location.href);
+      url.searchParams.delete("qa");
+      url.searchParams.set("newGame", "1");
+      win.location.assign(url.href);
+    };
     startButton.addEventListener("click", this.enterPrototype);
+    newGameButton.addEventListener("click", this.startNewCampaign);
     panelCloseButton.addEventListener("click", this.closePanel);
     pauseButton.addEventListener("click", this.togglePause);
     settingsButton.addEventListener("click", this.openSettings);
@@ -1550,6 +1623,12 @@ export class AppBootstrap {
             result.ok ? "주문을 접수했습니다. 화로에서 조리하세요." : `주문 접수 실패 (${result.code})`,
             result.ok ? "success" : "danger",
           );
+          if (result.events?.some((event) => event.type === "order.stockout")) {
+            this.#setActionStatus(
+              "준비한 메뉴가 모두 소진되어 이 손님은 품절로 퇴장합니다. 다음 날에는 인분을 더 준비하세요.",
+              "danger",
+            );
+          }
         } else if (command.type === WORLD_INTERACTION_COMMAND_TYPE.TABLE_SERVICE) {
           const tableTarget = this.hub.interactionRouter.authoredTableTargets.find(
             (candidate) => candidate.targetId === command.payload.targetId,
@@ -1599,10 +1678,12 @@ export class AppBootstrap {
     this.audioSystem?.destroy();
     if (this._interactionsBound) {
       const startButton = this.root.querySelector("#btn-start");
+      const newGameButton = this.root.querySelector("#btn-new-game");
       const panelCloseButton = this.root.querySelector("#btn-panel-close");
       const pauseButton = this.root.querySelector("#btn-pause");
       const settingsButton = this.root.querySelector("#btn-settings");
       startButton?.removeEventListener("click", this.enterPrototype);
+      newGameButton?.removeEventListener("click", this.startNewCampaign);
       panelCloseButton?.removeEventListener("click", this.closePanel);
       pauseButton?.removeEventListener("click", this.togglePause);
       settingsButton?.removeEventListener("click", this.openSettings);

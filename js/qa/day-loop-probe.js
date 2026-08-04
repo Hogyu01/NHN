@@ -12,7 +12,7 @@ import {
 import { createRngRegistryState } from "../core/rng.js";
 import { createEventState } from "../domain/events.js";
 import { createFacilityState } from "../domain/facility.js";
-import { createInventoryState } from "../domain/inventory.js";
+import { COMPLETED_DISH_STATE, createCompletedDish, createInventoryState } from "../domain/inventory.js";
 import { createMenuState, registerMenuSystem } from "../domain/menu.js";
 import { createRecipeState } from "../domain/recipe.js";
 import {
@@ -389,9 +389,18 @@ async function allAllowedTransitions(configuration) {
   assert(after.menu.locked && !after.menu.cleanupComplete, "Service Start가 메뉴를 잠그지 않았습니다.");
   assert(after.checkpointPhase === null, "Service Start 뒤 checkpoint가 남았습니다.");
   assert(after.recipes === before.recipes && after.saleSlots === before.saleSlots &&
-    after.inventory === before.inventory && after.events === before.events &&
+    after.events === before.events &&
     after.facilities === before.facilities && after.untouched === before.untouched,
   "Service Start가 write-set 밖 slice를 교체했습니다.");
+  // inventory는 write-set에 있지만, Service Start가 건드려도 되는 필드는 completedDishes뿐이다
+  // (service.completedDishes가 매일 []로 새로 시작하는 것과 짝을 맞추기 위함). lots/reservations/
+  // cookEscrows는 재료 재고·예약이라 하루가 지나도 절대 바뀌면 안 된다.
+  assert(equivalent(after.inventory.lots, before.inventory.lots) &&
+    equivalent(after.inventory.reservations, before.inventory.reservations) &&
+    equivalent(after.inventory.cookEscrows, before.inventory.cookEscrows),
+  "Service Start가 inventory의 lots/reservations/cookEscrows를 건드렸습니다.");
+  assert(after.inventory.completedDishes.length === 0,
+    "Service Start가 completedDishes를 새로 비우지 않았습니다.");
   assert(explicit.events.length === 1 && explicit.events[0].type === "day-loop.service-started",
     "Service Start committed event가 정확히 하나가 아닙니다.");
   return { allowedRows: genericRows + 1, genericRows, explicitStartRows: 1 };
@@ -508,12 +517,43 @@ async function explicitStartInvariants(configuration) {
     "reservation 불일치 Service Start",
   );
 
+  const historicalDishState = cloneValue(plannedSnapshot);
+  historicalDishState.inventory.completedDishes.push(createCompletedDish({
+    dishId: "qa.day-loop.historical-sold-dish",
+    recipeId: activeRecipe(plannedSnapshot).recipeId,
+    quality: 70,
+    bookCostG: 0,
+    recognizedBookCostG: 4,
+    state: COMPLETED_DISH_STATE.SOLD,
+  }));
+  const historicalDish = createHarness({ ...configuration, snapshot: historicalDishState });
+  const historicalStart = await confirmServiceStart(historicalDish, "qa:day-loop:historical-dish:start");
+  assert(historicalStart.ok, `이전 판매 요리 이력이 다음 Service를 막았습니다: ${historicalStart.code}`);
+
+  const carriedDishState = cloneValue(plannedSnapshot);
+  carriedDishState.inventory.completedDishes.push(createCompletedDish({
+    dishId: "qa.day-loop.carried-dish",
+    recipeId: activeRecipe(plannedSnapshot).recipeId,
+    quality: 70,
+    bookCostG: 4,
+    recognizedBookCostG: 0,
+    state: COMPLETED_DISH_STATE.CARRIED,
+  }));
+  const carriedDish = createHarness({ ...configuration, snapshot: carriedDishState });
+  await assertRejectedUnchanged(
+    carriedDish,
+    () => confirmServiceStart(carriedDish, "qa:day-loop:carried-dish:start"),
+    "SERVICE_START_TRANSIENTS_NOT_EMPTY",
+    "미서빙 CARRIED dish가 남은 Service Start",
+  );
+
   return {
-    invalidCases: 5,
-    exactPreservationCases: 5,
+    invalidCases: 6,
+    exactPreservationCases: 6,
     enabledRecipeInvariant: true,
     availableSlotInvariant: true,
     fullReservationInvariant: true,
+    historicalTerminalDishAllowed: true,
   };
 }
 

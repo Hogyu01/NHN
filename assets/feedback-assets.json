@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "vfxSheet": {
-    "width": 768,
-    "height": 512,
+    "width": 192,
+    "height": 128,
     "columns": 3,
     "rows": 2,
-    "frameWidth": 256,
-    "frameHeight": 256,
+    "frameWidth": 64,
+    "frameHeight": 64,
     "frameCount": 6,
     "frameOrder": "ROW_MAJOR",
     "background": "transparent"
@@ -14,25 +14,25 @@
   "vfx": [
     {
       "id": "vfx.sale_success",
-      "file": "assets/vfx/vfx-sale-success.png",
+      "file": "assets/generated/vfx/sale-success.png",
       "fps": 12,
       "anchor": "CENTER"
     },
     {
       "id": "vfx.cooking_success",
-      "file": "assets/vfx/vfx-cooking-success.png",
+      "file": "assets/generated/vfx/cooking-success.png",
       "fps": 10,
       "anchor": "BOTTOM_CENTER"
     },
     {
       "id": "vfx.cooking_waste",
-      "file": "assets/vfx/vfx-cooking-waste.png",
+      "file": "assets/generated/vfx/cooking-waste.png",
       "fps": 10,
       "anchor": "BOTTOM_CENTER"
     },
     {
       "id": "vfx.order_failure",
-      "file": "assets/vfx/vfx-order-failure.png",
+      "file": "assets/generated/vfx/order-failure.png",
       "fps": 12,
       "anchor": "BOTTOM_CENTER"
     }
@@ -40,19 +40,19 @@
   "hud": [
     {
       "id": "hud.gold",
-      "file": "assets/icons/hud/hud-gold.png"
+      "file": "assets/generated/ui/gold.png"
     },
     {
       "id": "hud.reputation",
-      "file": "assets/icons/hud/hud-reputation.png"
+      "file": "assets/generated/ui/reputation.png"
     },
     {
       "id": "hud.timer",
-      "file": "assets/icons/hud/hud-timer.png"
+      "file": "assets/generated/ui/timer.png"
     },
     {
       "id": "world.interaction_marker",
-      "file": "assets/icons/hud/world-interaction-marker.png"
+      "file": "assets/generated/ui/interaction-marker.png"
     }
   ]
 }

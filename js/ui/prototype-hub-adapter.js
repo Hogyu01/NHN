@@ -2,7 +2,7 @@ import { createRuntimeComposition } from "../app/runtime-composition.js";
 import { freezeDeep } from "../core/result.js";
 import { ACTIVE_ORDER_STATE, ORDER_GUEST_STATE } from "../domain/orders.js";
 import { SALE_SLOT_STATE } from "../domain/sale-slots.js";
-import { TIMING_COOK_STATE } from "../domain/timing-cook.js";
+import { COOK_TRIGGER, TIMING_COOK_STATE } from "../domain/timing-cook.js";
 import { RUNTIME_PHASE } from "../domain/timer-state.js";
 import { navigationPointToWorld } from "../world/map-schema.js";
 import { deriveCameraTransform } from "../world/camera.js";
@@ -25,6 +25,26 @@ import { CANVAS_LOGICAL_SIZE } from "../world/viewport-contract.js";
 import { InputRouter } from "./input-router.js";
 import { updateCampaignHud } from "./management-ui.js";
 import { PanelManager, STATIC_PANEL_DEFINITIONS } from "./panel-manager.js";
+
+const INGREDIENT_ICON_PATH = Object.freeze({
+  "ingredient.slime_gel": "assets/generated/ingredients/slime-gel.png",
+  "ingredient.cave_mushroom": "assets/generated/ingredients/cave-mushroom.png",
+  "ingredient.glow_herb": "assets/generated/ingredients/glow-herb.png",
+  "ingredient.ember_pepper": "assets/generated/ingredients/ember-pepper.png",
+  "ingredient.moonroot": "assets/generated/ingredients/moonroot.png",
+  "ingredient.crystal_salt": "assets/generated/ingredients/crystal-salt.png",
+  "ingredient.stonegrain": "assets/generated/ingredients/stonegrain.png",
+  "ingredient.griffin_egg": "assets/generated/ingredients/fire-lizard-meat.png",
+  "ingredient.mimic_bean": "assets/generated/ingredients/acid-berry.png",
+  "ingredient.moss_cheese": "assets/generated/ingredients/frost-boar-meat.png",
+});
+
+// PlayerController.step()는 호출 1회당 고정 PLAYER_MOVEMENT_STEP_MILLI_PX만큼만 이동하는 결정론적
+// 단위라 QA collision 테스트가 이를 그대로 사용한다. 실사용 RAF는 화면 주사율(60Hz/120Hz/144Hz)이나
+// headless 환경에 따라 호출 빈도가 달라지므로, 여기서 60Hz 기준 accumulator로 감싸 실제 이동 속도를
+// 주사율과 무관하게 고정한다 — PlayerController 자체의 결정론적 계약은 바꾸지 않는다.
+const MOVEMENT_STEP_MS = 1000 / 60;
+const MAX_MOVEMENT_CATCH_UP_STEPS = 5;
 
 export const PROTOTYPE_WORLD_CONTRACT = Object.freeze({
   tileSize: 32,
@@ -168,6 +188,13 @@ const BOARD_ERROR_MESSAGE = Object.freeze({
 
 function boardResultMessage(result, fallback) {
   if (result?.ok) return fallback;
+  if (result?.code === "INSUFFICIENT_AVAILABLE_CASH") {
+    const details = result.diagnostics?.find((diagnostic) =>
+      Number.isSafeInteger(diagnostic?.details?.amountG) &&
+      Number.isSafeInteger(diagnostic?.details?.availableCashG),
+    )?.details;
+    if (details) return `구매 가능 ${details.availableCashG}G / 필요 ${details.amountG}G입니다. 계약 예약금은 구매에 쓸 수 없습니다.`;
+  }
   const diagnosticMessage = result?.diagnostics?.find(
     (diagnostic) => typeof diagnostic?.details?.message === "string",
   )?.details?.message;
@@ -200,8 +227,17 @@ function renderBoardPanel(app, bodyEl, root, initialMessage = "") {
   section("시장 — 재료 구매");
   const snapshot = app.store.getSnapshot();
   const planningPhase = snapshot.runtimePhase === "PLANNING";
-  const ingredientName = (ingredientId) =>
-    app.ingredientCatalog?.find((entry) => entry.ingredientId === ingredientId)?.displayName ?? ingredientId;
+  const availableCashG = snapshot.economy.cashG - snapshot.economy.contractReserveG;
+  const ingredient = (ingredientId) =>
+    app.ingredientCatalog?.find((entry) => entry.ingredientId === ingredientId) ?? null;
+  const ingredientName = (ingredientId) => ingredient(ingredientId)?.displayName ?? ingredientId;
+  const cashGuide = el("p", {
+    className: "panel-service-guide market-cash-guide",
+    textContent: snapshot.economy.contractReserveG > 0
+      ? `보유 ${snapshot.economy.cashG}G · 계약 예약 ${snapshot.economy.contractReserveG}G · 구매 가능 ${availableCashG}G`
+      : `구매 가능 현금 ${availableCashG}G`,
+  });
+  bodyEl.append(cashGuide);
   const offerList = el("ul", { className: "panel-list" });
   for (const offer of snapshot.market?.offers ?? []) {
     const soldOut = offer.availableQuantity <= 0;
@@ -221,11 +257,19 @@ function renderBoardPanel(app, bodyEl, root, initialMessage = "") {
       const result = await composition.buyMarketOffer({ offerId: offer.offerId, quantity });
       rerender(boardResultMessage(result, `구매 완료: ${ingredientName(offer.ingredientId)} x${quantity}`));
     });
-    const row = el("li", {}, [
-      el("span", { textContent: `${ingredientName(offer.ingredientId)} · ${offer.unitPriceG}G · 품질 ${offer.quality} · 재고 ${offer.availableQuantity}` }),
-      qtyInput,
-      buyButton,
+    const definition = ingredient(offer.ingredientId);
+    const icon = el("img", {
+      className: "market-offer-icon",
+      src: INGREDIENT_ICON_PATH[offer.ingredientId] ?? "",
+      alt: "",
+    });
+    const details = el("div", { className: "market-offer-details" }, [
+      el("strong", { textContent: ingredientName(offer.ingredientId) }),
+      el("span", { textContent: `${definition?.flavorProfile ?? "특제"} · 품질 ${offer.quality}` }),
+      el("small", { textContent: `재고 ${offer.availableQuantity} · 개당 ${offer.unitPriceG}G` }),
     ]);
+    const controls = el("div", { className: "market-offer-controls" }, [qtyInput, buyButton]);
+    const row = el("li", { className: "market-offer-card" }, [icon, details, controls]);
     offerList.append(row);
   }
   if ((snapshot.market?.offers ?? []).length === 0) offerList.append(el("li", { textContent: "오늘은 더 구매할 재료가 없습니다." }));
@@ -404,6 +448,21 @@ function renderBoardPanel(app, bodyEl, root, initialMessage = "") {
     startButton.disabled = false;
   });
   bodyEl.append(serviceGuide);
+  if (!serviceInProgress && menuPlanReady) {
+    const plannedServings = positiveConfirmedEntries.reduce(
+      (total, entry) => total + entry.plannedQuantity,
+      0,
+    );
+    const expectedGuestCount = app.serviceConfiguration?.defaultGuestCount ?? 6;
+    const capacityGuide = el("p", {
+      className: "panel-service-guide",
+      textContent: plannedServings < expectedGuestCount
+        ? `오늘 예정 손님 ${expectedGuestCount}명 · 준비 ${plannedServings}인분 · ${expectedGuestCount - plannedServings}명은 품절로 떠납니다`
+        : `오늘 예정 손님 ${expectedGuestCount}명 · 준비 ${plannedServings}인분`,
+    });
+    if (plannedServings < expectedGuestCount) capacityGuide.dataset.tone = "warning";
+    bodyEl.append(capacityGuide);
+  }
   bodyEl.append(startButton);
 
 }
@@ -427,6 +486,7 @@ function stoveActions(app) {
           recipeId: slot.recipeId,
           saleSlotId: slot.saleSlotId,
           sourceOrderId: activeOrder ? activeOrder.orderId : null,
+          trigger: COOK_TRIGGER.PLAYER,
         });
       },
     },
@@ -469,6 +529,18 @@ function renderServiceStatus(root, bodyEl) {
 
 function recipeName(app, recipeId) {
   return app.recipeCatalog?.find((recipe) => recipe.recipeId === recipeId)?.displayName ?? recipeId;
+}
+
+function cookStartFailureMessage(code) {
+  const messageByCode = {
+    CARRIED_DISH_ALREADY_EXISTS: "완성된 요리를 들고 있습니다. 카운터에서 먼저 서빙하세요.",
+    COOK_ALREADY_RUNNING: "이미 조리 중인 요리가 있습니다.",
+    SALE_SLOT_NOT_COOKABLE: "이 주문은 더 이상 조리할 수 없습니다. 손님에게 다시 주문을 받으세요.",
+    SOURCE_ORDER_NOT_ACTIVE: "손님 주문이 만료되었습니다. 다시 주문을 받아야 합니다.",
+    SOURCE_ORDER_LINK_MISMATCH: "주문 정보가 갱신되었습니다. 화로를 닫았다가 다시 여세요.",
+    INSUFFICIENT_RESERVED_INGREDIENTS: "예약 재료가 부족합니다. 영업을 마친 뒤 메뉴를 다시 확정하세요.",
+  };
+  return messageByCode[code] ?? `조리를 시작하지 못했습니다. (${code ?? "UNKNOWN"})`;
 }
 
 function renderStovePanel(app, bodyEl, root) {
@@ -542,10 +614,11 @@ function renderStovePanel(app, bodyEl, root) {
         recipeId: order.recipeId,
         saleSlotId: order.saleSlotId,
         sourceOrderId: order.orderId,
+        trigger: COOK_TRIGGER.PLAYER,
       });
       if (result.ok) renderStovePanel(app, bodyEl, root);
       else {
-        setStatus(`조리를 시작하지 못했습니다. (${result.code ?? "UNKNOWN"})`);
+        setStatus(cookStartFailureMessage(result.code));
         button.disabled = false;
       }
     });
@@ -664,6 +737,7 @@ export class PrototypeHubAdapter {
 
     this.animationFrame = 0;
     this.animationTimer = 0;
+    this.movementAccumulatorMs = 0;
     this.running = false;
     this.inputActive = false;
     this.lastFrameTime = null;
@@ -760,6 +834,7 @@ export class PrototypeHubAdapter {
     this.interactionRouter?.setMapDefinition(mapDefinition);
     this.animationFrame = 0;
     this.animationTimer = 0;
+    this.movementAccumulatorMs = 0;
     this.lastPointerWorld = null;
     this.lastInputTransformCode = null;
     this.scene.setMapDefinition?.(mapDefinition);
@@ -787,8 +862,17 @@ export class PrototypeHubAdapter {
     const movementAllowed = !this.panelManager.isOpen &&
       this.root.documentElement.dataset.modalOpen !== "open" &&
       this.getApp()?.store?.runtimePhase !== RUNTIME_PHASE.PAUSED;
-    const result = this.controller.step({ movementAllowed });
-    this.#processZoneTransitions(result.zoneTransitions);
+    // RAF 호출 빈도(주사율/헤드리스)와 무관하게 이동 속도를 고정하는 60Hz accumulator.
+    // PlayerController.step()은 여전히 호출 1회당 고정 delta만 적용하는 결정론적 계약을 유지한다.
+    this.movementAccumulatorMs = Math.min(
+      (this.movementAccumulatorMs ?? 0) + Math.max(0, deltaMs),
+      MOVEMENT_STEP_MS * MAX_MOVEMENT_CATCH_UP_STEPS,
+    );
+    while (this.movementAccumulatorMs >= MOVEMENT_STEP_MS) {
+      this.movementAccumulatorMs -= MOVEMENT_STEP_MS;
+      const result = this.controller.step({ movementAllowed });
+      this.#processZoneTransitions(result.zoneTransitions);
+    }
     this.updateAnimation(deltaMs);
     this.render();
     return this.getWorldSnapshot();
@@ -901,6 +985,7 @@ export class PrototypeHubAdapter {
     this.interactionCommands = [];
     this.animationFrame = 0;
     this.animationTimer = 0;
+    this.movementAccumulatorMs = 0;
     this.lastPointerWorld = null;
     this.lastInputTransformCode = null;
     this.render();
@@ -991,6 +1076,7 @@ export class PrototypeHubAdapter {
         reputation: snapshot.campaign.reputation,
         paused: snapshot.runtimePhase === RUNTIME_PHASE.PAUSED,
         snapshot,
+        guestCatalog: app.guestCatalog,
       });
     }
     this.scene.render({

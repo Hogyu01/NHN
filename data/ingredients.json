@@ -8,9 +8,9 @@
       "category": "MONSTER_BYPRODUCT",
       "flavorProfile": "단맛",
       "basePriceG": 8,
-      "marketAvailabilityRate": 90,
+      "marketAvailabilityRate": 100,
       "marketStockRange": {
-        "minimum": 8,
+        "minimum": 12,
         "maximum": 16
       },
       "qualityDistribution": [
@@ -37,7 +37,7 @@
       "category": "VEGETABLE",
       "flavorProfile": "감칠맛",
       "basePriceG": 9,
-      "marketAvailabilityRate": 85,
+      "marketAvailabilityRate": 100,
       "marketStockRange": {
         "minimum": 7,
         "maximum": 14
@@ -153,7 +153,7 @@
       "category": "MINERAL",
       "flavorProfile": "짠맛",
       "basePriceG": 5,
-      "marketAvailabilityRate": 95,
+      "marketAvailabilityRate": 100,
       "marketStockRange": {
         "minimum": 8,
         "maximum": 18
@@ -240,9 +240,9 @@
       "category": "FRUIT",
       "flavorProfile": "신맛",
       "basePriceG": 16,
-      "marketAvailabilityRate": 55,
+      "marketAvailabilityRate": 100,
       "marketStockRange": {
-        "minimum": 3,
+        "minimum": 6,
         "maximum": 7
       },
       "qualityDistribution": [

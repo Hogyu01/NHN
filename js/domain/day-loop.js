@@ -3,7 +3,7 @@ import { defineAtomicTransaction, isStableIdentifier } from "../core/transaction
 import { planScheduledGuestGeneration } from "./demand.js";
 import { validateEventState } from "./events.js";
 import { validateFacilityState } from "./facility.js";
-import { validateInventoryState } from "./inventory.js";
+import { COMPLETED_DISH_STATE, validateInventoryState } from "./inventory.js";
 import {
   prepareMenuForServiceDraft,
   validateMenuPlanReconciliation,
@@ -68,6 +68,7 @@ export const SERVICE_START_WRITE_SET = Object.freeze([
   "checkpointPhase",
   "menu",
   "service",
+  "inventory",
   "rng",
   "idCounters",
 ]);
@@ -325,10 +326,13 @@ function validateServiceStartContext(ctx) {
   if (!serviceValidation.ok || service.lifecycle !== SERVICE_LIFECYCLE.INACTIVE) {
     return failure("SERVICE_START_STATE_INVALID", { cause: serviceValidation.code, lifecycle: service.lifecycle });
   }
-  if (inventory.cookEscrows.length > 0 || inventory.completedDishes.length > 0) {
+  const carriedDishCount = inventory.completedDishes.filter(
+    (dish) => dish.state === COMPLETED_DISH_STATE.CARRIED,
+  ).length;
+  if (inventory.cookEscrows.length > 0 || carriedDishCount > 0) {
     return failure("SERVICE_START_TRANSIENTS_NOT_EMPTY", {
       cookEscrowCount: inventory.cookEscrows.length,
-      completedDishCount: inventory.completedDishes.length,
+      carriedDishCount,
     });
   }
 
@@ -629,6 +633,11 @@ export function createConfirmServiceStartAtomicTransaction({
       draft.replace("runtimePhase", RUNTIME_PHASE.SERVICE);
       draft.replace("checkpointPhase", null);
       draft.replace("service", started.state);
+      // service.completedDishes는 매일 startServiceTimerState가 []로 새로 만드는데,
+      // inventory.completedDishes는 SOLD/WASTED 기록이 하루가 지나도 배열에 그대로 남아있어
+      // 서로 어긋나면 validateDirectServiceState의 CARRIED_DISH_REFERENCE_MISMATCH(DISH_MIRROR_MISMATCH)로
+      // 이어졌다. validateServiceStartContext가 이미 carried/escrow가 0임을 검증했으니 여기서 함께 비운다.
+      draft.write("inventory").completedDishes = [];
       draft.replace("rng", generation.plan.rngState);
       draft.replace("idCounters", generation.plan.idCounters);
       return validationSuccess();

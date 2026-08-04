@@ -9,6 +9,7 @@ export const SAVE_STORAGE_KEYS = Object.freeze({
 
 const MESSAGE_BY_CODE = Object.freeze({
   STORAGE_WRITE_FAILED: "저장소 쓰기(quota 등)에 실패했습니다.",
+  STORAGE_CLEAR_FAILED: "새 게임을 위한 기존 저장 삭제에 실패했습니다.",
   STORAGE_ABSENT: "저장된 데이터가 없습니다.",
 });
 
@@ -134,6 +135,20 @@ export class StorageAdapter {
       current: current.ok ? { ok: true } : { ok: false, code: current.code, raw: current.details?.raw ?? null },
       previous: previous.ok ? { ok: true } : { ok: false, code: previous.code, raw: previous.details?.raw ?? null },
     });
+  }
+
+  clearCampaign() {
+    const keys = [SAVE_STORAGE_KEYS.CURRENT, SAVE_STORAGE_KEYS.PREVIOUS, SAVE_STORAGE_KEYS.TEMP];
+    try {
+      for (const key of keys) this.storage.removeItem(key);
+      const retainedKeys = keys.filter((key) => this.storage.getItem(key) !== null);
+      if (retainedKeys.length > 0) return failure("STORAGE_CLEAR_FAILED", { retainedKeys });
+      return success({ clearedKeys: keys });
+    } catch (error) {
+      return failure("STORAGE_CLEAR_FAILED", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 }
 

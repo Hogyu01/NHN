@@ -12,7 +12,7 @@ import { registerDirectServiceSystem } from "../domain/direct-service.js";
 import { createEventState } from "../domain/events.js";
 import { createFacilityState } from "../domain/facility.js";
 import { createInventoryAccountingState, registerInventoryAccounting } from "../domain/inventory-accounting.js";
-import { createInventoryState } from "../domain/inventory.js";
+import { COMPLETED_DISH_STATE, createInventoryState } from "../domain/inventory.js";
 import { createMenuState, registerMenuSystem } from "../domain/menu.js";
 import { ACTIVE_ORDER_STATE, registerOrderSystem } from "../domain/orders.js";
 import { createRecipeState } from "../domain/recipe.js";
@@ -398,6 +398,65 @@ async function forceCleanupAtCapReleasesEverything(harness) {
   return { capDeadline };
 }
 
+/**
+ * 회귀 테스트: 조리를 끝까지 완료(CARRIED)했지만 서빙하지 않은 채 12초 cap이 지나면, cap은
+ * RUNNING_ESCROW 복구만 다루고 이미 완료된 carried dish는 그대로 남겨뒀었다. 그 결과
+ * service.carriedDishId와 inventory.completedDishes의 CARRIED 항목이 다음 날까지 어긋난 채
+ * 넘어가 실제 플레이에서 다음 날 조리 시작 시 CARRIED_DISH_REFERENCE_MISMATCH로 이어졌다.
+ */
+async function forceCleanupAtCapWastesUnservedCarriedDish(harness) {
+  const { transitionToken, durationMs } = await startService(harness);
+  const snapshot = harness.store.getSnapshot();
+  const recipe = activeRecipe(snapshot);
+  const slot = snapshot.saleSlots.slots.find((candidate) => candidate.recipeId === recipe.recipeId);
+  const cooked = await harness.directServiceSystem.startCook(commandInput(harness, `cook-start:${harness.store.revision}`, {
+    recipeId: recipe.recipeId,
+    saleSlotId: slot.saleSlotId,
+    sourceOrderId: null,
+    trigger: COOK_TRIGGER.PLAYER,
+  }));
+  assert(cooked.ok, `조리 시작 실패: ${cooked.code}`);
+
+  const targetAtMs = harness.store.getSnapshot().service.timingCook.targetAtMs;
+  const completed = await harness.directServiceSystem.completeCook({
+    commandId: `cook-complete:${harness.store.revision}`,
+    expectedRevision: harness.store.revision,
+    generationId: harness.store.generationId,
+    issuedAtSimulationMs: targetAtMs,
+    payload: { inputAtMs: targetAtMs },
+  });
+  assert(completed.ok, `조리 완료 실패: ${completed.code}`);
+  const carriedDishId = harness.store.getSnapshot().service.carriedDishId;
+  assert(carriedDishId !== null, "조리 완료 뒤 carriedDishId가 설정되지 않았습니다.");
+
+  // carried dish를 서빙하지 않은 채 Service duration이 끝나고 12초 cap까지 흘려보낸다.
+  const due = await harness.timerSystem.tick(durationMs);
+  assert(due.dispatched.length === 1 && due.dispatched[0].result.ok, "TIMER_ZERO dispatch 실패");
+  harness.timerSystem.armCleanupCap({ serviceToken: transitionToken });
+  const capDeadline = harness.scheduler.snapshot().queue.find(
+    (item) => item.stableId === cleanupCapStableId(transitionToken),
+  ).simulationTimeMs;
+  const capTick = await harness.timerSystem.tick(capDeadline);
+  assert(capTick.dispatched.length === 1 && capTick.dispatched[0].result.ok,
+    `cap dispatch 실패: ${JSON.stringify(capTick.dispatched[0]?.result)}`);
+
+  const after = harness.store.getSnapshot();
+  assert(after.service.carriedDishId === null,
+    `cap 뒤에도 carriedDishId가 남아있습니다: ${after.service.carriedDishId}`);
+  const dish = after.inventory.completedDishes.find((candidate) => candidate.dishId === carriedDishId);
+  assert(dish?.state === COMPLETED_DISH_STATE.WASTED,
+    `미서빙 carried dish가 waste로 정리되지 않았습니다: ${dish?.state}`);
+  assert(after.runtimePhase === RUNTIME_PHASE.SETTLEMENT, "cap 뒤 Settlement에 도달하지 못했습니다.");
+
+  // 다음 날 SERVICE_START precondition(SERVICE_START_TRANSIENTS_NOT_EMPTY)이 정확히 이 상태를
+  // 검사한다: carried dish가 남아있으면 안 된다.
+  const remainingCarried = after.inventory.completedDishes.filter(
+    (candidate) => candidate.state === COMPLETED_DISH_STATE.CARRIED,
+  ).length;
+  assert(remainingCarried === 0, `다음 날로 넘어갈 carried dish가 여전히 ${remainingCarried}개 남아있습니다.`);
+  return { carriedDishId, capDeadline };
+}
+
 export async function runTimerSystemProbe({ recipes, facilities, balance, guestArchetypes }) {
   const results = [];
   const cases = [
@@ -418,6 +477,8 @@ export async function runTimerSystemProbe({ recipes, facilities, balance, guestA
       orderTechnicalCancelDuringCleanup(createHarness({ canonicalRecipes: recipes, canonicalFacilities: facilities, balance, guestArchetypes }))],
     ["force-cleanup-at-cap-releases-everything", "Requirement 2.10, 2.11", () =>
       forceCleanupAtCapReleasesEverything(createHarness({ canonicalRecipes: recipes, canonicalFacilities: facilities, balance, guestArchetypes }))],
+    ["force-cleanup-at-cap-wastes-unserved-carried-dish", "Requirement 2.10, 2.11", () =>
+      forceCleanupAtCapWastesUnservedCarriedDish(createHarness({ canonicalRecipes: recipes, canonicalFacilities: facilities, balance, guestArchetypes }))],
   ];
   for (const [id, validates, execute] of cases) {
     results.push(await runCase(id, id, validates, execute));

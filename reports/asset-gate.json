@@ -1,0 +1,443 @@
+{
+  "buildId": "dungeon-restaurant-management-mvp.task-44",
+  "checks": [
+    {
+      "id": "manifest",
+      "status": "PASS"
+    },
+    {
+      "id": "pixi-dependency",
+      "status": "PASS"
+    },
+    {
+      "id": "required:character.player",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:character.player",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:character.player",
+      "status": "PASS"
+    },
+    {
+      "id": "required:guest.human_adventurer",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:guest.human_adventurer",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:guest.human_adventurer",
+      "status": "PASS"
+    },
+    {
+      "id": "required:guest.dwarf_courier",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:guest.dwarf_courier",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:guest.dwarf_courier",
+      "status": "PASS"
+    },
+    {
+      "id": "required:guest.goblin_scholar",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:guest.goblin_scholar",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:guest.goblin_scholar",
+      "status": "PASS"
+    },
+    {
+      "id": "required:guest.slime_gourmand",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:guest.slime_gourmand",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:guest.slime_gourmand",
+      "status": "PASS"
+    },
+    {
+      "id": "required:guest.kobold_porter",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:guest.kobold_porter",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:guest.kobold_porter",
+      "status": "PASS"
+    },
+    {
+      "id": "required:guest.mushroom_traveler",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:guest.mushroom_traveler",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:guest.mushroom_traveler",
+      "status": "PASS"
+    },
+    {
+      "id": "required:tile.floor.wood",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:tile.floor.wood",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:tile.floor.wood",
+      "status": "PASS"
+    },
+    {
+      "id": "required:tile.wall.stone",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:tile.wall.stone",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:tile.wall.stone",
+      "status": "PASS"
+    },
+    {
+      "id": "required:prop.board",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:prop.board",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:prop.board",
+      "status": "PASS"
+    },
+    {
+      "id": "required:prop.stove",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:prop.stove",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:prop.stove",
+      "status": "PASS"
+    },
+    {
+      "id": "required:prop.counter",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:prop.counter",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:prop.counter",
+      "status": "PASS"
+    },
+    {
+      "id": "required:prop.storage",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:prop.storage",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:prop.storage",
+      "status": "PASS"
+    },
+    {
+      "id": "required:prop.table",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:prop.table",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:prop.table",
+      "status": "PASS"
+    },
+    {
+      "id": "required:hud.gold",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:hud.gold",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:hud.gold",
+      "status": "PASS"
+    },
+    {
+      "id": "required:hud.reputation",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:hud.reputation",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:hud.reputation",
+      "status": "PASS"
+    },
+    {
+      "id": "required:hud.timer",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:hud.timer",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:hud.timer",
+      "status": "PASS"
+    },
+    {
+      "id": "required:world.interaction_marker",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:world.interaction_marker",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:world.interaction_marker",
+      "status": "PASS"
+    },
+    {
+      "id": "required:recipe.moonroot_pie",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:recipe.moonroot_pie",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:recipe.moonroot_pie",
+      "status": "PASS"
+    },
+    {
+      "id": "required:recipe.slime_stew",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:recipe.slime_stew",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:recipe.slime_stew",
+      "status": "PASS"
+    },
+    {
+      "id": "required:recipe.mimic_hotpot",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:recipe.mimic_hotpot",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:recipe.mimic_hotpot",
+      "status": "PASS"
+    },
+    {
+      "id": "required:recipe.stonegrain_bowl",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:recipe.stonegrain_bowl",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:recipe.stonegrain_bowl",
+      "status": "PASS"
+    },
+    {
+      "id": "required:recipe.glowcap_soup",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:recipe.glowcap_soup",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:recipe.glowcap_soup",
+      "status": "PASS"
+    },
+    {
+      "id": "required:recipe.ember_egg_skewer",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:recipe.ember_egg_skewer",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:recipe.ember_egg_skewer",
+      "status": "PASS"
+    },
+    {
+      "id": "required:ingredient.slime_gel",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:ingredient.slime_gel",
+      "status": "PASS"
+    },
+    {
+      "id": "required:ingredient.cave_mushroom",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:ingredient.cave_mushroom",
+      "status": "PASS"
+    },
+    {
+      "id": "required:ingredient.glow_herb",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:ingredient.glow_herb",
+      "status": "PASS"
+    },
+    {
+      "id": "required:ingredient.ember_pepper",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:ingredient.ember_pepper",
+      "status": "PASS"
+    },
+    {
+      "id": "required:ingredient.moonroot",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:ingredient.moonroot",
+      "status": "PASS"
+    },
+    {
+      "id": "required:ingredient.crystal_salt",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:ingredient.crystal_salt",
+      "status": "PASS"
+    },
+    {
+      "id": "required:ingredient.stonegrain",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:ingredient.stonegrain",
+      "status": "PASS"
+    },
+    {
+      "id": "required:ingredient.griffin_egg",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:ingredient.griffin_egg",
+      "status": "PASS"
+    },
+    {
+      "id": "required:ingredient.mimic_bean",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:ingredient.mimic_bean",
+      "status": "PASS"
+    },
+    {
+      "id": "required:ingredient.moss_cheese",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:ingredient.moss_cheese",
+      "status": "PASS"
+    },
+    {
+      "id": "required:vfx.sale_success",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:vfx.sale_success",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:vfx.sale_success",
+      "status": "PASS"
+    },
+    {
+      "id": "required:vfx.cooking_success",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:vfx.cooking_success",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:vfx.cooking_success",
+      "status": "PASS"
+    },
+    {
+      "id": "required:vfx.cooking_waste",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:vfx.cooking_waste",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:vfx.cooking_waste",
+      "status": "PASS"
+    },
+    {
+      "id": "required:vfx.order_failure",
+      "status": "PASS"
+    },
+    {
+      "id": "quality:vfx.order_failure",
+      "status": "PASS"
+    },
+    {
+      "id": "texture-ready:vfx.order_failure",
+      "status": "PASS"
+    },
+    {
+      "id": "remote-imports",
+      "status": "PASS"
+    },
+    {
+      "id": "raw-canvas-imports",
+      "status": "PASS"
+    },
+    {
+      "id": "resource-leaks",
+      "status": "PASS"
+    }
+  ],
+  "schemaVersion": 1,
+  "status": "PASS"
+}

@@ -1,10 +1,10 @@
 export const RECIPE_TEXTURE_PATH = Object.freeze({
-  "recipe.slime_stew": "assets/icons/dishes/dish-jelly-bowl.png",
-  "recipe.stonegrain_bowl": "assets/icons/dishes/dish-mushroom-medley.png",
-  "recipe.glowcap_soup": "assets/icons/dishes/dish-mushroom-stew.png",
-  "recipe.ember_egg_skewer": "assets/icons/dishes/dish-spiced-crawfish.png",
-  "recipe.moonroot_pie": "assets/icons/dishes/dish-berry-salad.png",
-  "recipe.mimic_hotpot": "assets/icons/dishes/dish-meat-hotpot.png",
+  "recipe.slime_stew": "assets/generated/recipes/slime-jelly.png",
+  "recipe.stonegrain_bowl": "assets/generated/recipes/mushroom-medley.png",
+  "recipe.glowcap_soup": "assets/generated/recipes/mushroom-stew.png",
+  "recipe.ember_egg_skewer": "assets/generated/recipes/spiced-crawfish.png",
+  "recipe.moonroot_pie": "assets/generated/recipes/meat-hotpot.png",
+  "recipe.mimic_hotpot": "assets/generated/recipes/berry-salad.png",
 });
 
 export function resolveCarriedDishTexturePath(carriedDish) {

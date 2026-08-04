@@ -1,0 +1,213 @@
+{
+  "assets": [
+    {
+      "assetId": "character.player",
+      "outcome": "PASS",
+      "outputHash": "eab5ba3e6d702136241f94e7ac3ed17407c8693569983b14c853946548588a85"
+    },
+    {
+      "assetId": "guest.human_adventurer",
+      "outcome": "PASS",
+      "outputHash": "f021314f00db8f27c31df84cf1f406f1eb7cfa4c34729350aa89421b1ae31834"
+    },
+    {
+      "assetId": "guest.dwarf_courier",
+      "outcome": "PASS",
+      "outputHash": "b4375aba6839850e3f2280d7c44930cb8b7c762bd19d9d50f8e819b33cba04d3"
+    },
+    {
+      "assetId": "guest.goblin_scholar",
+      "outcome": "PASS",
+      "outputHash": "1d21d30d1624d873d6fafce704f4241732ae42bd48360b54b5166f75d3a99fd7"
+    },
+    {
+      "assetId": "guest.slime_gourmand",
+      "outcome": "PASS",
+      "outputHash": "4057d2094cd75a8058cf496c8c25dbfe6d4295cadd2eacf7cf68b6a58e1c6650"
+    },
+    {
+      "assetId": "guest.kobold_porter",
+      "outcome": "PASS",
+      "outputHash": "f7d89eabf2773a0b4544b5840c0065d47514a7ccaee243ab3854ad0412da55d6"
+    },
+    {
+      "assetId": "guest.mushroom_traveler",
+      "outcome": "PASS",
+      "outputHash": "f95ff64fd099a8ff45d1bffbb907907eef0fa9aa1b40b938886da978896fd447"
+    },
+    {
+      "assetId": "tile.floor.wood",
+      "outcome": "PASS",
+      "outputHash": "5c22efd573f095b3fc4b1baacb66a440130ce513041271943e601ca36db37a2d"
+    },
+    {
+      "assetId": "tile.wall.stone",
+      "outcome": "PASS",
+      "outputHash": "f4f61be0edd16d44a48c61eb249013b75072bad5c04b90fa7e84867dccf8220f"
+    },
+    {
+      "assetId": "prop.board",
+      "outcome": "PASS",
+      "outputHash": "ba297ec1b61a68e2af8560b5eb0bff6ac81906dfe0586d05746651e2d6bb21f3"
+    },
+    {
+      "assetId": "prop.stove",
+      "outcome": "PASS",
+      "outputHash": "8124701800eb7dde374bff6bae4f2ad849910aba5af15bc178129477a29a7981"
+    },
+    {
+      "assetId": "prop.counter",
+      "outcome": "PASS",
+      "outputHash": "43133387d69deb295385536883bbb901fb07435b02f183e16b4bb81f9bc846d3"
+    },
+    {
+      "assetId": "prop.storage",
+      "outcome": "PASS",
+      "outputHash": "94657f2604f237d2e1dccdc6382b666e7b4debb3aff4c0bdb3c05314a7e02372"
+    },
+    {
+      "assetId": "prop.table",
+      "outcome": "PASS",
+      "outputHash": "c979461754d607b87d439a39e3bd3ad85e877f391a7646301128ea92877c8746"
+    },
+    {
+      "assetId": "hud.gold",
+      "outcome": "PASS",
+      "outputHash": "83e6aababc03f38d3437e7c1244f42d2456e40f1b16720274c3d31f318153cb0"
+    },
+    {
+      "assetId": "hud.reputation",
+      "outcome": "PASS",
+      "outputHash": "892bf7441896690fe4b59bf47cfb504242c0bdf50f0b78ca7555d3d552787c8d"
+    },
+    {
+      "assetId": "hud.timer",
+      "outcome": "PASS",
+      "outputHash": "deeef6e6447f25f7e72e8948085bebf964fbe315c58906c5bb47c7fc2449eb2d"
+    },
+    {
+      "assetId": "world.interaction_marker",
+      "outcome": "PASS",
+      "outputHash": "a26aef12287b512a855757d0d21b7f0c7ddbbb9b49ad0c4b2c42d5c7c10d6a31"
+    },
+    {
+      "assetId": "recipe.moonroot_pie",
+      "outcome": "PASS",
+      "outputHash": "29863256820c6dc9497e20e2df70f04498c4bf7c5b7c4f85eb0e12327f20f965"
+    },
+    {
+      "assetId": "recipe.slime_stew",
+      "outcome": "PASS",
+      "outputHash": "83905b15712499dab9de6c9eb3083dd3e2371782272baa80747377bde7a6206a"
+    },
+    {
+      "assetId": "recipe.mimic_hotpot",
+      "outcome": "PASS",
+      "outputHash": "8203f602fbb86fb34ee0bb6647ba4172bde65373f9b73ba3d28b82e1893eeeaa"
+    },
+    {
+      "assetId": "recipe.stonegrain_bowl",
+      "outcome": "PASS",
+      "outputHash": "a1af6792fce5d46bcd338fc4793593c05adca3f4b580ae2eb46eba05d34d0264"
+    },
+    {
+      "assetId": "recipe.glowcap_soup",
+      "outcome": "PASS",
+      "outputHash": "44f058e715a0d7145e7673c700d02f9559c3028bfc44f1f35e371ba194750657"
+    },
+    {
+      "assetId": "recipe.ember_egg_skewer",
+      "note": "레시피명(화염 도마뱀 허브구이, 꼬치구이)과 표시 그림(가재 요리)이 완전히 일치하진 않는다. 사용 가능한 6개 dish 아이콘 중 다른 5개를 재배치한 뒤 남은 유일한 선택지라 그대로 승인. 신규 아트 제작 전까지 알려진 한계로 기록.",
+      "outcome": "PASS",
+      "outputHash": "b61ee6ad773be638981ebcb5637d393624257bbcd10cf09b4abc2f9926350e13"
+    },
+    {
+      "assetId": "ingredient.slime_gel",
+      "outcome": "PASS",
+      "outputHash": "a735035753061db987238cd1d24b0473d8e23a0d3c4c224da11123f2fabd554b"
+    },
+    {
+      "assetId": "ingredient.cave_mushroom",
+      "outcome": "PASS",
+      "outputHash": "6501365930689571c315ecdf667383857603f98fb9d06934adb5171daad57b0c"
+    },
+    {
+      "assetId": "ingredient.glow_herb",
+      "outcome": "PASS",
+      "outputHash": "c770b9ecc4e08b6bd79f7fd25faecc08d0ce12e33bc80b66b44474c10363f613"
+    },
+    {
+      "assetId": "ingredient.ember_pepper",
+      "outcome": "PASS",
+      "outputHash": "40abf9374026928b4f0087edc6121277a00f43776fb55e1c5558ef8caecf4fc9"
+    },
+    {
+      "assetId": "ingredient.moonroot",
+      "outcome": "PASS",
+      "outputHash": "b7d5192764e19d145aab65657446842eade9544a02c93ab3b6b63d7d103aae67"
+    },
+    {
+      "assetId": "ingredient.crystal_salt",
+      "note": "생성된 크리스탈이 호박색(amber)이라 \"소금\" 느낌보다 보석에 가깝다. 사용 가능한 대체 소스가 없어(ing-crystal-blue는 slime_gel에 이미 사용 중) 그대로 승인. 형태/실루엣은 명확함.",
+      "outcome": "PASS",
+      "outputHash": "9d77588a59e3af553448797f5a60459b355559e323eb23565e84158cac9a32cc"
+    },
+    {
+      "assetId": "ingredient.stonegrain",
+      "outcome": "PASS",
+      "outputHash": "88423f325853288f6c1deab42b1ced4f1e323b4b0f8eb348217c861d2c2bd0e8"
+    },
+    {
+      "assetId": "ingredient.griffin_egg",
+      "outcome": "PASS",
+      "outputHash": "435218f3c8cdfaf35ee7f064a9f1b8cff1c2cddef46f8a5413bac524ae19675b"
+    },
+    {
+      "assetId": "ingredient.mimic_bean",
+      "outcome": "PASS",
+      "outputHash": "4a18b4912aa6ec2174b6888ed07c2dc3842b191fafc6b9124fd850ec022817ce"
+    },
+    {
+      "assetId": "ingredient.moss_cheese",
+      "outcome": "PASS",
+      "outputHash": "8eb5345be0b8f42352d9fc7062b473b99965f15dd03193ee2849c67e292d8659"
+    },
+    {
+      "assetId": "vfx.sale_success",
+      "outcome": "PASS",
+      "outputHash": "62548bfd0ea511f75aee4ed373972e24c4fa79610a9c405831db075fd44fe4fa"
+    },
+    {
+      "assetId": "vfx.cooking_success",
+      "outcome": "PASS",
+      "outputHash": "cfbabf2bdc1cce0ea282d893422039493ed36e4b9a3644dee1197887dde83b99"
+    },
+    {
+      "assetId": "vfx.cooking_waste",
+      "outcome": "PASS",
+      "outputHash": "e47f9b90165f409c0ba852efc583b3695e4afe9a805a353d614782fc205d329a"
+    },
+    {
+      "assetId": "vfx.order_failure",
+      "outcome": "PASS",
+      "outputHash": "dfbaae731025345debdf09d0963ec4aab060e33f2869a290a4b9f03da4600c3e"
+    }
+  ],
+  "buildId": "dungeon-restaurant-management-mvp.task-44",
+  "criteria": [
+    "dimensions",
+    "frame",
+    "foot-anchor",
+    "dish-anchor",
+    "clipping",
+    "jitter",
+    "silhouette",
+    "grayscale",
+    "contrast",
+    "seat-zones",
+    "originality"
+  ],
+  "reviewer": "Claude (Anthropic, Claude Code) — AI-assisted review, 38개 asset을 개별 이미지로 직접 열어 dimensions/frame/anchor/clipping/jitter/silhouette/grayscale/contrast/originality 기준으로 육안 검사함. 사람 검수 아님 — NAN 2026 AI 활용 고지 대상.",
+  "schemaVersion": 1,
+  "status": "PASS"
+}
